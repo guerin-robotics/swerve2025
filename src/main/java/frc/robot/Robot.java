@@ -164,11 +164,11 @@ public class Robot extends TimedRobot {
         double intakeRotationsPerSecond = intakeSpeed * -50;
 
         double liftPosition = m_fx.getPosition().getValueAsDouble();
-        if ((liftPosition > 68) && (joyValue < 0)) {
+        if ((liftPosition > 72) && (joyValue < 0)) {
             desiredRotationsPerSecond = joyValue * -1;
         }
         else if ((liftPosition > 60) && (joyValue < 0)) {
-            desiredRotationsPerSecond = joyValue * -(68-liftPosition)*10;
+            desiredRotationsPerSecond = joyValue * -(73-liftPosition)*10;
         }
         else if ((liftPosition < 7) && (joyValue > 0)) { 
             desiredRotationsPerSecond = joyValue * -liftPosition*10;
@@ -178,8 +178,10 @@ public class Robot extends TimedRobot {
         }
 
         if (!toplimitSwitch.get() && (joyValue > 0)) {
+        
         m_fx.setControl(m_brake);
         } else if (!bottomlimitSwitch.get() && (joyValue < 0)) {
+        Commands.print("Bottom limit switch activated");
         m_fx.setControl(m_brake);
         } else {
         if (m_joystick.getLeftBumperButton()) {
