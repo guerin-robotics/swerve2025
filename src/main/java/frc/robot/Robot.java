@@ -181,7 +181,6 @@ public class Robot extends TimedRobot {
         
         m_fx.setControl(m_brake);
         } else if (!bottomlimitSwitch.get() && (joyValue < 0)) {
-        Commands.print("Bottom limit switch activated");
         m_fx.setControl(m_brake);
         } else {
         if (m_joystick.getLeftBumperButton()) {
