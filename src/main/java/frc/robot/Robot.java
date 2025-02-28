@@ -38,6 +38,8 @@ public class Robot extends TimedRobot {
     private final DigitalInput toplimitSwitch = new DigitalInput(0);
     private final DigitalInput bottomlimitSwitch = new DigitalInput(1);
     private LaserCan elevatorBottom = new LaserCan(0);
+    private LaserCan elevatorTop = new LaserCan(1);
+    private LaserCan intakeSensor = new LaserCan(2);
 
     /* Be able to switch which control request to use based on a button press */
     /* Start at velocity 0, use slot 0 */
@@ -66,6 +68,7 @@ public class Robot extends TimedRobot {
         timer = new Timer();
         timer.start();
         joystick = new Joystick(0);
+        
 
         CanBridge.runTCP();
 
@@ -164,13 +167,21 @@ public class Robot extends TimedRobot {
         double intakeRotationsPerSecond = intakeSpeed * -50;
 
         double liftPosition = m_fx.getPosition().getValueAsDouble();
-        if ((liftPosition > 72) && (joyValue < 0)) {
-            desiredRotationsPerSecond = joyValue * -1;
+        System.out.println("Top: " + elevatorTop.getMeasurement().distance_mm);
+        System.out.println("Bottom: " + elevatorBottom.getMeasurement().distance_mm);
+        if ((elevatorTop.getMeasurement().distance_mm <= 40) && (joyValue < 0)) {
+            desiredRotationsPerSecond = 0;
         }
+        // else if ((elevatorTop.getMeasurement().distance_mm < 200) && (joyValue < 0)) {
+        //     desiredRotationsPerSecond = joyValue * -(75-liftPosition)*10;
+        // }
+        // else if ((elevatorBottom.getMeasurement().distance_mm < 300) && (joyValue > 0)) { 
+        //     desiredRotationsPerSecond = joyValue * -liftPosition*10;
+        // }
         else if ((liftPosition > 60) && (joyValue < 0)) {
-            desiredRotationsPerSecond = joyValue * -(73-liftPosition)*10;
+            desiredRotationsPerSecond = joyValue * -(75-liftPosition)*10;
         }
-        else if ((liftPosition < 7) && (joyValue > 0)) { 
+        else if ((liftPosition < 9) && (joyValue > 0)) { 
             desiredRotationsPerSecond = joyValue * -liftPosition*10;
         }
         else {
