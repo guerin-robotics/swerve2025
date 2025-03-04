@@ -29,6 +29,9 @@ import au.grapplerobotics.CanBridge;
 import au.grapplerobotics.LaserCan;
 import au.grapplerobotics.ConfigurationFailedException;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class Robot extends TimedRobot {
     private final CANBus canbus = new CANBus("rio");
     private final TalonFX m_fx = new TalonFX(10, canbus);
@@ -41,6 +44,8 @@ public class Robot extends TimedRobot {
     private LaserCan elevatorTop = new LaserCan(1);
     private LaserCan intakeSensor = new LaserCan(2);
 
+    // Thread Pool
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
     /* Be able to switch which control request to use based on a button press */
     /* Start at velocity 0, use slot 0 */
     private final VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
@@ -60,6 +65,9 @@ public class Robot extends TimedRobot {
     private Timer timer;
     private Joystick joystick;
 
+    private volatile boolean isLiftMoving = false;
+    private volatile boolean isIntaking = false;
+    private volatile boolean isOuttaking = false;
     Timer intakeTimer = new Timer();
     Timer liftTimer = new Timer();
 
@@ -82,8 +90,8 @@ public class Robot extends TimedRobot {
     configs.Slot0.kS = 0.3; // To account for friction, add 0.1 V of static feedforward
     configs.Slot0.kG = 0.2; // Gravity constant, determined by gear ratio
     configs.Slot0.kV = 0.13; // Kraken X60 is a 500 kV motor, 500 rpm per V = 8.333 rps per V, 1/8.33 = 0.12 volts / rotation per second
-    configs.Slot0.kP = 0.11; // An error of 1 rotation per second results in 0.11 V output
-    configs.Slot0.kI = 0.1; // No output for integrated error
+    configs.Slot0.kP = 0.12; // An error of 1 rotation per second results in 0.11 V output
+    configs.Slot0.kI = 0.06; // No output for integrated error
     configs.Slot0.kD = 0.001; // No output for error derivative
     // Peak output of 8 volts
     configs.Voltage.withPeakForwardVoltage(Volts.of(8))
@@ -123,7 +131,78 @@ public class Robot extends TimedRobot {
     m_fx.setPosition(0);
 
     }
-
+    private void startLiftToBottom() {
+    executorService.execute(() -> {
+        try {
+            liftTimer.start();
+            while (bottomlimitSwitch.get() && liftTimer.get() < 3.00) {
+                double liftPos = m_fx.getPosition().getValueAsDouble();
+                m_fx.setControl(m_velocityVoltage.withVelocity(-liftPos * 5));
+            }
+            m_fx.setControl(m_brake);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            liftTimer.stop();
+            liftTimer.reset();
+            isLiftMoving = false;
+        }
+    });
+}
+    
+private void moveLiftToPosition(double upperLimit, double lowerLimit) {
+    if (executorService.isShutdown()) {
+        System.out.println("Executor service is shutdown, rejecting new task.");
+        return;  // Prevent rejectedExecutionException
+    }
+    
+    executorService.execute(() -> {
+        try {
+            while (m_fx.getPosition().getValueAsDouble() > upperLimit && !buttonPanel.getRawButtonPressed(10)) {
+                m_fx.setControl(m_velocityVoltage.withVelocity(-50));
+            }
+            while (m_fx.getPosition().getValueAsDouble() < lowerLimit && !buttonPanel.getRawButtonPressed(10)) {
+                m_fx.setControl(m_velocityVoltage.withVelocity(50));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    });
+}
+    
+    private void startIntakeSequence() {
+        executorService.execute(() -> {
+            try {
+                intakeTimer.start();
+                while (intakeSensor.getMeasurement().distance_mm > 10 && intakeTimer.get() < 5.00) {
+                    m_intakeLeft.setControl(m_intakeVoltage.withVelocity(20));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                intakeTimer.stop();
+                intakeTimer.reset();
+                isIntaking = false;
+            }
+        });
+    }
+    
+    private void startOuttakeSequence() {
+        executorService.execute(() -> {
+            try {
+                intakeTimer.start();
+                while (intakeTimer.get() < 1.00) {
+                    m_intakeLeft.setControl(m_intakeVoltage.withVelocity(20));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                intakeTimer.stop();
+                intakeTimer.reset();
+                isOuttaking = false;
+            }
+        });
+    }
     @Override
     public void robotPeriodic() {
         // Runs the scheduler for commands
@@ -134,8 +213,6 @@ public class Robot extends TimedRobot {
         // }
     }
 
-    @Override
-    public void disabledInit() {}
 
     @Override
     public void disabledPeriodic() {}
@@ -154,188 +231,106 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        // Stop autonomous command when teleop starts
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.cancel();
-        }
+    if (executorService.isShutdown() || executorService.isTerminated()) {
+        executorService = Executors.newSingleThreadExecutor();  // Restart executor
     }
 
+    if (m_autonomousCommand != null) {
+        m_autonomousCommand.cancel();
+    }
+}
+
     @Override
-    public void teleopPeriodic() {
-        double joyValue = m_joystick.getLeftY();
-        double intakeSpeed = m_joystick.getRightY();
-        if (Math.abs(joyValue) < 0.05) joyValue = 0; // add a deadband
+public void teleopPeriodic() {
+    double joyValue = m_joystick.getLeftY();
+    double intakeSpeed = m_joystick.getRightY();
+    if (Math.abs(joyValue) < 0.05) joyValue = 0; // add a deadband
 
-        double desiredRotationsPerSecond;
-        double intakeRotationsPerSecond = intakeSpeed * -50;
+    double desiredRotationsPerSecond;
+    double intakeRotationsPerSecond = intakeSpeed * -50;
+    double liftPosition = m_fx.getPosition().getValueAsDouble();
 
-        double liftPosition = m_fx.getPosition().getValueAsDouble();
-        // System.out.println("Top: " + elevatorTop.getMeasurement().distance_mm);
-        // System.out.println("Bottom: " + elevatorBottom.getMeasurement().distance_mm);
-        if ((elevatorTop.getMeasurement().distance_mm <= 40) && (joyValue < 0)) {
-            desiredRotationsPerSecond = 0;
-        }
-        // else if ((elevatorTop.getMeasurement().distance_mm < 200) && (joyValue < 0)) {
-        //     desiredRotationsPerSecond = joyValue * -(75-liftPosition)*10;
-        // }
-        // else if ((elevatorBottom.getMeasurement().distance_mm < 300) && (joyValue > 0)) { 
-        //     desiredRotationsPerSecond = joyValue * -liftPosition*10;
-        // }
-        else if ((liftPosition > 60) && (joyValue < 0)) {
-            desiredRotationsPerSecond = joyValue * -(75-liftPosition)*10;
-        }
-        else if ((liftPosition < 9) && (joyValue > 0)) { 
-            desiredRotationsPerSecond = joyValue * -liftPosition*10;
-        }
-        else {
-            desiredRotationsPerSecond = joyValue * -100;
-        }
+    if ((elevatorTop.getMeasurement().distance_mm <= 40) && (joyValue < 0)) {
+        desiredRotationsPerSecond = 0;
+    } else if ((liftPosition > 60) && (joyValue < 0)) {
+        desiredRotationsPerSecond = joyValue * -(75 - liftPosition) * 10;
+    } else if ((liftPosition < 9) && (joyValue > 0)) {
+        desiredRotationsPerSecond = joyValue * -liftPosition * 10;
+    } else {
+        desiredRotationsPerSecond = joyValue * -100;
+    }
 
-        if (!bottomlimitSwitch.get() && (joyValue > 0)) {
+    if (!bottomlimitSwitch.get() && (joyValue > 0)) {
         m_fx.setControl(m_brake);
-        } else if (!toplimitSwitch.get() && (joyValue < 0)) {
+    } else if (!toplimitSwitch.get() && (joyValue < 0)) {
         m_fx.setControl(m_brake);
-        } else {
+    } else {
         if (m_joystick.getLeftBumperButton()) {
-            /* Use velocity voltage */
             m_fx.setControl(m_velocityVoltage.withVelocity(desiredRotationsPerSecond));
         } else {
-            /* Disable the motor instead */
             m_fx.setControl(m_velocityVoltage.withVelocity(0));
-        }
-        }
-
-        if (m_joystick.getRightBumperButton()) {
-            /* Use velocity voltage */
-            // if (intakeRotationsPerSecond > 0) {
-            //     intakeRotationsPerSecond *= 0.25;
-            // }
-            m_intakeLeft.setControl(m_intakeVoltage.withVelocity(intakeRotationsPerSecond * 2));
-        } else {
-            /* Disable the motor instead */
-            m_intakeLeft.setControl(m_intakeVoltage.withVelocity(0));
-        }
-
-        
-        if (m_joystick.getRightTriggerAxis() > 0) {
-            m_intakeLeft.setControl(m_intakeVoltage.withVelocity(20 * m_joystick.getRightTriggerAxis()));
-        }
-        else if (m_joystick.getLeftTriggerAxis() > 0) {
-            m_intakeLeft.setControl(m_intakeVoltage.withVelocity(-20 * m_joystick.getLeftTriggerAxis()));
-        }
-
-        if (m_joystick.getAButton()) {
-            m_intakeLeft.setControl(m_intakeVoltage.withVelocity(85));
-            m_intakeRight.setControl(m_intakeVoltage.withVelocity(0));
-        }
-        else {
-            m_intakeRight.setControl(new Follower(m_intakeLeft.getDeviceID(), true));
-        }
-        // System.out.println(toplimitSwitch.get());
-        if (buttonPanel.getRawButtonPressed(3)) {
-            liftTimer.start();
-            System.out.println(buttonPanel.getRawButton(10));
-            while(bottomlimitSwitch.get() && liftTimer.get() < 3.00 && !buttonPanel.getRawButton(10)) {
-                liftPosition = m_fx.getPosition().getValueAsDouble();
-                // System.out.println(bottomlimitSwitch.get());
-                m_fx.setControl(m_velocityVoltage.withVelocity(-liftPosition*5));
-                // System.out.println(liftPosition);
-            }
-            m_fx.setControl(m_brake);
-            System.out.println(buttonPanel.getRawButton(10));
-            while (!bottomlimitSwitch.get() && liftTimer.get() < 0.3  && !buttonPanel.getRawButton(10)) {
-                if (buttonPanel.getRawButtonPressed(10)) {
-                    m_intakeLeft.stopMotor();
-                    break;
-                }
-                m_intakeLeft.setControl(m_intakeVoltage.withVelocity(85));
-                m_intakeRight.setControl(m_intakeVoltage.withVelocity(0)); 
-            }
-            m_intakeRight.setControl(new Follower(m_intakeLeft.getDeviceID(), true));
-            liftTimer.stop();
-            liftTimer.reset();
-        }
-            // m_fx.setControl(m_velocityVoltage.withVelocity(0));
-        // if (buttonPanel.getRawButtonPressed(2)) {
-        //     while (elevatorBottom.getMeasurement().distance_mm > 150  && !buttonPanel.getRawButtonPressed(10)) {  
-        //         m_fx.setControl(m_velocityVoltage.withVelocity(-50));
-        //     }
-        //     while (elevatorBottom.getMeasurement().distance_mm < 145  && !buttonPanel.getRawButtonPressed(10)) {  
-        //         m_fx.setControl(m_velocityVoltage.withVelocity(50));
-        //     }
-        //     // m_fx.setControl(m_velocityVoltage.withVelocity(0));
-        // }
-        // if (buttonPanel.getRawButtonPressed(4)) {
-        //     while (elevatorBottom.getMeasurement().distance_mm > 360 && !buttonPanel.getRawButtonPressed(10)) {  
-        //         m_fx.setControl(m_velocityVoltage.withVelocity(-50));
-        //     }
-        //     while (elevatorBottom.getMeasurement().distance_mm < 310 && !buttonPanel.getRawButtonPressed(10)) {  
-        //         m_fx.setControl(m_velocityVoltage.withVelocity(50));
-        //     }
-        // }
-        // if (buttonPanel.getRawButtonPressed(8)) {
-        //     while (elevatorTop.getMeasurement().distance_mm > 60 && !buttonPanel.getRawButtonPressed(10)) {  
-        //         m_fx.setControl(m_velocityVoltage.withVelocity(20));
-        //     }
-        // }
-
-        // NEW AREA
-        if (buttonPanel.getRawButtonPressed(2)) { // L2
-            while (m_fx.getPosition().getValueAsDouble() > 18  && !buttonPanel.getRawButtonPressed(10)) {  
-                m_fx.setControl(m_velocityVoltage.withVelocity(-50));
-            }
-            while (m_fx.getPosition().getValueAsDouble() < 17  && !buttonPanel.getRawButtonPressed(10)) {  
-                m_fx.setControl(m_velocityVoltage.withVelocity(50));
-            }
-            // m_fx.setControl(m_velocityVoltage.withVelocity(0));
-        }
-        if (buttonPanel.getRawButtonPressed(4)) { // L3
-            while (m_fx.getPosition().getValueAsDouble() > 38 && !buttonPanel.getRawButtonPressed(10)) {  
-                m_fx.setControl(m_velocityVoltage.withVelocity(-50));
-            }
-            while (m_fx.getPosition().getValueAsDouble() < 37 && !buttonPanel.getRawButtonPressed(10)) {  
-                m_fx.setControl(m_velocityVoltage.withVelocity(50));
-            }
-        }
-        if (buttonPanel.getRawButtonPressed(8)) { // L4
-            while (m_fx.getPosition().getValueAsDouble() < 74 && !buttonPanel.getRawButtonPressed(10)) {  
-                liftPosition = m_fx.getPosition().getValueAsDouble();
-                if (liftPosition > 65){
-                    desiredRotationsPerSecond = (75-liftPosition);
-                } else {
-                    desiredRotationsPerSecond = 75;
-                }
-                m_fx.setControl(m_velocityVoltage.withVelocity(desiredRotationsPerSecond));
-            }
-        }
-
-        // END NEW CODE
-        if (buttonPanel.getRawButtonPressed(1)) {
-            System.out.println("In button pressed");
-            intakeTimer.start();
-            while (intakeSensor.getMeasurement().distance_mm > 10  && intakeTimer.get() < 5.00 && !buttonPanel.getRawButtonPressed(10)) {
-                // System.out.println("intake sensor is " + intakeSensor.getMeasurement().distance_mm);
-                m_intakeLeft.setControl(m_intakeVoltage.withVelocity(20));
-                System.out.println(intakeTimer.get());
-            }
-            intakeTimer.stop();
-            intakeTimer.reset();
-        }
-        if (buttonPanel.getRawButtonPressed(7)) {
-            System.out.println("Out button pressed");
-            intakeTimer.start();
-            while (intakeTimer.get() < 1.00 && !buttonPanel.getRawButtonPressed(10)) {
-                // System.out.println("intake sensor is " + intakeSensor.getMeasurement().distance_mm);
-                m_intakeLeft.setControl(m_intakeVoltage.withVelocity(20));
-            }
-            intakeTimer.stop();
-            intakeTimer.reset();
         }
     }
 
+    if (m_joystick.getRightBumperButton()) {
+        m_intakeLeft.setControl(m_intakeVoltage.withVelocity(intakeRotationsPerSecond * 2));
+    } else {
+        m_intakeLeft.setControl(m_intakeVoltage.withVelocity(0));
+    }
+
+    if (m_joystick.getRightTriggerAxis() > 0) {
+        m_intakeLeft.setControl(m_intakeVoltage.withVelocity(20 * m_joystick.getRightTriggerAxis()));
+    } else if (m_joystick.getLeftTriggerAxis() > 0) {
+        m_intakeLeft.setControl(m_intakeVoltage.withVelocity(-20 * m_joystick.getLeftTriggerAxis()));
+    }
+
+    if (m_joystick.getAButton()) {
+        m_intakeLeft.setControl(m_intakeVoltage.withVelocity(85));
+        m_intakeRight.setControl(m_intakeVoltage.withVelocity(0));
+    } else {
+        m_intakeRight.setControl(new Follower(m_intakeLeft.getDeviceID(), true));
+    }
+
+    // --- BUTTON PANEL ACTIONS (Now using flags) ---
+    if (buttonPanel.getRawButtonPressed(3)) {
+        if (!isLiftMoving) {
+            isLiftMoving = true;
+            startLiftToBottom();
+        }
+        
+    }
+    
+    // 2
+    if (buttonPanel.getRawButtonPressed(2)) {
+        moveLiftToPosition(18, 17);
+    }
+    // L3
+    if (buttonPanel.getRawButtonPressed(4)) {
+        moveLiftToPosition(38, 37.5);
+    }
+
+    // L4
+    if (buttonPanel.getRawButtonPressed(8)) {
+        moveLiftToPosition(74, 73.5);
+    }
+    
+    if (buttonPanel.getRawButtonPressed(1)) {
+        if (!isIntaking) {
+            isIntaking = true;
+            startIntakeSequence();
+        }
+    }
+
+    if (buttonPanel.getRawButtonPressed(7)) {
+        if (!isOuttaking) {
+            isOuttaking = true;
+            startOuttakeSequence();
+        }
+    }
+}
+
     @Override
-    public void testInit() {
-        // Cancel all running commands when test mode starts
-        CommandScheduler.getInstance().cancelAll();
+    public void disabledInit() {
+        executorService.shutdownNow();  // Force stop all running tasks
     }
 }
