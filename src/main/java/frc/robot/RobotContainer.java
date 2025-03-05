@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.Orchestra;
@@ -14,6 +15,8 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MusicTone;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -21,10 +24,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import pabeles.concurrency.IntOperatorTask.Max;
 
 public class RobotContainer {
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(2).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired top speed
+    public static double MaxAngularRate = RotationsPerSecond.of(2).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -36,6 +40,7 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandJoystick joystick = new CommandJoystick(0);
+    private final XboxController Xbox = new XboxController(1);
 
     // private final TalonFX frontLeftDrive = new TalonFX(1);
     // private final TalonFX frontLeftSteer = new TalonFX(2);
@@ -51,6 +56,7 @@ public class RobotContainer {
     final DutyCycleOut m_leftRequest = new DutyCycleOut(0.0);
     final DutyCycleOut m_rightRequest = new DutyCycleOut(0.0);
 
+
     Orchestra m_Orchestra = new Orchestra();
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -60,8 +66,29 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        
+        
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
+
+
+        double xSpeed;
+        double rot;
+        // double ySpeed;
+        var ySpeed = joystick.getY() * MaxSpeed;
+        if (Xbox.getBButtonPressed()) {
+            System.out.println("Limelight activated");
+            final var rot_limelight = limelight_aim_proportional();
+            rot = rot_limelight;
+            final var forward_limelight = limelight_range_proportional();
+            xSpeed = forward_limelight; 
+        }
+        else {
+            xSpeed = -joystick.getX() * MaxSpeed;
+
+            rot = -joystick.getTwist() * MaxAngularRate;
+        }
+
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
@@ -87,6 +114,28 @@ public class RobotContainer {
         // reset the field-centric heading on middle button press
         joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+    double limelight_aim_proportional() {
+        double kP = 0.035;
+        double targetingAngularVelocity = LimelightHelpers.getTX(null) * kP;
+        targetingAngularVelocity *= MaxSpeed;
+        targetingAngularVelocity *= -1.0;
+        return targetingAngularVelocity;
+    }
+
+    double limelight_range_proportional() {
+        double kP = 0.1;
+        double targetingForwardSpeed = LimelightHelpers.getTY(null) * kP;
+        targetingForwardSpeed *= MaxSpeed;
+        targetingForwardSpeed *= -1.0;
+        return targetingForwardSpeed;
+    }
+
+    private void align(boolean fieldRelative) {
+        // var xSpeed = -joystick.getY() * MaxSpeed;
+        var ySpeed = -joystick.getX() * MaxSpeed;
+        // var rot = -joystick.getTwist() * MaxAngularRate;  
     }
 
     // public void configureOrchestra() {

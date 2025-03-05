@@ -43,6 +43,7 @@ public class Robot extends TimedRobot {
     private LaserCan elevatorBottom = new LaserCan(0);
     private LaserCan elevatorTop = new LaserCan(1);
     private LaserCan intakeSensor = new LaserCan(2);
+    
 
     // Thread Pool
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -63,7 +64,7 @@ public class Robot extends TimedRobot {
     private TalonFX LiftRightTalonFX;
     private DutyCycleOut control;
     private Timer timer;
-    private Joystick joystick;
+    private Joystick joystick = new Joystick(0);
 
     private volatile boolean isLiftMoving = false;
     private volatile boolean isIntaking = false;
@@ -242,6 +243,7 @@ private void moveLiftToPosition(double upperLimit, double lowerLimit) {
 
     @Override
 public void teleopPeriodic() {
+
     double joyValue = m_joystick.getLeftY();
     double intakeSpeed = m_joystick.getRightY();
     if (Math.abs(joyValue) < 0.05) joyValue = 0; // add a deadband
@@ -297,7 +299,7 @@ public void teleopPeriodic() {
             isLiftMoving = true;
             startLiftToBottom();
         }
-        
+
     }
     
     // 2
@@ -328,6 +330,8 @@ public void teleopPeriodic() {
         }
     }
 }
+
+
 
     @Override
     public void disabledInit() {
