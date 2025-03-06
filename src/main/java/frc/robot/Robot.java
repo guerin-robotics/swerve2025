@@ -41,7 +41,7 @@ public class Robot extends TimedRobot {
     private final LaserCan elevatorBottom = new LaserCan(0);
     private final LaserCan elevatorTop = new LaserCan(1);
     private final LaserCan intakeSensor = new LaserCan(2);
-    private final SparkMax algaeMotor = new SparkMax(0, MotorType.kBrushed);
+    private final SparkMax algaeMotor = new SparkMax(1, MotorType.kBrushed);
     
 
     // Thread Pool
@@ -206,11 +206,13 @@ private void moveLiftToPosition(double upperLimit, double lowerLimit) {
     }
 
     private void algaeOut() {
+        // RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
         RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
         executorService.execute(() -> {
             try {
-                while (algaeEncoder.getPosition() < 10) {
-                    algaeMotor.set(10);
+                while (algaeEncoder.getPosition() < 0.05) {
+                    System.out.println(algaeEncoder.getPosition());
+                    algaeMotor.set(50);
                 }
                 algaeMotor.set(0);
             }
@@ -226,8 +228,9 @@ private void moveLiftToPosition(double upperLimit, double lowerLimit) {
         RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
         executorService.execute(() -> {
             try {
-                while (algaeEncoder.getPosition() > 0) {
-                    algaeMotor.set(-10);
+                while (algaeEncoder.getPosition() < 0.04) {
+                    System.out.println(algaeEncoder.getPosition());
+                    algaeMotor.set(-50);
                 }
                 algaeMotor.set(0);
             }
@@ -365,14 +368,14 @@ public void teleopPeriodic() {
         }
     }
 
-    if (buttonPanel.getRawButtonPressed(14)) {
+    if (buttonPanel.getRawButtonPressed(5)) {
         if (!isAlgaeIn) {
             isAlgaeIn = true;
             algaeIn();
         }
     }
 
-    if (buttonPanel.getRawButtonPressed(15)) {
+    if (buttonPanel.getRawButtonPressed(9)) {
         if (!isAlgaeOut) {
             isAlgaeOut = true;
             algaeOut();
