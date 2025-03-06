@@ -205,14 +205,14 @@ private void moveLiftToPosition(double upperLimit, double lowerLimit) {
         });
     }
 
-    private void algaeOut() {
+    private void algaeIn() {
         // RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
         RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
         executorService.execute(() -> {
             try {
-                while (algaeEncoder.getPosition() < 0.05) {
+                while (algaeEncoder.getPosition() > 0) {
                     System.out.println(algaeEncoder.getPosition());
-                    algaeMotor.set(50);
+                    algaeMotor.set(100);
                 }
                 algaeMotor.set(0);
             }
@@ -224,13 +224,13 @@ private void moveLiftToPosition(double upperLimit, double lowerLimit) {
             }
         });
     }
-    private void algaeIn() {
+    private void algaeOut() {
         RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
         executorService.execute(() -> {
             try {
                 while (algaeEncoder.getPosition() < 0.04) {
                     System.out.println(algaeEncoder.getPosition());
-                    algaeMotor.set(-50);
+                    algaeMotor.set(-100);
                 }
                 algaeMotor.set(0);
             }

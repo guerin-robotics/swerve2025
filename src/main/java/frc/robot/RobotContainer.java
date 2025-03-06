@@ -118,7 +118,7 @@ public class RobotContainer {
 
     double limelight_aim_proportional() {
         double kP = 0.035;
-        double targetingAngularVelocity = LimelightHelpers.getTX(null) * kP;
+        double targetingAngularVelocity = LimelightHelpers.getTX("limelight") * kP;
         targetingAngularVelocity *= MaxSpeed;
         targetingAngularVelocity *= -1.0;
         return targetingAngularVelocity;
@@ -126,7 +126,7 @@ public class RobotContainer {
 
     double limelight_range_proportional() {
         double kP = 0.1;
-        double targetingForwardSpeed = LimelightHelpers.getTY(null) * kP;
+        double targetingForwardSpeed = LimelightHelpers.getTY("limelight") * kP;
         targetingForwardSpeed *= MaxSpeed;
         targetingForwardSpeed *= -1.0;
         return targetingForwardSpeed;
