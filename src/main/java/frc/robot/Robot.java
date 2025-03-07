@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.Elevator;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -70,7 +71,6 @@ public class Robot extends TimedRobot {
     private volatile boolean isIntaking = false;
     private volatile boolean isOuttaking = false;
     private volatile boolean isAlgaeOut = false;
-    private volatile boolean isAlgaeIn = false;
 
     Timer intakeTimer = new Timer();
     static Timer liftTimer = new Timer();
@@ -184,7 +184,7 @@ public class Robot extends TimedRobot {
                 e.printStackTrace();
             }
             finally {
-                isAlgaeIn = false;
+                isAlgaeOut = true;
             }
         });
     }
@@ -275,6 +275,8 @@ public void teleopPeriodic() {
             isAlgaeOut = true;
             algaeOut();
         }
+        moveLiftToPosition(33, 32.5);
+        
     }
 
     if (buttonPanel.getRawButtonPressed(9)) {
@@ -284,6 +286,7 @@ public void teleopPeriodic() {
             isAlgaeOut = true;
             algaeOut();
         }
+        moveLiftToPosition(50, 49.5);
     }
 
     if (buttonPanel.getRawButtonPressed(10)){
@@ -291,10 +294,12 @@ public void teleopPeriodic() {
             isAlgaeOut = false;
             algaeIn();
         }
+        if (!isAlgaeOut) {
+            isAlgaeOut = true;
+            algaeOut();
+        }
     }
 }
-
-
 
     @Override
     public void disabledInit() {
