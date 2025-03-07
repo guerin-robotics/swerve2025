@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.cameraserver.CameraServer;
+
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.CANBus;
@@ -76,12 +78,12 @@ public class Robot extends TimedRobot {
         // Initialize robot components
         m_robotContainer = new RobotContainer();
         // LiftLeftTalonFX = new TalonFX(10, "rio");
-        // LiftRightTalonFX = new TalonFX(11, "rio");
+        // LiftRightTalonFX = new TalonFX(11, "rio");+
         control = new DutyCycleOut(0);
         timer = new Timer();
         timer.start();
         joystick = new Joystick(0);
-
+        CameraServer.startAutomaticCapture();
         CanBridge.runTCP();
 
     TalonFXConfiguration configs = new TalonFXConfiguration();
