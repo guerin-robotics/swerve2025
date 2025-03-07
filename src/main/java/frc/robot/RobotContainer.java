@@ -76,18 +76,18 @@ public class RobotContainer {
         double rot;
         // double ySpeed;
         var ySpeed = joystick.getY() * MaxSpeed;
-        if (Xbox.getBButtonPressed()) {
-            System.out.println("Limelight activated");
-            final var rot_limelight = limelight_aim_proportional();
-            rot = rot_limelight;
-            final var forward_limelight = limelight_range_proportional();
-            xSpeed = forward_limelight; 
-        }
-        else {
-            xSpeed = -joystick.getX() * MaxSpeed;
+        // if (Xbox.getBButtonPressed()) {
+        //     System.out.println("Limelight activated");
+        //     final var rot_limelight = limelight_aim_proportional();
+        //     rot = rot_limelight;
+        //     final var forward_limelight = limelight_range_proportional();
+        //     xSpeed = forward_limelight; 
+        // }
+        // else {
+        //     xSpeed = -joystick.getX() * MaxSpeed;
 
-            rot = -joystick.getTwist() * MaxAngularRate;
-        }
+        //     rot = -joystick.getTwist() * MaxAngularRate;
+        // }
 
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
@@ -116,21 +116,21 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
-    double limelight_aim_proportional() {
-        double kP = 0.035;
-        double targetingAngularVelocity = LimelightHelpers.getTX("limelight") * kP;
-        targetingAngularVelocity *= MaxSpeed;
-        targetingAngularVelocity *= -1.0;
-        return targetingAngularVelocity;
-    }
+    // double limelight_aim_proportional() {
+    //     double kP = 0.035;
+    //     double targetingAngularVelocity = LimelightHelpers.getTX("limelight") * kP;
+    //     targetingAngularVelocity *= MaxSpeed;
+    //     targetingAngularVelocity *= -1.0;
+    //     return targetingAngularVelocity;
+    // }
 
-    double limelight_range_proportional() {
-        double kP = 0.1;
-        double targetingForwardSpeed = LimelightHelpers.getTY("limelight") * kP;
-        targetingForwardSpeed *= MaxSpeed;
-        targetingForwardSpeed *= -1.0;
-        return targetingForwardSpeed;
-    }
+    // double limelight_range_proportional() {
+    //     double kP = 0.1;
+    //     double targetingForwardSpeed = LimelightHelpers.getTY("limelight") * kP;
+    //     targetingForwardSpeed *= MaxSpeed;
+    //     targetingForwardSpeed *= -1.0;
+    //     return targetingForwardSpeed;
+    // }
 
     private void align(boolean fieldRelative) {
         // var xSpeed = -joystick.getY() * MaxSpeed;

@@ -210,7 +210,7 @@ private void moveLiftToPosition(double upperLimit, double lowerLimit) {
         RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
         executorService.execute(() -> {
             try {
-                while (algaeEncoder.getPosition() > 0) {
+                while (algaeEncoder.getPosition() > 0.01) {
                     System.out.println(algaeEncoder.getPosition());
                     algaeMotor.set(100);
                 }
@@ -369,16 +369,25 @@ public void teleopPeriodic() {
     }
 
     if (buttonPanel.getRawButtonPressed(5)) {
-        if (!isAlgaeIn) {
-            isAlgaeIn = true;
-            algaeIn();
+        moveLiftToPosition(35, 34.5);
+        if (!isAlgaeOut) {
+            isAlgaeOut = true;
+            algaeOut();
         }
     }
 
     if (buttonPanel.getRawButtonPressed(9)) {
+        moveLiftToPosition(50, 49.5);
         if (!isAlgaeOut) {
             isAlgaeOut = true;
             algaeOut();
+        }
+    }
+
+    if (buttonPanel.getRawButtonPressed(10)){
+        if (isAlgaeOut) {
+            isAlgaeOut = false;
+            algaeIn();
         }
     }
 }
