@@ -7,6 +7,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
@@ -16,33 +19,29 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.sim.PhysicsSim;
-
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-
 import au.grapplerobotics.CanBridge;
 import au.grapplerobotics.LaserCan;
-import au.grapplerobotics.ConfigurationFailedException;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.*;
+
+
 public class Robot extends TimedRobot {
     private final CANBus canbus = new CANBus("rio");
-    private final TalonFX m_fx = new TalonFX(10, canbus);
-    private final TalonFX m_fllr = new TalonFX(11, canbus);
+    private final TalonFX m_liftLeft = new TalonFX(10, canbus);
+    private final TalonFX m_liftRight = new TalonFX(11, canbus);
     private final TalonFX m_intakeLeft = new TalonFX(12, canbus);
     private final TalonFX m_intakeRight = new TalonFX(13, canbus);
     private final DigitalInput toplimitSwitch = new DigitalInput(1);
     private final DigitalInput bottomlimitSwitch = new DigitalInput(0);
-    private LaserCan elevatorBottom = new LaserCan(0);
-    private LaserCan elevatorTop = new LaserCan(1);
-    private LaserCan intakeSensor = new LaserCan(2);
+    private final LaserCan elevatorBottom = new LaserCan(0);
+    private final LaserCan elevatorTop = new LaserCan(1);
+    private final LaserCan intakeSensor = new LaserCan(2);
+    private final SparkMax algaeMotor = new SparkMax(1, MotorType.kBrushed);
     
 
     // Thread Pool
@@ -60,8 +59,6 @@ public class Robot extends TimedRobot {
     private final Mechanisms m_mechanisms = new Mechanisms();
     private Command m_autonomousCommand;
     private RobotContainer m_robotContainer;
-    private TalonFX LiftLeftTalonFX;
-    private TalonFX LiftRightTalonFX;
     private DutyCycleOut control;
     private Timer timer;
     private Joystick joystick = new Joystick(0);
@@ -69,6 +66,9 @@ public class Robot extends TimedRobot {
     private volatile boolean isLiftMoving = false;
     private volatile boolean isIntaking = false;
     private volatile boolean isOuttaking = false;
+    private volatile boolean isAlgaeOut = false;
+    private volatile boolean isAlgaeIn = false;
+
     Timer intakeTimer = new Timer();
     Timer liftTimer = new Timer();
 
@@ -119,7 +119,7 @@ public class Robot extends TimedRobot {
     /* Retry config apply up to 5 times, report if failure */
     StatusCode status = StatusCode.StatusCodeNotInitialized;
     for (int i = 0; i < 5; ++i) {
-      status = m_fx.getConfigurator().apply(configs);
+      status = m_liftLeft.getConfigurator().apply(configs);
       m_intakeLeft.getConfigurator().apply(intakeConfig);
       if (status.isOK()) break;
     }
@@ -127,9 +127,9 @@ public class Robot extends TimedRobot {
       System.out.println("Could not apply configs, error code: " + status.toString());
     }
 
-    m_fllr.setControl(new Follower(m_fx.getDeviceID(), true));
+    m_liftRight.setControl(new Follower(m_liftLeft.getDeviceID(), true));
     m_intakeRight.setControl(new Follower(m_intakeLeft.getDeviceID(), true));
-    m_fx.setPosition(0);
+    m_liftLeft.setPosition(0);
 
     }
     private void startLiftToBottom() {
@@ -137,10 +137,10 @@ public class Robot extends TimedRobot {
         try {
             liftTimer.start();
             while (bottomlimitSwitch.get() && liftTimer.get() < 3.00) {
-                double liftPos = m_fx.getPosition().getValueAsDouble();
-                m_fx.setControl(m_velocityVoltage.withVelocity(-liftPos * 5));
+                double liftPos = m_liftLeft.getPosition().getValueAsDouble();
+                m_liftLeft.setControl(m_velocityVoltage.withVelocity(-liftPos * 5));
             }
-            m_fx.setControl(m_brake);
+            m_liftLeft.setControl(m_brake);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -159,11 +159,11 @@ private void moveLiftToPosition(double upperLimit, double lowerLimit) {
     
     executorService.execute(() -> {
         try {
-            while (m_fx.getPosition().getValueAsDouble() > upperLimit && !buttonPanel.getRawButtonPressed(10)) {
-                m_fx.setControl(m_velocityVoltage.withVelocity(-50));
+            while (m_liftLeft.getPosition().getValueAsDouble() > upperLimit && !buttonPanel.getRawButtonPressed(10)) {
+                m_liftLeft.setControl(m_velocityVoltage.withVelocity(-50));
             }
-            while (m_fx.getPosition().getValueAsDouble() < lowerLimit && !buttonPanel.getRawButtonPressed(10)) {
-                m_fx.setControl(m_velocityVoltage.withVelocity(50));
+            while (m_liftLeft.getPosition().getValueAsDouble() < lowerLimit && !buttonPanel.getRawButtonPressed(10)) {
+                m_liftLeft.setControl(m_velocityVoltage.withVelocity(50));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -204,10 +204,48 @@ private void moveLiftToPosition(double upperLimit, double lowerLimit) {
             }
         });
     }
+
+    private void algaeIn() {
+        // RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
+        RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
+        executorService.execute(() -> {
+            try {
+                while (algaeEncoder.getPosition() > 0.01) {
+                    System.out.println(algaeEncoder.getPosition());
+                    algaeMotor.set(100);
+                }
+                algaeMotor.set(0);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+            finally {
+                isAlgaeOut = false;
+            }
+        });
+    }
+    private void algaeOut() {
+        RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
+        executorService.execute(() -> {
+            try {
+                while (algaeEncoder.getPosition() < 0.04) {
+                    System.out.println(algaeEncoder.getPosition());
+                    algaeMotor.set(-100);
+                }
+                algaeMotor.set(0);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+            finally {
+                isAlgaeIn = false;
+            }
+        });
+    }
     @Override
     public void robotPeriodic() {
         // Runs the scheduler for commands
-        m_mechanisms.update(m_fx.getPosition(), m_fx.getVelocity());
+        m_mechanisms.update(m_liftLeft.getPosition(), m_liftLeft.getVelocity());
         CommandScheduler.getInstance().run();
         // if (elevatorBottom.getMeasurement() != null) {
         //     System.out.println("Elevator is " + elevatorBottom.getMeasurement().distance_mm + " mm away!");
@@ -250,7 +288,7 @@ public void teleopPeriodic() {
 
     double desiredRotationsPerSecond;
     double intakeRotationsPerSecond = intakeSpeed * -50;
-    double liftPosition = m_fx.getPosition().getValueAsDouble();
+    double liftPosition = m_liftLeft.getPosition().getValueAsDouble();
 
     if ((elevatorTop.getMeasurement().distance_mm <= 40) && (joyValue < 0)) {
         desiredRotationsPerSecond = 0;
@@ -263,14 +301,14 @@ public void teleopPeriodic() {
     }
 
     if (!bottomlimitSwitch.get() && (joyValue > 0)) {
-        m_fx.setControl(m_brake);
+        m_liftLeft.setControl(m_brake);
     } else if (!toplimitSwitch.get() && (joyValue < 0)) {
-        m_fx.setControl(m_brake);
+        m_liftLeft.setControl(m_brake);
     } else {
         if (m_joystick.getLeftBumperButton()) {
-            m_fx.setControl(m_velocityVoltage.withVelocity(desiredRotationsPerSecond));
+            m_liftLeft.setControl(m_velocityVoltage.withVelocity(desiredRotationsPerSecond));
         } else {
-            m_fx.setControl(m_velocityVoltage.withVelocity(0));
+            m_liftLeft.setControl(m_velocityVoltage.withVelocity(0));
         }
     }
 
@@ -327,6 +365,29 @@ public void teleopPeriodic() {
         if (!isOuttaking) {
             isOuttaking = true;
             startOuttakeSequence();
+        }
+    }
+
+    if (buttonPanel.getRawButtonPressed(5)) {
+        moveLiftToPosition(35, 34.5);
+        if (!isAlgaeOut) {
+            isAlgaeOut = true;
+            algaeOut();
+        }
+    }
+
+    if (buttonPanel.getRawButtonPressed(9)) {
+        moveLiftToPosition(50, 49.5);
+        if (!isAlgaeOut) {
+            isAlgaeOut = true;
+            algaeOut();
+        }
+    }
+
+    if (buttonPanel.getRawButtonPressed(10)){
+        if (isAlgaeOut) {
+            isAlgaeOut = false;
+            algaeIn();
         }
     }
 }
