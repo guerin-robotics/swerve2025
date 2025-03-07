@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -69,7 +70,6 @@ public class Robot extends TimedRobot {
     private volatile boolean isIntaking = false;
     private volatile boolean isOuttaking = false;
     private volatile boolean isAlgaeOut = false;
-    private volatile boolean isAlgaeIn = false;
 
     Timer intakeTimer = new Timer();
     Timer liftTimer = new Timer();
@@ -90,12 +90,12 @@ public class Robot extends TimedRobot {
     TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
 
     /* Voltage-based velocity requires a velocity feed forward to account for the back-emf of the motor */
-    configs.Slot0.kS = 0.3; // To account for friction, add 0.1 V of static feedforward
+    // configs.Slot0.kS = 0.1; // To account for friction, add 0.1 V of static feedforward
     configs.Slot0.kG = 0.2; // Gravity constant, determined by gear ratio
     configs.Slot0.kV = 0.13; // Kraken X60 is a 500 kV motor, 500 rpm per V = 8.333 rps per V, 1/8.33 = 0.12 volts / rotation per second
-    configs.Slot0.kP = 0.12; // An error of 1 rotation per second results in 0.11 V output
-    configs.Slot0.kI = 0.06; // No output for integrated error
-    configs.Slot0.kD = 0.001; // No output for error derivative
+    configs.Slot0.kP = 0.15; // An error of 1 rotation per second results in 0.11 V output
+    configs.Slot0.kI = 0.00; // No output for integrated error
+    configs.Slot0.kD = 0.010; // No output for error derivative
     // Peak output of 8 volts
     configs.Voltage.withPeakForwardVoltage(Volts.of(8))
       .withPeakReverseVoltage(Volts.of(-8));
@@ -240,7 +240,7 @@ private void moveLiftToPosition(double upperLimit, double lowerLimit) {
                 e.printStackTrace();
             }
             finally {
-                isAlgaeIn = false;
+                isAlgaeOut = true;
             }
         });
     }
@@ -353,7 +353,7 @@ public void teleopPeriodic() {
 
     // L4
     if (buttonPanel.getRawButtonPressed(8)) {
-        moveLiftToPosition(74, 73.5);
+        moveLiftToPosition(72, 71.5);
     }
     
     if (buttonPanel.getRawButtonPressed(1)) {
@@ -371,19 +371,20 @@ public void teleopPeriodic() {
     }
 
     if (buttonPanel.getRawButtonPressed(5)) {
-        moveLiftToPosition(35, 34.5);
         if (!isAlgaeOut) {
             isAlgaeOut = true;
             algaeOut();
         }
+        moveLiftToPosition(33, 32.5);
+        
     }
 
     if (buttonPanel.getRawButtonPressed(9)) {
-        moveLiftToPosition(50, 49.5);
         if (!isAlgaeOut) {
             isAlgaeOut = true;
             algaeOut();
         }
+        moveLiftToPosition(50, 49.5);
     }
 
     if (buttonPanel.getRawButtonPressed(10)){
@@ -391,10 +392,12 @@ public void teleopPeriodic() {
             isAlgaeOut = false;
             algaeIn();
         }
+        if (!isAlgaeOut) {
+            isAlgaeOut = true;
+            algaeOut();
+        }
     }
 }
-
-
 
     @Override
     public void disabledInit() {
