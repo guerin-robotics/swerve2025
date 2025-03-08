@@ -16,6 +16,9 @@ import com.ctre.phoenix6.controls.MusicTone;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,7 +27,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import pabeles.concurrency.IntOperatorTask.Max;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.events.EventTrigger;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 public class RobotContainer {
     public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired top speed
@@ -57,12 +64,18 @@ public class RobotContainer {
     final DutyCycleOut m_rightRequest = new DutyCycleOut(0.0);
 
 
+
     Orchestra m_Orchestra = new Orchestra();
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    private final SendableChooser<Command> autoChooser;
     public RobotContainer() {
         configureBindings();
+
+        autoChooser = AutoBuilder.buildAutoChooser();
+
+        SmartDashboard.putData("Auto mode", autoChooser);
     }
 
     private void configureBindings() {
@@ -130,7 +143,7 @@ public class RobotContainer {
     //     targetingForwardSpeed *= MaxSpeed;
     //     targetingForwardSpeed *= -1.0;
     //     return targetingForwardSpeed;
-    // }
+    // }       
 
     private void align(boolean fieldRelative) {
         // var xSpeed = -joystick.getY() * MaxSpeed;
@@ -155,6 +168,15 @@ public class RobotContainer {
     // }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        try{
+        // Load the path you want to follow using its name in the GUI
+        PathPlannerPath path = PathPlannerPath.fromPathFile("Blue 1");
+
+        // Create a path following command using AutoBuilder. This will also trigger event markers.
+        return AutoBuilder.followPath(path);
+    } catch (Exception e) {
+        DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+    }
     }
 }

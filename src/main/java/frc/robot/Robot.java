@@ -392,7 +392,7 @@ public void teleopPeriodic() {
             isAlgaeOut = false;
             algaeIn();
         }
-        if (!isAlgaeOut) {
+    else if (!isAlgaeOut) {
             isAlgaeOut = true;
             algaeOut();
         }
