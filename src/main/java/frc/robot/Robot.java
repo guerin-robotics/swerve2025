@@ -162,7 +162,7 @@ public class Robot extends TimedRobot {
         RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
         executorService.execute(() -> {
             try {
-                while (algaeEncoder.getPosition() > 0.01) {
+                while (algaeEncoder.getPosition() > -0.025) {
                     System.out.println(algaeEncoder.getPosition());
                     algaeMotor.set(100);
                 }
@@ -180,7 +180,7 @@ public class Robot extends TimedRobot {
         RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
         executorService.execute(() -> {
             try {
-                while (algaeEncoder.getPosition() < 0.04) {
+                while (algaeEncoder.getPosition() < 0.0) {
                     System.out.println(algaeEncoder.getPosition());
                     algaeMotor.set(-100);
                 }
