@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -41,6 +42,9 @@ public class RobotContainer {
 
     private final CommandJoystick joystick = new CommandJoystick(0);
     private final XboxController Xbox = new XboxController(1);
+    private final CommandJoystick buttonPanel = new CommandJoystick(2);
+
+
 
     // private final TalonFX frontLeftDrive = new TalonFX(1);
     // private final TalonFX frontLeftSteer = new TalonFX(2);
@@ -66,7 +70,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        
+        buttonPanel.button(Constants.buttonPanel.lift.L1).onTrue(new InstantCommand(() -> Robot.startLiftToBottom()));
         
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
@@ -158,3 +162,4 @@ public class RobotContainer {
         return Commands.print("No autonomous command configured");
     }
 }
+
