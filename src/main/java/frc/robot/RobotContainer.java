@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.lang.ModuleLayer.Controller;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -43,11 +45,13 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandJoystick joystick = new CommandJoystick(0);
-    private final XboxController Xbox = new XboxController(1);
+    private final CommandJoystick XboxController = new CommandJoystick(1);
     private final CommandJoystick buttonPanel = new CommandJoystick(2);
 
     final DutyCycleOut m_leftRequest = new DutyCycleOut(0.0);
     final DutyCycleOut m_rightRequest = new DutyCycleOut(0.0);
+
+    public final Elevator m_elevator = new Elevator();
 
 
     Orchestra m_Orchestra = new Orchestra();
@@ -59,10 +63,11 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        buttonPanel.button(Constants.buttonPanel.lift.L1).onTrue(new InstantCommand(() -> Elevator.toBottom()));
-        buttonPanel.button(Constants.buttonPanel.lift.L2).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L2)));
-        buttonPanel.button(Constants.buttonPanel.lift.L3).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L3)));
-        buttonPanel.button(Constants.buttonPanel.lift.L4).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L4)));
+        buttonPanel.button(Constants.buttonPanel.lift.L1).onTrue(new InstantCommand(() -> m_elevator.toBottom()));
+        buttonPanel.button(Constants.buttonPanel.lift.L2).onTrue(new InstantCommand(() -> m_elevator.toPosition(Constants.elevator.level.L2)));
+        buttonPanel.button(Constants.buttonPanel.lift.L3).onTrue(new InstantCommand(() -> m_elevator.toPosition(Constants.elevator.level.L3)));
+        buttonPanel.button(Constants.buttonPanel.lift.L4).onTrue(new InstantCommand(() -> m_elevator.toPosition(Constants.elevator.level.L4)));
+        XboxController.button(5).onTrue(new InstantCommand(() -> m_elevator.manualControl(XboxController)));
         
 
         // Note that X is defined as forward according to WPILib convention,

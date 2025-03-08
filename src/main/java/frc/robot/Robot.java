@@ -33,6 +33,8 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.*;
 
+import frc.robot.subsystems.*;
+
 
 public class Robot extends TimedRobot {
     private final static CANBus canbus = new CANBus("rio");
@@ -40,10 +42,10 @@ public class Robot extends TimedRobot {
     private final TalonFX m_liftRight = new TalonFX(11, canbus);
     private final TalonFX m_intakeLeft = new TalonFX(12, canbus);
     private final TalonFX m_intakeRight = new TalonFX(13, canbus);
-    private final DigitalInput toplimitSwitch = new DigitalInput(1);
-    private final static DigitalInput bottomlimitSwitch = new DigitalInput(0);
-    private final LaserCan elevatorBottom = new LaserCan(0);
-    private final LaserCan elevatorTop = new LaserCan(1);
+    // private final DigitalInput toplimitSwitch = new DigitalInput(1);
+    // private final static DigitalInput bottomlimitSwitch = new DigitalInput(0);
+    // private final LaserCan elevatorBottom = new LaserCan(0);
+    // private final LaserCan elevatorTop = new LaserCan(1);
     private final LaserCan intakeSensor = new LaserCan(2);
     private final SparkMax algaeMotor = new SparkMax(1, MotorType.kBrushed);
     
@@ -63,6 +65,7 @@ public class Robot extends TimedRobot {
     private final Mechanisms m_mechanisms = new Mechanisms();
     private Command m_autonomousCommand;
     private RobotContainer m_robotContainer;
+    private Elevator elevator;
     private DutyCycleOut control;
     private Timer timer;
     private Joystick joystick = new Joystick(0);
@@ -84,6 +87,7 @@ public class Robot extends TimedRobot {
         timer = new Timer();
         timer.start();
         joystick = new Joystick(0);
+        // elevator = new Elevator();
 
         CanBridge.runTCP();
 
@@ -270,7 +274,7 @@ public void teleopPeriodic() {
 
     if (buttonPanel.getRawButtonPressed(5)) {
         // moveLiftToPosition(35, 34.5);
-        Elevator.toPosition(35);
+        // Elevator.toPosition(35);
         if (!isAlgaeOut) {
             isAlgaeOut = true;
             algaeOut();
@@ -280,7 +284,7 @@ public void teleopPeriodic() {
 
     if (buttonPanel.getRawButtonPressed(9)) {
         // moveLiftToPosition(50, 49.5);
-        Elevator.toPosition(50);
+        // Elevator.toPosition(50);
         if (!isAlgaeOut) {
             isAlgaeOut = true;
             algaeOut();
