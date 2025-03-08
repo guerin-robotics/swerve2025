@@ -24,7 +24,7 @@ public class Constants {
         public static final int LiftRight = 11;
 
         public static final class level {
-            public static final double L1 = 0;
+            public static final double L1 = 0.2;
             public static final double L2 = 18.0;
             public static final double L3 = 38.0;
             public static final double L4 = 73.0;

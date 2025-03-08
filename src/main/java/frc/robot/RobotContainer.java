@@ -51,7 +51,7 @@ public class RobotContainer {
     final DutyCycleOut m_leftRequest = new DutyCycleOut(0.0);
     final DutyCycleOut m_rightRequest = new DutyCycleOut(0.0);
 
-    public final Elevator m_elevator = new Elevator();
+    public  Elevator m_elevator = new Elevator();
 
 
     Orchestra m_Orchestra = new Orchestra();
@@ -63,7 +63,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        buttonPanel.button(Constants.buttonPanel.lift.L1).onTrue(new InstantCommand(() -> m_elevator.toBottom()));
+        buttonPanel.button(Constants.buttonPanel.lift.L1).onTrue(new InstantCommand(() -> m_elevator.toPosition(Constants.elevator.level.L1)));
         buttonPanel.button(Constants.buttonPanel.lift.L2).onTrue(new InstantCommand(() -> m_elevator.toPosition(Constants.elevator.level.L2)));
         buttonPanel.button(Constants.buttonPanel.lift.L3).onTrue(new InstantCommand(() -> m_elevator.toPosition(Constants.elevator.level.L3)));
         buttonPanel.button(Constants.buttonPanel.lift.L4).onTrue(new InstantCommand(() -> m_elevator.toPosition(Constants.elevator.level.L4)));

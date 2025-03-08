@@ -33,6 +33,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.*;
 
+import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.subsystems.*;
 
 
@@ -87,6 +88,7 @@ public class Robot extends TimedRobot {
         timer = new Timer();
         timer.start();
         joystick = new Joystick(0);
+        CameraServer.startAutomaticCapture();
         // elevator = new Elevator();
 
         CanBridge.runTCP();
@@ -106,7 +108,7 @@ public class Robot extends TimedRobot {
     /* Retry config apply up to 5 times, report if failure */
     StatusCode status = StatusCode.StatusCodeNotInitialized;
     for (int i = 0; i < 5; ++i) {
-        status = m_liftLeft.getConfigurator().apply(configs);
+        // status = m_liftLeft.getConfigurator().apply(configs);
         m_intakeLeft.getConfigurator().apply(intakeConfig);
         if (status.isOK()) break;
     }
@@ -114,7 +116,7 @@ public class Robot extends TimedRobot {
             System.out.println("Could not apply configs, error code: " + status.toString());
         }
     
-        m_liftRight.setControl(new Follower(m_liftLeft.getDeviceID(), true));
+        // m_liftRight.setControl(new Follower(m_liftLeft.getDeviceID(), true));
         m_intakeRight.setControl(new Follower(m_intakeLeft.getDeviceID(), true));
         m_liftLeft.setPosition(0);
     
@@ -257,6 +259,8 @@ public void teleopPeriodic() {
         m_intakeRight.setControl(new Follower(m_intakeLeft.getDeviceID(), true));
     }
 
+    // System.out.println(Elevator.calculateSpeed(10, 50));
+
     // --- BUTTON PANEL ACTIONS (Now using flags) ---
     if (buttonPanel.getRawButtonPressed(1)) {
         if (!isIntaking) {
@@ -274,7 +278,8 @@ public void teleopPeriodic() {
 
     if (buttonPanel.getRawButtonPressed(5)) {
         // moveLiftToPosition(35, 34.5);
-        // Elevator.toPosition(35);
+        // .toPosition(35);
+
         if (!isAlgaeOut) {
             isAlgaeOut = true;
             algaeOut();
@@ -296,11 +301,12 @@ public void teleopPeriodic() {
             isAlgaeOut = false;
             algaeIn();
         }
-        if (!isAlgaeOut) {
+        else if (!isAlgaeOut) {
             isAlgaeOut = true;
             algaeOut();
         }
     }
+
 }
 
     @Override
