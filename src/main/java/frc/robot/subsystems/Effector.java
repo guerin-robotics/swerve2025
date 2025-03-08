@@ -60,5 +60,17 @@ public class Effector extends SubsystemBase {
         
     }
 
+    public static void outtakeSequence() {
+
+    }
+
+    public static void scoreCoral(int level) {
+
+    }
+
+    public static void removeAlgae(int level) {
+
+    }
+
 
 }

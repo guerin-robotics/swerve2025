@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import static edu.wpi.first.units.Units.Volts;
@@ -90,6 +91,6 @@ public class Elevator extends SubsystemBase{
     }
     
     public static void manualControl(CommandXboxController controller) {
-        liftLeft.set(calculateSpeed(controller.getLeftY(), liftLeft.getPosition().getValueAsDouble()));
+        controller.leftBumper().onTrue(new InstantCommand(() -> liftLeft.set(calculateSpeed(controller.getLeftY(), liftLeft.getPosition().getValueAsDouble()))));
     }
 }

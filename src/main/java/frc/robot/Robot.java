@@ -275,7 +275,6 @@ public void teleopPeriodic() {
             isAlgaeOut = true;
             algaeOut();
         }
-        moveLiftToPosition(33, 32.5);
         
     }
 
@@ -286,7 +285,6 @@ public void teleopPeriodic() {
             isAlgaeOut = true;
             algaeOut();
         }
-        moveLiftToPosition(50, 49.5);
     }
 
     if (buttonPanel.getRawButtonPressed(10)){
