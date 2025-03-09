@@ -6,30 +6,21 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.lang.ModuleLayer.Controller;
-
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.MusicTone;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
-import pabeles.concurrency.IntOperatorTask.Max;
+import frc.robot.subsystems.*;
 
-import frc.robot.subsystems.Elevator;
 
 public class RobotContainer {
     public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired top speed
@@ -51,7 +42,8 @@ public class RobotContainer {
     final DutyCycleOut m_leftRequest = new DutyCycleOut(0.0);
     final DutyCycleOut m_rightRequest = new DutyCycleOut(0.0);
 
-    public  Elevator m_elevator = new Elevator();
+    public Elevator m_elevator = new Elevator();
+    public Effector m_effector = new Effector();
 
 
     Orchestra m_Orchestra = new Orchestra();
@@ -63,12 +55,18 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        buttonPanel.button(Constants.buttonPanel.lift.L1).onTrue(new InstantCommand(() -> m_elevator.toPosition(Constants.elevator.level.L1)));
-        buttonPanel.button(Constants.buttonPanel.lift.L2).onTrue(new InstantCommand(() -> m_elevator.toPosition(Constants.elevator.level.L2)));
-        buttonPanel.button(Constants.buttonPanel.lift.L3).onTrue(new InstantCommand(() -> m_elevator.toPosition(Constants.elevator.level.L3)));
-        buttonPanel.button(Constants.buttonPanel.lift.L4).onTrue(new InstantCommand(() -> m_elevator.toPosition(Constants.elevator.level.L4)));
-        XboxController.button(5).onTrue(new InstantCommand(() -> m_elevator.manualControl(XboxController)));
-        
+        buttonPanel.button(Constants.buttonPanel.lift.L1).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1)));
+        buttonPanel.button(Constants.buttonPanel.lift.L2).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L2)));
+        buttonPanel.button(Constants.buttonPanel.lift.L3).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L3)));
+        buttonPanel.button(Constants.buttonPanel.lift.L4).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L4)));
+        buttonPanel.button(Constants.buttonPanel.algae.Lower).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
+        buttonPanel.button(Constants.buttonPanel.algae.Upper).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
+        buttonPanel.button(Constants.buttonPanel.coral.In).onTrue(new InstantCommand(() -> Effector.intakeUntilDetected()));
+        buttonPanel.button(Constants.buttonPanel.coral.Out).onTrue(new InstantCommand(() -> Effector.outtakeUntilDetected()));
+        XboxController.button(Constants.XboxController.bumper.Left).whileTrue(new RunCommand(() -> Elevator.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.LeftYAxis))));
+        XboxController.button(Constants.XboxController.button.A).onTrue(new InstantCommand(() -> Effector.asymmetricalOuttake(null, null)));
+        XboxController.button(Constants.XboxController.bumper.Right).whileTrue(new RunCommand(() -> Effector.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.RightYAxis), null)));
+
 
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.

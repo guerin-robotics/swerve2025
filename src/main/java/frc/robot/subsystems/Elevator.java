@@ -35,10 +35,9 @@ public class Elevator extends SubsystemBase{
     // private static LaserCan elevatorBottom = new LaserCan(0);
     // private static LaserCan elevatorTop = new LaserCan(1);
 
-    private final VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
-
+    private final static VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
     private final static MotionMagicVoltage motionControl = new MotionMagicVoltage(0).withSlot(0);
-            
+                
     public Elevator() {
         System.out.println("Creating new motor with ID " + Constants.elevator.LiftLeft);
 
@@ -62,7 +61,7 @@ public class Elevator extends SubsystemBase{
     //     }
     // }
                     
-    public void toPosition(double rotations) {
+    public static void toPosition(double rotations) {
         System.out.println("Going to " + rotations);
         if (toplimitSwitch.get()) {
             System.out.println(motionControl.withPosition(rotations));
@@ -77,7 +76,7 @@ public class Elevator extends SubsystemBase{
         }
     }
     
-    public void toBottom() {
+    public static void toBottom() {
         while (bottomlimitSwitch.get()) {
             // liftLeft.setControl(motionControl.withPosition(0));
             liftLeft.setControl(m_velocityVoltage.withVelocity(10));
@@ -85,14 +84,14 @@ public class Elevator extends SubsystemBase{
         liftLeft.setControl(m_velocityVoltage.withVelocity(0));
     }
     
-    public void manualControl(CommandJoystick controller) {
+    public static void manualControl(double velocity) {
         // liftLeft.setControl(motionControl.withFeedForward(-controller.getRawAxis(1)));
-        System.out.println("Joystick at: " + controller.getRawAxis(1));
-        // liftLeft.setControl(m_velocityVoltage.withVelocity(-controller.getRawAxis(1)));
+        System.out.println("Joystick at: " + velocity);
+        liftLeft.setControl(m_velocityVoltage.withVelocity(velocity));
         // liftLeft.set(controller.getRawAxis(1));
     }
 
-    public void configureElevator() {
+    public static void configureElevator() {
         TalonFXConfiguration elevatorConfig = new TalonFXConfiguration();
         var limitConfigs = elevatorConfig.CurrentLimits;
 
