@@ -158,8 +158,8 @@ public class Effector extends SubsystemBase {
     public static void algaeEffectorUp() {
         RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
 
-        while (algaeEncoder.getPosition() < 0.0) {
-            algaeMotor.set(100);
+        while (algaeEncoder.getPosition() < 0.1) {
+            algaeMotor.set(-100);
         }
         algaeMotor.set(0);
         isAlgaeOut = true;
@@ -168,8 +168,8 @@ public class Effector extends SubsystemBase {
     public static void algaeEffectorDown() {
         RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
 
-        while (algaeEncoder.getPosition() > -0.025) {
-            algaeMotor.set(-100);
+        while (algaeEncoder.getPosition() > -0.1) {
+            algaeMotor.set(100);
         }
         algaeMotor.set(0);
         isAlgaeOut = false;

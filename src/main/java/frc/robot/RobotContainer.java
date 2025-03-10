@@ -35,9 +35,9 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandJoystick joystick = new CommandJoystick(0);
-    private final CommandJoystick XboxController = new CommandJoystick(1);
-    private final CommandJoystick buttonPanel = new CommandJoystick(2);
+    public static final CommandJoystick joystick = new CommandJoystick(0);
+    public static final CommandJoystick XboxController = new CommandJoystick(1);
+    public static final CommandJoystick buttonPanel = new CommandJoystick(2);
 
     final DutyCycleOut m_leftRequest = new DutyCycleOut(0.0);
     final DutyCycleOut m_rightRequest = new DutyCycleOut(0.0);
@@ -51,6 +51,14 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public RobotContainer() {
+        drivetrain.seedFieldCentric();
+        if (SwerveRequest.ForwardPerspectiveValue.OperatorPerspective == SwerveRequest.ForwardPerspectiveValue.BlueAlliance) {
+            var heading = 1;
+        }
+        else {
+            var heading = -1;
+        }
+
         configureBindings();
     }
 
@@ -61,6 +69,7 @@ public class RobotContainer {
         buttonPanel.button(Constants.buttonPanel.lift.L4).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L4)));
         buttonPanel.button(Constants.buttonPanel.algae.Lower).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
         buttonPanel.button(Constants.buttonPanel.algae.Upper).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
+        buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new InstantCommand(() -> Effector.toggleAlgae()));
         buttonPanel.button(Constants.buttonPanel.coral.In).onTrue(new InstantCommand(() -> Effector.intakeUntilDetected()));
         buttonPanel.button(Constants.buttonPanel.coral.Out).onTrue(new InstantCommand(() -> Effector.outtakeUntilDetected()));
         XboxController.button(Constants.XboxController.bumper.Left).whileTrue(new RunCommand(() -> Elevator.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.LeftYAxis))));
@@ -92,8 +101,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getX() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(joystick.getY() * MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(joystick.getY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(joystick.getX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-joystick.getTwist() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );

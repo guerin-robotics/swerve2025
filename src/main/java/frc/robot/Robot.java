@@ -2,10 +2,15 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
+
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.Effector;
+
+import com.ctre.phoenix6.configs.Pigeon2Configuration;
 
 import au.grapplerobotics.CanBridge;
 
@@ -29,7 +34,13 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         // Runs the scheduler for commands
         CommandScheduler.getInstance().run();
+        if (RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.LeftTrigger) > 0) {
+            Effector.manualControl(-0.5* RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.LeftTrigger), null);
+        }
+        else {
+        Effector.manualControl(0.5*RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.RightTrigger), null);
     }
+}
 
 
     @Override
@@ -52,6 +63,7 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
+        
     }
 
     @Override
