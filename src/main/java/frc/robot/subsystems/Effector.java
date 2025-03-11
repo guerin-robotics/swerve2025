@@ -128,7 +128,7 @@ public class Effector extends SubsystemBase {
             motorSpeedL = velocityLeft;
         }
         else {
-            motorSpeedL = Constants.effector.defaultVelocity * 2.5;
+            motorSpeedL = 80;
         }
         if (velocityRight != null) {
             motorSpeedR = velocityRight;
@@ -149,7 +149,7 @@ public class Effector extends SubsystemBase {
 
     public static void manualControl(double velocityLeft, Double velocityRight) {
         if (velocityRight == null) {
-            velocityRight = velocityLeft;
+            velocityRight = -velocityLeft;
         }
         effectorLeft.set(velocityLeft);
         effectorRight.set(velocityRight);

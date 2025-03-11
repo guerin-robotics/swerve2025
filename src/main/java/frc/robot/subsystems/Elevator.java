@@ -87,7 +87,12 @@ public class Elevator extends SubsystemBase{
     public static void manualControl(double velocity) {
         // liftLeft.setControl(motionControl.withFeedForward(-controller.getRawAxis(1)));
         System.out.println("Joystick at: " + velocity);
-        liftLeft.setControl(m_velocityVoltage.withVelocity(velocity));
+        if (velocity == 0) {
+            liftLeft.set(0);
+        }
+        else {
+            liftLeft.set(-velocity * 0.5);
+        }
         // liftLeft.set(controller.getRawAxis(1));
     }
 

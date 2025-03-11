@@ -8,10 +8,14 @@ import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -23,6 +27,8 @@ import frc.robot.subsystems.*;
 
 
 public class RobotContainer {
+    private final SendableChooser<Command> autoChooser;
+
     public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired top speed
     public static double MaxAngularRate = RotationsPerSecond.of(2).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -60,6 +66,10 @@ public class RobotContainer {
         }
 
         configureBindings();
+
+        autoChooser = AutoBuilder.buildAutoChooser("");
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+
     }
 
     private void configureBindings() {
@@ -75,6 +85,10 @@ public class RobotContainer {
         XboxController.button(Constants.XboxController.bumper.Left).whileTrue(new RunCommand(() -> Elevator.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.LeftYAxis))));
         XboxController.button(Constants.XboxController.button.A).onTrue(new InstantCommand(() -> Effector.asymmetricalOuttake(null, null)));
         XboxController.button(Constants.XboxController.bumper.Right).whileTrue(new RunCommand(() -> Effector.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.RightYAxis), null)));
+        XboxController.button(Constants.XboxController.button.X).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
+        XboxController.button(Constants.XboxController.button.B).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
+        XboxController.button(Constants.XboxController.button.Y).onTrue(new InstantCommand(() -> Elevator.toPosition(0)));
+        
 
 
         // Note that X is defined as forward according to WPILib convention,
@@ -149,7 +163,8 @@ public class RobotContainer {
 
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        // return Commands.print("No autonomous command configured");
+        return autoChooser.getSelected();
     }
 }
 
