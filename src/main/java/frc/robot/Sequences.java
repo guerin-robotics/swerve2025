@@ -14,4 +14,9 @@ public class Sequences {
         Effector.algaeEffectorUp();
         Elevator.toPosition(Constants.elevator.algaeLevel.L3 - 3);
     }
+
+    public static void scoreL1Coral() {
+        Elevator.toPosition(Constants.elevator.level.L1);
+        Effector.asymmetricalOuttake(null, null);
+    }
 }

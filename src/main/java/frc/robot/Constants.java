@@ -47,15 +47,15 @@ public class Constants {
         public static final int LiftRight = 11;
 
         public static final class level {
-            public static final double L1 = 0.2;
+            public static final double L1 = 0.05;
             public static final double L2 = 18.0;
             public static final double L3 = 38.0;
-            public static final double L4 = 73.0;
+            public static final double L4 = 73.8; //73.0 for good wheels
         }
 
         public static final class algaeLevel {
-            public static final double L2 = 34.0;
-            public static final double L3 = 50.0;
+            public static final double L2 = 30.0;
+            public static final double L3 = 49.0;
         }
     }
 

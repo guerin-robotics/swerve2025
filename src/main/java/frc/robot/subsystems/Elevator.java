@@ -74,6 +74,7 @@ public class Elevator extends SubsystemBase{
             liftLeft.set(0);
             liftLeft.setControl(m_velocityVoltage.withVelocity(0));
         }
+        return;
     }
     
     public static void toBottom() {
@@ -88,10 +89,10 @@ public class Elevator extends SubsystemBase{
         // liftLeft.setControl(motionControl.withFeedForward(-controller.getRawAxis(1)));
         System.out.println("Joystick at: " + velocity);
         if (velocity == 0) {
-            liftLeft.set(0);
+            liftLeft.setControl(m_velocityVoltage.withVelocity(0));
         }
         else {
-            liftLeft.set(-velocity * 0.5);
+            liftLeft.setControl(m_velocityVoltage.withVelocity(-velocity * 5));
         }
         // liftLeft.set(controller.getRawAxis(1));
     }
@@ -130,5 +131,9 @@ public class Elevator extends SubsystemBase{
         System.out.println("Left elevator: " + liftLeft.getDeviceID());
         System.out.println("Right elevator: " + liftRight.getDeviceID());
 
+    }
+
+    public static double getPosition() {
+        return liftLeft.getPosition().getValueAsDouble();
     }
 }

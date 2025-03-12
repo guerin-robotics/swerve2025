@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static edu.wpi.first.units.Units.Volts;
@@ -13,6 +13,7 @@ import com.revrobotics.RelativeEncoder;
 
 import au.grapplerobotics.LaserCan;
 import frc.robot.Constants;
+import frc.robot.Constants.effector;
 import edu.wpi.first.wpilibj.Timer;
 
 import com.revrobotics.spark.SparkMax;
@@ -52,8 +53,8 @@ public class Effector extends SubsystemBase {
         effectorTimer = new Timer();
 
         effectorConfig.Slot0.kS = 0; // Static friction
-        effectorConfig.Slot0.kV = 0.12; // 0.12 for Kraken X60
-        effectorConfig.Slot0.kP = 0.1; // Rotational error per second
+        effectorConfig.Slot0.kV = 0; // 0.12 for Kraken X60
+        effectorConfig.Slot0.kP = 0.3; // Rotational error per second
         effectorConfig.Slot0.kI = 0; // Integrated error
         effectorConfig.Slot0.kD = 0; // Error derivative
 
@@ -72,32 +73,34 @@ public class Effector extends SubsystemBase {
 
     public static void intakeUntilDetected() {
         while (intakeSensor.getMeasurement().distance_mm > 10) {
-            effectorLeft.set(50);
-            effectorRight.set(-50);
+            // effectorLeft.set(10);
+            // effectorRight.set(-10);
+            effectorLeft.setControl(m_velocityVoltage.withVelocity(20));
+            effectorRight.setControl(m_velocityVoltage.withVelocity(-20));
         }
         effectorTimer.start();
-        while (effectorTimer.get() < 0.5) {
-            effectorLeft.set(50);
-            effectorRight.set(-50);
+        while (effectorTimer.get() < 0.2) {
+            effectorLeft.setControl(m_velocityVoltage.withVelocity(20));
+            effectorRight.setControl(m_velocityVoltage.withVelocity(-20));
         }
-        effectorLeft.set(0);
-        effectorRight.set(0);
+        effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
+        effectorRight.setControl((m_velocityVoltage.withVelocity(0)));
         effectorTimer.stop();
         effectorTimer.reset();
     }
 
     public static void outtakeUntilDetected() {
         while (intakeSensor.getMeasurement().distance_mm < 10) {
-            effectorLeft.set(30);
-            effectorRight.set(-30);
+            effectorLeft.setControl(m_velocityVoltage.withVelocity(30));
+            effectorRight.setControl(m_velocityVoltage.withVelocity(-30));
         }
         effectorTimer.start();
         while (effectorTimer.get() < 1.0) {
             effectorLeft.set(30);
             effectorRight.set(-30);
         } 
-        effectorLeft.set(0);
-        effectorRight.set(0);
+        effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
+        effectorRight.setControl(m_velocityVoltage.withVelocity(0));
         effectorTimer.stop();
         effectorTimer.reset();
     }
@@ -112,16 +115,18 @@ public class Effector extends SubsystemBase {
         }
         effectorTimer.start();
         while (effectorTimer.get() < 2) {
-            effectorLeft.set(motorSpeed);
-            effectorRight.set(-motorSpeed);
+            effectorLeft.setControl(m_velocityVoltage.withVelocity(motorSpeed));
+            effectorRight.setControl(m_velocityVoltage.withVelocity(-motorSpeed));
         }
-        effectorLeft.set(0);
-        effectorRight.set(0);
+        effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
+        effectorRight.setControl(m_velocityVoltage.withVelocity(0));
         effectorTimer.stop();
         effectorTimer.reset();
+        return;
     }
 
     public static void asymmetricalOuttake(Double velocityLeft, Double velocityRight) {
+        System.out.println("This is running!");
         double motorSpeedL;
         double motorSpeedR;
         if (velocityLeft != null) {
@@ -137,12 +142,12 @@ public class Effector extends SubsystemBase {
             motorSpeedR = 0;
         }
         effectorTimer.start();
-        while (effectorTimer.get() < 1) {
-            effectorLeft.set(motorSpeedL);
-            effectorRight.set(-motorSpeedR);
+        while (effectorTimer.get() < 1.5) {
+            effectorLeft.setControl(m_velocityVoltage.withVelocity(motorSpeedL));
+            effectorRight.setControl(m_velocityVoltage.withVelocity(-motorSpeedR));
         }
-        effectorLeft.set(0);
-        effectorRight.set(0);
+        effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
+        effectorRight.setControl(m_velocityVoltage.withVelocity(0));
         effectorTimer.stop();
         effectorTimer.reset();
     }
@@ -151,14 +156,14 @@ public class Effector extends SubsystemBase {
         if (velocityRight == null) {
             velocityRight = -velocityLeft;
         }
-        effectorLeft.set(velocityLeft);
-        effectorRight.set(velocityRight);
+        effectorLeft.setControl(m_velocityVoltage.withVelocity(velocityLeft * 70));
+        effectorRight.setControl(m_velocityVoltage.withVelocity(velocityRight * 70));
     }
 
     public static void algaeEffectorUp() {
         RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
 
-        while (algaeEncoder.getPosition() < 0.1) {
+        while (algaeEncoder.getPosition() < 0.03) {
             algaeMotor.set(-100);
         }
         algaeMotor.set(0);
@@ -168,7 +173,8 @@ public class Effector extends SubsystemBase {
     public static void algaeEffectorDown() {
         RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
 
-        while (algaeEncoder.getPosition() > -0.1) {
+        while (algaeEncoder.getPosition() > 0.02
+        ) {
             algaeMotor.set(100);
         }
         algaeMotor.set(0);
