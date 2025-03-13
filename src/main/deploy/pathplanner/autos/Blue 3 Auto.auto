@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Drive to Reef B3"
+            "pathName": "Drive To Reef B3"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "scoreL1Coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B3 Coral Station"
           }
         }
       ]

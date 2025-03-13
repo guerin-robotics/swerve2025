@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.5855,
-        "y": 7.535
+        "x": 9.95475,
+        "y": 7.5447500000000005
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.89875,
-        "y": 7.5545
+        "x": 12.158249999999999,
+        "y": 7.496
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.9822500000000005,
-        "y": 4.83425
+        "x": 13.484250000000001,
+        "y": 4.7855
       },
       "prevControl": {
-        "x": 5.5085000000000015,
-        "y": 5.963999999999999
+        "x": 14.010500000000002,
+        "y": 5.915249999999999
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "B3 Transition"
+      "linkedName": "R1 Transition"
     }
   ],
   "rotationTargets": [],
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "scoreL1Coral",
-      "waypointRelativePos": 0,
+      "waypointRelativePos": 1.0,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -55,7 +55,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 1.024437083192162
   },
   "useDefaultConstraints": true
 }
