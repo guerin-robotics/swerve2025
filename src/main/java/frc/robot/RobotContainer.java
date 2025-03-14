@@ -92,10 +92,10 @@ public class RobotContainer {
         buttonPanel.button(Constants.buttonPanel.algae.Lower).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
         buttonPanel.button(Constants.buttonPanel.algae.Upper).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
         //buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new InstantCommand(() -> Effector.toggleAlgae(), m_effector));
-        buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new ParallelDeadlineGroup(new WaitCommand(3.00), new InstantCommand(() -> Effector.toggleAlgae(), m_effector)));
+        buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new ParallelDeadlineGroup(new WaitCommand(1.00), new InstantCommand(() -> Effector.toggleAlgae(), m_effector)));
         buttonPanel.button(Constants.buttonPanel.coral.In).onTrue(new InstantCommand(() -> Effector.intakeUntilDetected()));
         buttonPanel.button(Constants.buttonPanel.coral.Out).onTrue(new InstantCommand(() -> Effector.outtakeUntilDetected()));
-        XboxController.button(Constants.XboxController.bumper.Left).whileTrue(new RunCommand(() -> Elevator.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.LeftYAxis)*10)));
+        // XboxController.button(Constants.XboxController.bumper.Left).whileTrue(new InstantCommand(() -> Elevator.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.LeftYAxis)*10)));
         XboxController.button(Constants.XboxController.button.A).onTrue(new InstantCommand(() -> Effector.asymmetricalOuttake(null, null)));
         XboxController.button(Constants.XboxController.bumper.Right).whileTrue(new RunCommand(() -> Effector.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.RightYAxis)*10, null)));
         XboxController.button(Constants.XboxController.button.X).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));

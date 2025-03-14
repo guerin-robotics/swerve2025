@@ -35,7 +35,7 @@ public class Elevator extends SubsystemBase{
     // private static LaserCan elevatorBottom = new LaserCan(0);
     private static LaserCan elevatorTop = new LaserCan(1);
 
-    private final static VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
+    public final static VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(1);
     private final static MotionMagicVoltage motionControl = new MotionMagicVoltage(0).withSlot(0);
                 
     public Elevator() {
@@ -96,14 +96,14 @@ public class Elevator extends SubsystemBase{
         // else {
         //     liftLeft.setControl(m_velocityVoltage.withVelocity(-velocity * 5));
         // }
-        if ((elevatorTop.getMeasurement().distance_mm <= 40) && (velocity < 0)) {
+        if ((liftPosition < 0.2) && (velocity < 0)) {
             desiredRotationsPerSecond = 0;
         } else if ((liftPosition > 60) && (velocity < 0)) {
-            desiredRotationsPerSecond = velocity * -(75 - liftPosition) * 10;
+            desiredRotationsPerSecond = velocity * -(75 - liftPosition) * 1;
         } else if ((liftPosition < 9) && (velocity > 0)) {
-            desiredRotationsPerSecond = velocity * -liftPosition * 10;
+            desiredRotationsPerSecond = velocity * -liftPosition * 1;
         } else {
-            desiredRotationsPerSecond = velocity * -100;
+            desiredRotationsPerSecond = velocity * -10;
         }
         liftLeft.setControl(m_velocityVoltage.withVelocity(desiredRotationsPerSecond));
         // liftLeft.set(controller.getRawAxis(1));
@@ -117,10 +117,10 @@ public class Elevator extends SubsystemBase{
         limitConfigs.StatorCurrentLimit = 120;
         limitConfigs.StatorCurrentLimitEnable = true;
 
-        elevatorConfig.Voltage.withPeakForwardVoltage(Volts.of(12)).withPeakReverseVoltage(Volts.of(-12));
+        elevatorConfig.Voltage.withPeakForwardVoltage(Volts.of(5)).withPeakReverseVoltage(Volts.of(-5));
 
         MotionMagicConfigs motionConfig = elevatorConfig.MotionMagic;
-        motionConfig.withMotionMagicCruiseVelocity(RotationsPerSecond.of(100)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(500));
+        motionConfig.withMotionMagicCruiseVelocity(RotationsPerSecond.of(10)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(500));
         // PID CONSTANTS
         elevatorConfig.Slot0.kP = 1.5; //3
         elevatorConfig.Slot0.kI = 0.00; //0.03
@@ -129,6 +129,13 @@ public class Elevator extends SubsystemBase{
         elevatorConfig.Slot0.kG = 0.22; //0.22
         elevatorConfig.Slot0.kS = 0;
         elevatorConfig.Slot0.kA = 0;
+
+        elevatorConfig.Slot1.kS = 0.3; // To account for friction, add 0.1 V of static feedforward
+        elevatorConfig.Slot1.kG = 0.2; // Gravity constant, determined by gear ratio
+        elevatorConfig.Slot1.kV = 0.13; // Kraken X60 is a 500 kV motor, 500 rpm per V = 8.333 rps per V, 1/8.33 = 0.12 volts / rotation per second
+        elevatorConfig.Slot1.kP = 0.12; // An error of 1 rotation per second results in 0.11 V output
+        elevatorConfig.Slot1.kI = 0.06; // No output for integrated error
+        elevatorConfig.Slot1.kD = 0.001; // No output for error derivative
 
         StatusCode status = StatusCode.StatusCodeNotInitialized;
         for (int i = 0; i < 5; ++i) {
@@ -142,6 +149,8 @@ public class Elevator extends SubsystemBase{
 
         System.out.println("Left elevator: " + liftLeft.getDeviceID());
         System.out.println("Right elevator: " + liftRight.getDeviceID());
+
+        liftLeft.setPosition(0);
 
     }
 
