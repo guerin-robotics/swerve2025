@@ -15,6 +15,7 @@ import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 
 
 public class RobotContainer {
@@ -36,7 +38,7 @@ public class RobotContainer {
     public static double MaxAngularRate = RotationsPerSecond.of(2).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+    public static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -54,10 +56,12 @@ public class RobotContainer {
     public Elevator m_elevator = new Elevator();
     public Effector m_effector = new Effector();
 
+    public Vision m_vision = new Vision();
+
 
     Orchestra m_Orchestra = new Orchestra();
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public RobotContainer() {
         drivetrain.seedFieldCentric();
@@ -75,7 +79,7 @@ public class RobotContainer {
 
         autoChooser = AutoBuilder.buildAutoChooser("");
         SmartDashboard.putData("Auto Chooser", autoChooser);
-
+        
         
         // NamedCommands.registerCommand("Score L1", Effector.asymmetricalOuttake(null, null));
     }
@@ -87,7 +91,8 @@ public class RobotContainer {
         buttonPanel.button(Constants.buttonPanel.lift.L4).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L4)));
         buttonPanel.button(Constants.buttonPanel.algae.Lower).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
         buttonPanel.button(Constants.buttonPanel.algae.Upper).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
-        buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new InstantCommand(() -> Effector.toggleAlgae()));
+        //buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new InstantCommand(() -> Effector.toggleAlgae(), m_effector));
+        buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new ParallelDeadlineGroup(new WaitCommand(3.00), new InstantCommand(() -> Effector.toggleAlgae(), m_effector)));
         buttonPanel.button(Constants.buttonPanel.coral.In).onTrue(new InstantCommand(() -> Effector.intakeUntilDetected()));
         buttonPanel.button(Constants.buttonPanel.coral.Out).onTrue(new InstantCommand(() -> Effector.outtakeUntilDetected()));
         XboxController.button(Constants.XboxController.bumper.Left).whileTrue(new RunCommand(() -> Elevator.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.LeftYAxis)*10)));
@@ -96,6 +101,7 @@ public class RobotContainer {
         XboxController.button(Constants.XboxController.button.X).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
         XboxController.button(Constants.XboxController.button.B).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
         XboxController.button(Constants.XboxController.button.Y).onTrue(new InstantCommand(() -> Elevator.toPosition(0)));
+        XboxController.button(Constants.XboxController.button.Start).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate)));
         
 
 
@@ -107,11 +113,12 @@ public class RobotContainer {
         double rot;
         // double ySpeed;
         var ySpeed = joystick.getY() * MaxSpeed;
-        // if (Xbox.getBButtonPressed()) {
+        
+        // if (XboxController.button(Constants.XboxController.button.Start)) {
         //     System.out.println("Limelight activated");
-        //     final var rot_limelight = limelight_aim_proportional();
+        //     final var rot_limelight = m_vision.limelight_aim_proportional(MaxAngularRate);
         //     rot = rot_limelight;
-        //     final var forward_limelight = limelight_range_proportional();
+        //     final var forward_limelight = m_vision.limelight_range_proportional(MaxAngularRate);
         //     xSpeed = forward_limelight; 
         // }
         // else {
@@ -145,6 +152,8 @@ public class RobotContainer {
         // reset the field-centric heading on middle button press
         joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        
     }
 
     // double limelight_aim_proportional() {

@@ -3,10 +3,11 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
-
+import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Effector;
 
@@ -39,6 +40,8 @@ public class Robot extends TimedRobot {
         }
         else {
         Effector.manualControl(0.5*RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.RightTrigger), null);
+        SmartDashboard.putNumber("Tx reading", NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(1));
+        SmartDashboard.putNumber("Tv reading", NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(1));
     }
 }
 

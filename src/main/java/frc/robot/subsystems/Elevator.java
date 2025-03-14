@@ -33,7 +33,7 @@ public class Elevator extends SubsystemBase{
     public static DigitalInput bottomlimitSwitch = new DigitalInput(0);
     public static DigitalInput toplimitSwitch = new DigitalInput(1);
     // private static LaserCan elevatorBottom = new LaserCan(0);
-    // private static LaserCan elevatorTop = new LaserCan(1);
+    private static LaserCan elevatorTop = new LaserCan(1);
 
     private final static VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
     private final static MotionMagicVoltage motionControl = new MotionMagicVoltage(0).withSlot(0);
@@ -86,14 +86,26 @@ public class Elevator extends SubsystemBase{
     }
     
     public static void manualControl(double velocity) {
+        double desiredRotationsPerSecond;
+        double liftPosition = liftLeft.getPosition().getValueAsDouble();
         // liftLeft.setControl(motionControl.withFeedForward(-controller.getRawAxis(1)));
         System.out.println("Joystick at: " + velocity);
-        if (velocity == 0) {
-            liftLeft.setControl(m_velocityVoltage.withVelocity(0));
+        // if (velocity == 0) {
+        //     liftLeft.setControl(m_velocityVoltage.withVelocity(0));
+        // }
+        // else {
+        //     liftLeft.setControl(m_velocityVoltage.withVelocity(-velocity * 5));
+        // }
+        if ((elevatorTop.getMeasurement().distance_mm <= 40) && (velocity < 0)) {
+            desiredRotationsPerSecond = 0;
+        } else if ((liftPosition > 60) && (velocity < 0)) {
+            desiredRotationsPerSecond = velocity * -(75 - liftPosition) * 10;
+        } else if ((liftPosition < 9) && (velocity > 0)) {
+            desiredRotationsPerSecond = velocity * -liftPosition * 10;
+        } else {
+            desiredRotationsPerSecond = velocity * -100;
         }
-        else {
-            liftLeft.setControl(m_velocityVoltage.withVelocity(-velocity * 5));
-        }
+        liftLeft.setControl(m_velocityVoltage.withVelocity(desiredRotationsPerSecond));
         // liftLeft.set(controller.getRawAxis(1));
     }
 

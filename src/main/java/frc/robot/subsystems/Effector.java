@@ -91,15 +91,14 @@ public class Effector extends SubsystemBase {
     }
 
     public static void outtakeUntilDetected() {
-        while (intakeSensor.getMeasurement().distance_mm < 10) {
-            effectorLeft.setControl(m_velocityVoltage.withVelocity(30));
-            effectorRight.setControl(m_velocityVoltage.withVelocity(-30));
+        if (Elevator.getPosition() < 5) {
+            asymmetricalOuttake(null, null);
         }
-        effectorTimer.start();
-        while (effectorTimer.get() < 1.0) {
-            effectorLeft.set(30);
-            effectorRight.set(-30);
-        } 
+        else {
+            while (intakeSensor.getMeasurement().distance_mm < 10) {
+            symmetricalOuttake(null);
+            }
+        }
         effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
         effectorRight.setControl(m_velocityVoltage.withVelocity(0));
         effectorTimer.stop();
