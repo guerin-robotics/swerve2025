@@ -1,6 +1,11 @@
 package frc.robot;
 
 public class Constants {
+    public static final class Joystick {
+        public static final int Function1 = 10;
+        public static final int Function2 = 9;
+    }
+
     public static final class buttonPanel {
         public static final class lift {
             public static final int L1 = 3;
@@ -40,7 +45,14 @@ public class Constants {
             public static final int RightYAxis = 5;
             public static final int LeftTrigger = 2;
             public static final int RightTrigger = 3;
-    }
+        }
+
+        public static final class dpad {
+            public static final int Up = 0;
+            public static final int Right = 90;
+            public static final int Down = 180;
+            public static final int Left = 270;
+        }
 }
 
     public static final class elevator {
@@ -51,7 +63,7 @@ public class Constants {
             public static final double L1 = 0.05;
             public static final double L2 = 18.0;
             public static final double L3 = 38.0;
-            public static final double L4 = 73.8; //73.0 for good wheels
+            public static final double L4 = 73.5; //73.0 for good wheels
         }
 
         public static final class algaeLevel {

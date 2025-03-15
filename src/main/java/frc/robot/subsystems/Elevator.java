@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
@@ -23,6 +24,7 @@ import au.grapplerobotics.LaserCan;
 import frc.robot.Constants;
 import frc.robot.Constants.elevator;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.Robot;
@@ -37,6 +39,8 @@ public class Elevator extends SubsystemBase{
 
     public final static VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(1);
     private final static MotionMagicVoltage motionControl = new MotionMagicVoltage(0).withSlot(0);
+
+    private static Timer zeroTimer = new Timer();
                 
     public Elevator() {
         System.out.println("Creating new motor with ID " + Constants.elevator.LiftLeft);
@@ -117,10 +121,10 @@ public class Elevator extends SubsystemBase{
         limitConfigs.StatorCurrentLimit = 120;
         limitConfigs.StatorCurrentLimitEnable = true;
 
-        elevatorConfig.Voltage.withPeakForwardVoltage(Volts.of(5)).withPeakReverseVoltage(Volts.of(-5));
+        elevatorConfig.Voltage.withPeakForwardVoltage(Volts.of(12)).withPeakReverseVoltage(Volts.of(-12));
 
         MotionMagicConfigs motionConfig = elevatorConfig.MotionMagic;
-        motionConfig.withMotionMagicCruiseVelocity(RotationsPerSecond.of(10)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(500));
+        motionConfig.withMotionMagicCruiseVelocity(RotationsPerSecond.of(80)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(500));
         // PID CONSTANTS
         elevatorConfig.Slot0.kP = 1.5; //3
         elevatorConfig.Slot0.kI = 0.00; //0.03
@@ -156,5 +160,11 @@ public class Elevator extends SubsystemBase{
 
     public static double getPosition() {
         return liftLeft.getPosition().getValueAsDouble();
+    }
+
+    public static void resetLift() {
+        // new WaitCommand(0.5);
+        // liftLeft.setPosition(0);
+        // System.out.println("Elevator zero set");
     }
 }

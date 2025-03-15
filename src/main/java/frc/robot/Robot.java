@@ -81,36 +81,36 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        double joyValue = m_joystick.getLeftY();
-        double intakeSpeed = m_joystick.getRightY();
-        if (Math.abs(joyValue) < 0.05) joyValue = 0; // add a deadband
+        // double joyValue = m_joystick.getLeftY();
+        // double intakeSpeed = m_joystick.getRightY();
+        // if (Math.abs(joyValue) < 0.05) joyValue = 0; // add a deadband
 
-        double desiredRotationsPerSecond;
-        double intakeRotationsPerSecond = intakeSpeed * -50;
-        double liftPosition = Elevator.liftLeft.getPosition().getValueAsDouble();
+        // double desiredRotationsPerSecond;
+        // double intakeRotationsPerSecond = intakeSpeed * -50;
+        // double liftPosition = Elevator.liftLeft.getPosition().getValueAsDouble();
 
-        if ((joyValue < 0)) {
-            desiredRotationsPerSecond = 0;
-        } else if ((liftPosition > 60) && (joyValue < 0)) {
-            desiredRotationsPerSecond = joyValue * -(75 - liftPosition) * 10;
-        } else if ((liftPosition < 9) && (joyValue > 0)) {
-            desiredRotationsPerSecond = joyValue * -liftPosition * 10;
-        } else {
-            desiredRotationsPerSecond = joyValue * -10;
-        }
+        // if ((joyValue < 0)) {
+        //     desiredRotationsPerSecond = 0;
+        // } else if ((liftPosition > 60) && (joyValue < 0)) {
+        //     desiredRotationsPerSecond = joyValue * -(75 - liftPosition) * 10;
+        // } else if ((liftPosition < 9) && (joyValue > 0)) {
+        //     desiredRotationsPerSecond = joyValue * -liftPosition * 10;
+        // } else {
+        //     desiredRotationsPerSecond = joyValue * -10;
+        // }
 
-        if (!Elevator.bottomlimitSwitch.get() && (joyValue > 0)) {
-            Elevator.liftLeft.setControl(m_brake);
-        } else if (!Elevator.toplimitSwitch.get() && (joyValue < 0)) {
-            Elevator.liftLeft.setControl(m_brake);
-        } else {
-            if (m_joystick.getLeftBumperButton()) {
-                System.out.println("Moving elevator with speed " + desiredRotationsPerSecond);
-                Elevator.liftLeft.setControl(Elevator.m_velocityVoltage.withVelocity(desiredRotationsPerSecond));
-            } else {
-                Elevator.liftLeft.setControl(Elevator.m_velocityVoltage.withVelocity(0));
-            }
-        }
+        // if (!Elevator.bottomlimitSwitch.get() && (joyValue > 0)) {
+        //     Elevator.liftLeft.setControl(m_brake);
+        // } else if (!Elevator.toplimitSwitch.get() && (joyValue < 0)) {
+        //     Elevator.liftLeft.setControl(m_brake);
+        // } else {
+        //     if (m_joystick.getLeftBumperButton()) {
+        //         System.out.println("Moving elevator with speed " + desiredRotationsPerSecond);
+        //         Elevator.liftLeft.setControl(Elevator.m_velocityVoltage.withVelocity(desiredRotationsPerSecond));
+        //     } else {
+        //         Elevator.liftLeft.setControl(Elevator.m_velocityVoltage.withVelocity(0));
+        //     }
+        // }
     }
 
     @Override

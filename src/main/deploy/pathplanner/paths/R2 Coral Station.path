@@ -3,24 +3,24 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 11.78775,
-        "y": 4.22
+        "x": 11.819877049180327,
+        "y": 4.330686475409836
       },
       "prevControl": null,
       "nextControl": {
-        "x": 12.78775,
-        "y": 4.22
+        "x": 12.819877049180327,
+        "y": 4.330686475409836
       },
       "isLocked": false,
       "linkedName": "R2 Transition"
     },
     {
       "anchor": {
-        "x": 10.0,
+        "x": 10.621106557377047,
         "y": 4.22
       },
       "prevControl": {
-        "x": 9.0,
+        "x": 9.621106557377047,
         "y": 4.22
       },
       "nextControl": null,

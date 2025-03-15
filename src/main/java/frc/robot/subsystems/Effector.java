@@ -30,6 +30,7 @@ public class Effector extends SubsystemBase {
     private static SparkMax algaeMotor = new SparkMax(1, MotorType.kBrushed);
 
     private static Timer effectorTimer = new Timer();
+    private static Timer algaeTimer = new Timer();
 
     private final static VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
 
@@ -76,8 +77,8 @@ public class Effector extends SubsystemBase {
         while (intakeSensor.getMeasurement().distance_mm > 10) {
             // effectorLeft.set(10);
             // effectorRight.set(-10);
-            effectorLeft.setControl(m_velocityVoltage.withVelocity(20));
-            effectorRight.setControl(m_velocityVoltage.withVelocity(-20));
+            effectorLeft.setControl(m_velocityVoltage.withVelocity(25));
+            effectorRight.setControl(m_velocityVoltage.withVelocity(-25));
         }
         effectorTimer.start();
         while (effectorTimer.get() < 0.2) {
@@ -133,13 +134,13 @@ public class Effector extends SubsystemBase {
             motorSpeedL = velocityLeft;
         }
         else {
-            motorSpeedL = 80;
+            motorSpeedL = 30;
         }
         if (velocityRight != null) {
             motorSpeedR = velocityRight;
         }
         else {
-            motorSpeedR = 0;
+            motorSpeedR = 10;
         }
         effectorTimer.start();
         while (effectorTimer.get() < 1.5) {
@@ -160,25 +161,59 @@ public class Effector extends SubsystemBase {
         effectorRight.setControl(m_velocityVoltage.withVelocity(velocityRight * 70));
     }
 
-    public static void algaeEffectorUp() {
-        RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
+    public static void algaeEffectorUp(Double time) {
+        algaeTimer.start();
 
-        while (algaeEncoder.getPosition() < 0.03) {
-            algaeMotor.set(-100);
+        if (time == null) {
+            time = 0.10;
+        }
+        else {
+        }
+
+        while (algaeTimer.get() < 0.10) {
+            algaeMotor.set(-80);
         }
         algaeMotor.set(0);
         isAlgaeOut = true;
+
+        algaeTimer.stop();
+        algaeTimer.reset();
+
+        // RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
+
+        // while (algaeEncoder.getPosition() < 0.028) {
+        //     algaeMotor.set(-80);
+        // }
+        // algaeMotor.set(0);
+        // isAlgaeOut = true;
     }
 
     public static void algaeEffectorDown() {
-        RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
+        algaeTimer.start();
 
-        while (algaeEncoder.getPosition() > 0.01
-        ) {
-            algaeMotor.set(100);
+        while (algaeTimer.get() < 0.08) {
+            algaeMotor.set(80);
         }
         algaeMotor.set(0);
         isAlgaeOut = false;
+
+        algaeTimer.stop();
+        algaeTimer.reset();        
+        
+        // RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
+
+        // while (algaeEncoder.getPosition() > 0.1 // 0.1
+        // ) {
+        //     algaeMotor.set(80);
+        // }
+        // algaeMotor.set(0);
+        // isAlgaeOut = false;
+    }
+
+    public static void resetAlgaePosition() {
+        RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
+
+        algaeEncoder.setPosition(0);
     }
 
     public static void toggleAlgae() {
@@ -186,7 +221,7 @@ public class Effector extends SubsystemBase {
             algaeEffectorDown();
         }
         else {
-            algaeEffectorUp();
+            algaeEffectorUp(null);
         }
     }
 }
