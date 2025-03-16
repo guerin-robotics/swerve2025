@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 16.37025,
-        "y": 0.914749999999998
+        "x": 3.222375,
+        "y": 3.9811249999999996
       },
       "prevControl": null,
       "nextControl": {
-        "x": 14.824875000000002,
-        "y": 2.143249999999999
+        "x": 2.188875,
+        "y": 3.966499999999999
       },
       "isLocked": false,
-      "linkedName": "R3 Coral Intake Point"
+      "linkedName": "B1 Calibration"
     },
     {
       "anchor": {
-        "x": 14.322750000000001,
-        "y": 3.8202499999999993
+        "x": 2.0816250000000003,
+        "y": 3.9811249999999996
       },
       "prevControl": {
-        "x": 15.141750000000002,
-        "y": 3.947
+        "x": 3.1785,
+        "y": 3.971375
       },
       "nextControl": null,
       "isLocked": false,
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 126.43085812016203
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

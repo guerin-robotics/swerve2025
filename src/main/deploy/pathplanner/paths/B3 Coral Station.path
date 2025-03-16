@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.9822500000000005,
-        "y": 4.83425
+        "x": 5.6354999999999995,
+        "y": 5.7848749999999995
       },
       "isLocked": false,
       "linkedName": "B3 Transition"
     },
     {
       "anchor": {
-        "x": 2.54475,
-        "y": 7.515499999999999
+        "x": 1.2480000000000002,
+        "y": 7.223
       },
       "prevControl": {
-        "x": 4.134,
-        "y": 7.447249999999999
+        "x": 2.2425,
+        "y": 6.45275
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "B3 Coral Intake"
     }
   ],
   "rotationTargets": [],
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -56.475526751423125
   },
   "reversed": false,
   "folder": null,
