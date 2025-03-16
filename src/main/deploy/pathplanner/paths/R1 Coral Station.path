@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 14.878499999999999,
-        "y": 7.515499999999999
+        "x": 16.302,
+        "y": 7.0865
       },
       "prevControl": {
-        "x": 13.878499999999999,
-        "y": 7.515499999999999
+        "x": 15.4635,
+        "y": 6.6964999999999995
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "R1 Coral Intake"
     }
   ],
   "rotationTargets": [],
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -127.69424046668891
   },
   "reversed": false,
   "folder": null,

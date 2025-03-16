@@ -63,7 +63,7 @@ public class Constants {
             public static final double L1 = 0.05;
             public static final double L2 = 18.0;
             public static final double L3 = 38.0;
-            public static final double L4 = 73.5; //73.0 for good wheels
+            public static final double L4 = 74.0; //73.0 for good wheels
         }
 
         public static final class algaeLevel {

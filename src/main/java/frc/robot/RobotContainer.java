@@ -77,6 +77,7 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("scoreL1Coral", new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2.0), m_elevator), new InstantCommand(() -> Effector.asymmetricalOuttake(null, null), m_effector), new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1), m_elevator)));
         NamedCommands.registerCommand("scoreL4Coral", new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L4), m_elevator), new InstantCommand(() -> Effector.symmetricalOuttake(null), m_effector), new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1), m_elevator)));
+        NamedCommands.registerCommand("intakeCoral", new InstantCommand(() -> Effector.intakeUntilDetected(), m_effector));
 
         autoChooser = AutoBuilder.buildAutoChooser("");
         SmartDashboard.putData("Auto Chooser", autoChooser);

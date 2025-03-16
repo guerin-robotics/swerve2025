@@ -21,6 +21,24 @@
           "data": {
             "pathName": "R3 Coral Station"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "R3 Coral Intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreL1Coral"
+          }
         }
       ]
     }
