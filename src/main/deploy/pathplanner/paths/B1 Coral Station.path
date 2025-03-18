@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.00175,
+        "y": 3.2059999999999995
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.893875,
+        "y": 2.255374999999999
+      },
+      "isLocked": false,
+      "linkedName": "B1 Transition"
+    },
+    {
+      "anchor": {
+        "x": 1.16025,
+        "y": 0.9244999999999993
+      },
+      "prevControl": {
+        "x": 2.6763750000000006,
+        "y": 2.0018750000000005
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "B1 Coral Intake"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 53.67317404787975
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 121.15930450834438
+  },
+  "useDefaultConstraints": true
+}
