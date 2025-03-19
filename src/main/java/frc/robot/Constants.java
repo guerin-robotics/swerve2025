@@ -1,6 +1,10 @@
 package frc.robot;
+import edu.wpi.first.hal.DriverStationJNI;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class Constants {
+
     public static final class Joystick {
         public static final int Function1 = 10;
         public static final int Function2 = 9;
@@ -63,7 +67,7 @@ public class Constants {
             public static final double L1 = 0.05;
             public static final double L2 = 18.0;
             public static final double L3 = 38.0;
-            public static final double L4 = 74.0; //73.0 for good wheels
+            public static double L4 = 74.0;
         }
 
         public static final class algaeLevel {
@@ -75,6 +79,27 @@ public class Constants {
     public static final class effector {
         public static final int EffectorLeft = 12;
         public static final int EffectorRight = 13;
-        public static final double defaultVelocity = 30;
+        public static final double defaultVelocity = 15;
+    }
+    
+    public static void setL4() {
+        System.out.println("Driver side:" + DriverStationJNI.getAllianceStation().toString());
+        var driverStation = DriverStationJNI.getAllianceStation().toString();
+        if (driverStation == ("Blue1")) {
+            elevator.level.L4 = 73.25;
+            System.out.println("Setting blue side L4");
+        }
+        else if (driverStation == ("Blue2")) {
+            elevator.level.L4 = 73.25;
+            System.out.println("Setting blue side L4");
+        }
+        else if (driverStation == ("Blue3")) {
+            elevator.level.L4 = 73.25;
+            System.out.println("Setting blue side L4");
+        }
+        else {
+            elevator.level.L4 = 74.0; //74.0 for good wheels
+            System.out.println("Setting red side L4");
+        }
     }
 }

@@ -1,5 +1,6 @@
  package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -74,12 +75,18 @@ public class Effector extends SubsystemBase {
     }
 
     public static void intakeUntilDetected() {
+        effectorTimer.start();
         while (intakeSensor.getMeasurement().distance_mm > 10) {
-            // effectorLeft.set(10);
-            // effectorRight.set(-10);
+            if (effectorTimer.get() > 5) {
+                break;
+            }
+            else {
             effectorLeft.setControl(m_velocityVoltage.withVelocity(25));
             effectorRight.setControl(m_velocityVoltage.withVelocity(-25));
+            }
         }
+        effectorTimer.stop();
+        effectorTimer.reset();
         effectorTimer.start();
         while (effectorTimer.get() < 0.2) {
             effectorLeft.setControl(m_velocityVoltage.withVelocity(20));
@@ -165,13 +172,13 @@ public class Effector extends SubsystemBase {
         algaeTimer.start();
 
         if (time == null) {
-            time = 0.10;
+            time = 0.1; //0.10
         }
         else {
         }
 
-        while (algaeTimer.get() < 0.10) {
-            algaeMotor.set(-80);
+        while (algaeTimer.get() < time) {
+            algaeMotor.set(-80); //-80
         }
         algaeMotor.set(0);
         isAlgaeOut = true;
@@ -191,8 +198,8 @@ public class Effector extends SubsystemBase {
     public static void algaeEffectorDown() {
         algaeTimer.start();
 
-        while (algaeTimer.get() < 0.08) {
-            algaeMotor.set(80);
+        while (algaeTimer.get() < 0.08) { //0.08
+            algaeMotor.set(80); //80
         }
         algaeMotor.set(0);
         isAlgaeOut = false;

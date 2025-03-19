@@ -68,12 +68,12 @@ public class Elevator extends SubsystemBase{
     public static void toPosition(double rotations) {
         System.out.println("Going to " + rotations);
         if (toplimitSwitch.get()) {
-            System.out.println(motionControl.withPosition(rotations));
+            // System.out.println(motionControl.withPosition(rotations));
             liftLeft.setControl(motionControl.withPosition(rotations));
             // var status = liftLeft.setControl(m_velocityVoltage.withVelocity(-10));
 
             // liftLeft.set(5);
-            System.out.println(liftLeft.getPosition() + " rotations reached.");
+            // System.out.println(liftLeft.getPosition() + " rotations reached.");
         } else{
             liftLeft.set(0);
             liftLeft.setControl(m_velocityVoltage.withVelocity(0));
@@ -93,7 +93,7 @@ public class Elevator extends SubsystemBase{
         double desiredRotationsPerSecond;
         double liftPosition = liftLeft.getPosition().getValueAsDouble();
         // liftLeft.setControl(motionControl.withFeedForward(-controller.getRawAxis(1)));
-        System.out.println("Joystick at: " + velocity);
+        // System.out.println("Joystick at: " + velocity);
         // if (velocity == 0) {
         //     liftLeft.setControl(m_velocityVoltage.withVelocity(0));
         // }
@@ -124,7 +124,7 @@ public class Elevator extends SubsystemBase{
         elevatorConfig.Voltage.withPeakForwardVoltage(Volts.of(12)).withPeakReverseVoltage(Volts.of(-12));
 
         MotionMagicConfigs motionConfig = elevatorConfig.MotionMagic;
-        motionConfig.withMotionMagicCruiseVelocity(RotationsPerSecond.of(80)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(500));
+        motionConfig.withMotionMagicCruiseVelocity(RotationsPerSecond.of(85)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(500));
         // PID CONSTANTS
         elevatorConfig.Slot0.kP = 1.5; //3
         elevatorConfig.Slot0.kI = 0.00; //0.03

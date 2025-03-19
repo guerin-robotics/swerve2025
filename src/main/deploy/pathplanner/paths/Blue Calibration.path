@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.222375,
-        "y": 3.9811249999999996
+        "x": 3.4125,
+        "y": 4.05425
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.188875,
-        "y": 3.966499999999999
+        "x": 2.379,
+        "y": 4.039624999999999
       },
       "isLocked": false,
       "linkedName": "B1 Calibration"
