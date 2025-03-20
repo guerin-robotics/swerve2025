@@ -11,7 +11,6 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class Vision extends SubsystemBase {
-  
       public static double limelight_aim_proportional(double MaxAngularSpeed)
     {    
       // kP (constant of proportionality)
@@ -46,11 +45,10 @@ public class Vision extends SubsystemBase {
       return targetingForwardSpeed;
     }
   
-    public static double alignRobot(double MaxAngularSpeed) {
+    public static double alignRobot(double MaxAngularSpeed, double angle) {
       double kP = 0.8;
-      double arbitraryAngle = 60;
-      arbitraryAngle *= Math.PI/180;
-      double alignSpeed = (RobotContainer.drivetrain.getRotation3d().getZ() + arbitraryAngle)%(360+arbitraryAngle) * kP;
+      angle *= Math.PI/180;
+      double alignSpeed = (RobotContainer.drivetrain.getRotation3d().getZ() + angle)%360 * kP;
 
       alignSpeed *= MaxAngularSpeed;
       alignSpeed *= -1;
@@ -63,7 +61,51 @@ public class Vision extends SubsystemBase {
     static double rot;
 
   public static void applyLimelight(double MaxAngularRate) {
-    final var rot_gyro = alignRobot(MaxAngularRate);
+    int target = (int) LimelightHelpers.getFiducialID("");
+    var angle = 0;
+    switch (target) {
+      case 6:
+        angle = 300;
+        break;
+      case 7:
+        angle = 0;
+        break;
+      case 8:
+        angle = 60;
+        break;
+      case 9:
+        angle = 120;
+        break;
+      case 10:
+        angle = 180;
+        break;
+      case 11:
+        angle = 240;
+        break;
+      case 17:
+        angle = 240;
+        break;
+      case 18:
+        angle = 180;
+        break;
+      case 19:
+        angle = 120;
+        break;
+      case 20:
+        angle = 60;
+        break;
+      case 21:
+        angle = 0;
+        break;
+      case 22:
+        angle = 300;
+        break;
+      default:
+        angle = 0;
+        break;
+    }
+
+    final var rot_gyro = alignRobot(MaxAngularRate, angle);
     // System.out.println("Limelight activated");
     final var rot_limelight = limelight_aim_proportional(MaxAngularRate);
     rot = rot_limelight;
@@ -72,6 +114,6 @@ public class Vision extends SubsystemBase {
     // System.out.println("Rotation: " + rot_limelight + "Distance: " + forward_limelight);
 
     // RobotContainer.drivetrain.setDefaultCommand(RobotContainer.drivetrain.applyRequest(() -> RobotContainer.drive.withVelocityX(xSpeed).withVelocityY(0).withRotationalRate(rot)));
-    RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(0).withRotationalRate(rot_gyro));
+    RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(forward_limelight).withVelocityY(0).withRotationalRate(rot_gyro));
   }
 }
