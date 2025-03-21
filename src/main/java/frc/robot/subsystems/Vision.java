@@ -18,7 +18,7 @@ public class Vision extends SubsystemBase {
       // if it is too high, the robot will oscillate around.
       // if it is too low, the robot will never reach its target
       // if the robot never turns in the correct direction, kP should be inverted.
-      double kP = 0.04;
+      double kP = 0.01;
   
       // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of 
       // your limelight 3 feed, tx should return roughly 31 degrees.
@@ -59,6 +59,11 @@ public class Vision extends SubsystemBase {
 
     static double xSpeed;
     static double rot;
+
+    // public static double yAlign(double MaxAngularSpeed) {
+    //   double kP = 0.1;
+
+    // }
 
   public static void applyLimelight(double MaxAngularRate) {
     int target = (int) LimelightHelpers.getFiducialID("");
@@ -110,10 +115,10 @@ public class Vision extends SubsystemBase {
     final var rot_limelight = limelight_aim_proportional(MaxAngularRate);
     rot = rot_limelight;
     final var forward_limelight = limelight_range_proportional(MaxAngularRate);
-    xSpeed = forward_limelight * 0;
+    xSpeed = forward_limelight * 1;
     // System.out.println("Rotation: " + rot_limelight + "Distance: " + forward_limelight);
 
     // RobotContainer.drivetrain.setDefaultCommand(RobotContainer.drivetrain.applyRequest(() -> RobotContainer.drive.withVelocityX(xSpeed).withVelocityY(0).withRotationalRate(rot)));
-    RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(forward_limelight).withVelocityY(0).withRotationalRate(rot_gyro));
+    RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(xSpeed).withVelocityY(rot_limelight).withRotationalRate(rot_gyro));
   }
 }
