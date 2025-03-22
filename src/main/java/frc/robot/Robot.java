@@ -66,7 +66,7 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
         }
-        RobotContainer.drivetrain.seedFieldCentric();
+        // RobotContainer.drivetrain.seedFieldCentric(); // Not currently working - reverses direction on blue side
     }
 
     @Override

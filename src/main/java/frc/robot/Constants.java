@@ -98,7 +98,7 @@ public class Constants {
             System.out.println("Setting blue side L4");
         }
         else {
-            elevator.level.L4 = 74.0; //74.0 for good wheels
+            elevator.level.L4 = 73.5; //74.0 for good wheels
             System.out.println("Setting red side L4");
         }
     }

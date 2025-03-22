@@ -107,8 +107,9 @@ public class RobotContainer {
         XboxController.pov(Constants.XboxController.dpad.Up).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null), m_effector));
         XboxController.pov(Constants.XboxController.dpad.Down).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown(), m_effector));
         joystick.button(Constants.Joystick.Function1).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown()));
-        joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null))); 
-        
+        joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null)));
+        XboxController.pov(Constants.XboxController.dpad.Left).onTrue(new InstantCommand(() -> Elevator.manualOffset(false)));
+        XboxController.pov(Constants.XboxController.dpad.Right).onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));
 
 
         // Note that X is defined as forward according to WPILib convention,

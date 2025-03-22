@@ -113,6 +113,19 @@ public class Elevator extends SubsystemBase{
         // liftLeft.set(controller.getRawAxis(1));
     }
 
+    public static void manualOffset(boolean direction) {
+        var currentPos = liftLeft.getPosition().getValueAsDouble();
+        if (direction == false) {
+            currentPos -= 0.3;
+        }
+        else {
+            currentPos += 0.3;
+        }
+        liftLeft.setControl(motionControl.withPosition(currentPos));
+        System.out.println("New Position: " + currentPos);
+        SmartDashboard.putNumber("Offset", currentPos);
+    }
+
     public static void configureElevator() {
         TalonFXConfiguration elevatorConfig = new TalonFXConfiguration();
         var limitConfigs = elevatorConfig.CurrentLimits;
