@@ -8,6 +8,8 @@ public class Constants {
     public static final class Joystick {
         public static final int Function1 = 10;
         public static final int Function2 = 9;
+        public static final int strafeLeft = 3;
+        public static final int strafeRight = 4;
     }
 
     public static final class buttonPanel {
@@ -40,6 +42,7 @@ public class Constants {
             public static final int X = 3;
             public static final int Y = 4;
             public static final int Start = 8;
+            public static final int Window = 7;
         }
 
         public static final class axis {
@@ -86,15 +89,15 @@ public class Constants {
         System.out.println("Driver side:" + DriverStationJNI.getAllianceStation().toString());
         var driverStation = DriverStationJNI.getAllianceStation().toString();
         if (driverStation == ("Blue1")) {
-            elevator.level.L4 = 73.25;
+            elevator.level.L4 = 73.0;
             System.out.println("Setting blue side L4");
         }
         else if (driverStation == ("Blue2")) {
-            elevator.level.L4 = 73.25;
+            elevator.level.L4 = 73.0;
             System.out.println("Setting blue side L4");
         }
         else if (driverStation == ("Blue3")) {
-            elevator.level.L4 = 73.25;
+            elevator.level.L4 = 73.0;
             System.out.println("Setting blue side L4");
         }
         else {

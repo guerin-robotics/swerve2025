@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4125,
-        "y": 4.05425
+        "x": 3.3832500000000003,
+        "y": 3.966499999999999
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.379,
-        "y": 4.039624999999999
+        "x": 2.3497500000000002,
+        "y": 3.9518749999999985
       },
       "isLocked": false,
-      "linkedName": "B1 Calibration"
+      "linkedName": "B3 Calibration"
     },
     {
       "anchor": {

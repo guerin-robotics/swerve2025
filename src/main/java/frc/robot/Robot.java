@@ -46,14 +46,18 @@ public class Robot extends TimedRobot {
         // Runs the scheduler for commands
         CommandScheduler.getInstance().run();
         if (RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.LeftTrigger) > 0) {
-            Effector.manualControl(-0.5* RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.LeftTrigger), null);
+            Effector.manualControl(-0.5*70* RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.LeftTrigger), null);
         }
         else {
-        Effector.manualControl(0.5*RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.RightTrigger), null);
+        Effector.manualControl(0.5*70*RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.RightTrigger), null);
+        }
+        if (RobotContainer.XboxController.button(Constants.XboxController.button.A).getAsBoolean()) {
+            Effector.manualControl(20.0, -6.0);
+        }
+        
         SmartDashboard.putNumber("Tx reading", NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(1));
         SmartDashboard.putNumber("Tv reading", NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(1));
     }
-}
 
 
     @Override

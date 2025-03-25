@@ -4,6 +4,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
@@ -11,6 +12,7 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class Vision extends SubsystemBase {
+  private static Timer yTimer = new Timer();
       public static double limelight_aim_proportional(double MaxAngularSpeed)
     {    
       // kP (constant of proportionality)
@@ -65,12 +67,24 @@ public class Vision extends SubsystemBase {
 
     // }
 
+    public static void strafe(boolean side) {
+      yTimer.start();
+      while (yTimer.get() < 1) {
+        if (side == true) {
+          RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(1).withRotationalRate(0));
+        }
+        else {
+          RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(-1).withRotationalRate(0));
+        }
+      }
+    }
+
   public static void applyLimelight(double MaxAngularRate) {
     int target = (int) LimelightHelpers.getFiducialID("");
     var angle = 0;
     switch (target) {
       case 6:
-        angle = 300;
+        angle = 0; //300 normally
         break;
       case 7:
         angle = 0;

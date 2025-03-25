@@ -16,6 +16,7 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,7 +37,7 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired top speed
-    public static double MaxAngularRate = RotationsPerSecond.of(2).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    public static double MaxAngularRate = RotationsPerSecond.of(2.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     public static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -98,7 +99,9 @@ public class RobotContainer {
         buttonPanel.button(Constants.buttonPanel.coral.In).onTrue(new ParallelRaceGroup(new WaitCommand(5.00), new InstantCommand(() -> Effector.intakeUntilDetected(), m_effector)));
         buttonPanel.button(Constants.buttonPanel.coral.Out).onTrue(new InstantCommand(() -> Effector.outtakeUntilDetected()));
         // XboxController.button(Constants.XboxController.bumper.Left).whileTrue(new InstantCommand(() -> Elevator.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.LeftYAxis)*10)));
-        XboxController.button(Constants.XboxController.button.A).onTrue(new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2)), new InstantCommand(() -> Effector.asymmetricalOuttake(null, null)), new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1))));
+        XboxController.button(Constants.XboxController.button.A).onTrue(new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2)))); // 
+        // XboxController.button(Constants.XboxController.button.A).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2)));
+        // XboxController.button(Constants.XboxController.button.A).whileTrue(new RunCommand(() -> Effector.asymmetricalOuttake(null, null)));
         XboxController.button(Constants.XboxController.bumper.Right).whileTrue(new RunCommand(() -> Effector.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.RightYAxis)*10, null)));
         XboxController.button(Constants.XboxController.button.X).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
         XboxController.button(Constants.XboxController.button.B).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
@@ -108,10 +111,12 @@ public class RobotContainer {
         XboxController.pov(Constants.XboxController.dpad.Down).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown(), m_effector));
         joystick.button(Constants.Joystick.Function1).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown()));
         joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null)));
-        XboxController.pov(Constants.XboxController.dpad.Left).onTrue(new InstantCommand(() -> Elevator.manualOffset(false)));
-        XboxController.pov(Constants.XboxController.dpad.Right).onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));
+        // joystick.button(Constants.Joystick.strafeLeft).onTrue(new InstantCommand(() -> Vision.strafe(true)));
+        // joystick.button(Constants.Joystick.strafeRight).onTrue(new InstantCommand(() -> Vision.strafe(false)));
+        XboxController.pov(Constants.XboxController.dpad.Left).onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));
+        XboxController.pov(Constants.XboxController.dpad.Right).onTrue(new InstantCommand(() -> Elevator.manualOffset(false)));
 
-
+        // XboxController.button(Constants.XboxController.button.Window).onTrue(new InstantCommand(() -> Elevator.resetLift()));
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
 

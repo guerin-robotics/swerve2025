@@ -2,11 +2,16 @@
 
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -35,6 +40,9 @@ public class Effector extends SubsystemBase {
 
     private final static VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
 
+    private final static MotionMagicVoltage motionMagicLeft = new MotionMagicVoltage(0).withSlot(1);
+    private final static MotionMagicVoltage motionMagicRight = new MotionMagicVoltage(0).withSlot(1);
+
     private volatile static boolean isAlgaeOut = false;
     
     public Effector() {
@@ -51,22 +59,56 @@ public class Effector extends SubsystemBase {
 
     public void ConfigureEffector() {
         TalonFXConfiguration effectorConfig = new TalonFXConfiguration();
+        TalonFXConfiguration effectorLeftConfig = new TalonFXConfiguration();
+        TalonFXConfiguration effectorRightConfig = new TalonFXConfiguration();
+
+        MotionMagicConfigs effectorLeftMotion = effectorLeftConfig.MotionMagic;
+        MotionMagicConfigs effectorRightMotion = effectorRightConfig.MotionMagic;
+        effectorLeftMotion.withMotionMagicCruiseVelocity(RotationsPerSecond.of(30)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(100));
+        effectorRightMotion.withMotionMagicCruiseVelocity(RotationsPerSecond.of(10)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(100));
+
         var limitConfigs = new CurrentLimitsConfigs();
 
         effectorTimer = new Timer();
 
-        effectorConfig.Slot0.kS = 0; // Static friction
-        effectorConfig.Slot0.kV = 0; // 0.12 for Kraken X60
-        effectorConfig.Slot0.kP = 0.3; // Rotational error per second
-        effectorConfig.Slot0.kI = 0; // Integrated error
-        effectorConfig.Slot0.kD = 0; // Error derivative
+        effectorLeftConfig.Slot0.kS = 0; // Static friction
+        effectorLeftConfig.Slot0.kV = 0; // 0.12 for Kraken X60
+        effectorLeftConfig.Slot0.kP = 0.3; // Rotational error per second
+        effectorLeftConfig.Slot0.kI = 0; // Integrated error
+        effectorLeftConfig.Slot0.kD = 0; // Error derivative
 
-        effectorConfig.Voltage.withPeakForwardVoltage(Volts.of(8)).withPeakReverseVoltage(Volts.of(-8));
+        effectorLeftConfig.Voltage.withPeakForwardVoltage(Volts.of(8)).withPeakReverseVoltage(Volts.of(-8));
+
+        effectorRightConfig.Slot0.kS = 0; // Static friction
+        effectorRightConfig.Slot0.kV = 0; // 0.12 for Kraken X60
+        effectorRightConfig.Slot0.kP = 0.3; // Rotational error per second
+        effectorRightConfig.Slot0.kI = 0; // Integrated error
+        effectorRightConfig.Slot0.kD = 0; // Error derivative
+
+        effectorRightConfig.Voltage.withPeakForwardVoltage(Volts.of(8)).withPeakReverseVoltage(Volts.of(-8));
+
+        effectorLeftConfig.Slot1.kS = 1; // Static friction
+        effectorLeftConfig.Slot1.kV = 0; // 0.12 for Kraken X60
+        effectorLeftConfig.Slot1.kP = 1.0; // Rotational error per second
+        effectorLeftConfig.Slot1.kI = 0; // Integrated error
+        effectorLeftConfig.Slot1.kD = 0; // Error derivative
+
+        effectorLeftConfig.Voltage.withPeakForwardVoltage(Volts.of(8)).withPeakReverseVoltage(Volts.of(-8));
+
+        effectorRightConfig.Slot1.kS = 1; // Static friction
+        effectorRightConfig.Slot1.kV = 0; // 0.12 for Kraken X60
+        effectorRightConfig.Slot1.kP = 1.0; // Rotational error per second
+        effectorRightConfig.Slot1.kI = 0; // Integrated error
+        effectorRightConfig.Slot1.kD = 0; // Error derivative
+
+        effectorRightConfig.Voltage.withPeakForwardVoltage(Volts.of(8)).withPeakReverseVoltage(Volts.of(-8));
 
         StatusCode status = StatusCode.StatusCodeNotInitialized;
         for (int i = 0; i < 5; ++i) {
-            status = effectorLeft.getConfigurator().apply(effectorConfig);
-            effectorRight.getConfigurator().apply(effectorConfig);
+            // status = effectorLeft.getConfigurator().apply(effectorConfig);
+            // effectorRight.getConfigurator().apply(effectorConfig);
+            status = effectorRight.getConfigurator().apply(effectorRightConfig);
+            effectorLeft.getConfigurator().apply(effectorLeftConfig);
             if (status.isOK()) break;
         }
         if (!status.isOK()) {
@@ -134,7 +176,7 @@ public class Effector extends SubsystemBase {
     }
 
     public static void asymmetricalOuttake(Double velocityLeft, Double velocityRight) {
-        System.out.println("This is running!");
+        System.out.println(effectorLeft.getPosition().getValueAsDouble());
         double motorSpeedL;
         double motorSpeedR;
         if (velocityLeft != null) {
@@ -154,6 +196,9 @@ public class Effector extends SubsystemBase {
             effectorLeft.setControl(m_velocityVoltage.withVelocity(motorSpeedL));
             effectorRight.setControl(m_velocityVoltage.withVelocity(-motorSpeedR));
         }
+
+        // effectorLeft.setControl(motionMagicLeft.withPosition(100));
+        // effectorRight.setControl(motionMagicRight.withPosition(30));
         effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
         effectorRight.setControl(m_velocityVoltage.withVelocity(0));
         effectorTimer.stop();
@@ -164,8 +209,8 @@ public class Effector extends SubsystemBase {
         if (velocityRight == null) {
             velocityRight = -velocityLeft;
         }
-        effectorLeft.setControl(m_velocityVoltage.withVelocity(velocityLeft * 70));
-        effectorRight.setControl(m_velocityVoltage.withVelocity(velocityRight * 70));
+        effectorLeft.setControl(m_velocityVoltage.withVelocity(velocityLeft));
+        effectorRight.setControl(m_velocityVoltage.withVelocity(velocityRight));
     }
 
     public static void algaeEffectorUp(Double time) {
