@@ -7,31 +7,40 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.hardware.TalonFX;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.MusicTone;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
-import pabeles.concurrency.IntOperatorTask.Max;
+import frc.robot.subsystems.*;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+
 
 public class RobotContainer {
+    private final SendableChooser<Command> autoChooser;
+
     public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired top speed
-    public static double MaxAngularRate = RotationsPerSecond.of(2).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    public static double MaxAngularRate = RotationsPerSecond.of(2.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+    public static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -39,35 +48,75 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandJoystick joystick = new CommandJoystick(0);
-    private final XboxController Xbox = new XboxController(1);
-
-    // private final TalonFX frontLeftDrive = new TalonFX(1);
-    // private final TalonFX frontLeftSteer = new TalonFX(2);
-    // private final TalonFX frontRightDrive = new TalonFX(3);
-    // private final TalonFX frontRightSteer = new TalonFX(4);
-    // private final TalonFX backLeftDrive = new TalonFX(5);
-    // private final TalonFX backLeftSteer = new TalonFX(6);
-    // private final TalonFX backRightDrive = new TalonFX(7);
-    // private final TalonFX backRightSteer = new TalonFX(8 );
-    // private final TalonFX liftLeft = new TalonFX(10, "rio");
-    // private final TalonFX liftRight = new TalonFX(11, "rio");
+    public static final CommandJoystick joystick = new CommandJoystick(0);
+    public static final CommandJoystick XboxController = new CommandJoystick(1);
+    public static final CommandJoystick buttonPanel = new CommandJoystick(2);
 
     final DutyCycleOut m_leftRequest = new DutyCycleOut(0.0);
     final DutyCycleOut m_rightRequest = new DutyCycleOut(0.0);
 
+    public Elevator m_elevator = new Elevator();
+    public Effector m_effector = new Effector();
+
+    public Vision m_vision = new Vision();
+
 
     Orchestra m_Orchestra = new Orchestra();
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public RobotContainer() {
+        drivetrain.seedFieldCentric();
+        if (SwerveRequest.ForwardPerspectiveValue.OperatorPerspective == SwerveRequest.ForwardPerspectiveValue.BlueAlliance) {
+            var heading = 1;
+        }
+        else {
+            var heading = -1;
+        }
+
         configureBindings();
+
+        NamedCommands.registerCommand("scoreL1Coral", new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2.0), m_elevator), new InstantCommand(() -> Effector.asymmetricalOuttake(null, null), m_effector), new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1), m_elevator)));
+        NamedCommands.registerCommand("scoreL4Coral", new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L4 - 1), m_elevator), new WaitCommand(1.5), new InstantCommand(() -> Effector.symmetricalOuttake(null), m_effector), new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1), m_elevator)));
+        NamedCommands.registerCommand("intakeCoral", new InstantCommand(() -> Effector.intakeUntilDetected()));
+
+        autoChooser = AutoBuilder.buildAutoChooser("");
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+        
+        
+        // NamedCommands.registerCommand("Score L1", Effector.asymmetricalOuttake(null, null));
     }
 
     private void configureBindings() {
-        
-        
+        buttonPanel.button(Constants.buttonPanel.lift.L1).onTrue(new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1))));
+        buttonPanel.button(Constants.buttonPanel.lift.L2).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L2)));
+        buttonPanel.button(Constants.buttonPanel.lift.L3).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L3)));
+        buttonPanel.button(Constants.buttonPanel.lift.L4).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L4)));
+        buttonPanel.button(Constants.buttonPanel.algae.Lower).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
+        buttonPanel.button(Constants.buttonPanel.algae.Upper).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
+        //buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new InstantCommand(() -> Effector.toggleAlgae(), m_effector));
+        buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new ParallelDeadlineGroup(new InstantCommand(() -> Effector.toggleAlgae(), m_effector)));
+        buttonPanel.button(Constants.buttonPanel.coral.In).onTrue(new ParallelRaceGroup(new WaitCommand(5.00), new InstantCommand(() -> Effector.intakeUntilDetected(), m_effector)));
+        buttonPanel.button(Constants.buttonPanel.coral.Out).onTrue(new InstantCommand(() -> Effector.outtakeUntilDetected()));
+        // XboxController.button(Constants.XboxController.bumper.Left).whileTrue(new InstantCommand(() -> Elevator.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.LeftYAxis)*10)));
+        XboxController.button(Constants.XboxController.button.A).onTrue(new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2)))); // 
+        // XboxController.button(Constants.XboxController.button.A).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2)));
+        // XboxController.button(Constants.XboxController.button.A).whileTrue(new RunCommand(() -> Effector.asymmetricalOuttake(null, null)));
+        XboxController.button(Constants.XboxController.bumper.Right).whileTrue(new RunCommand(() -> Effector.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.RightYAxis)*10, null)));
+        XboxController.button(Constants.XboxController.button.X).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
+        XboxController.button(Constants.XboxController.button.B).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
+        XboxController.button(Constants.XboxController.button.Y).onTrue(new InstantCommand(() -> Elevator.toPosition(0)));
+        XboxController.button(Constants.XboxController.button.Start).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate)));
+        XboxController.pov(Constants.XboxController.dpad.Up).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null), m_effector));
+        XboxController.pov(Constants.XboxController.dpad.Down).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown(), m_effector));
+        joystick.button(Constants.Joystick.Function1).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown()));
+        joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null)));
+        // joystick.button(Constants.Joystick.strafeLeft).onTrue(new InstantCommand(() -> Vision.strafe(true)));
+        // joystick.button(Constants.Joystick.strafeRight).onTrue(new InstantCommand(() -> Vision.strafe(false)));
+        XboxController.pov(Constants.XboxController.dpad.Left).onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));
+        XboxController.pov(Constants.XboxController.dpad.Right).onTrue(new InstantCommand(() -> Elevator.manualOffset(false)));
+
+        // XboxController.button(Constants.XboxController.button.Window).onTrue(new InstantCommand(() -> Elevator.resetLift()));
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
 
@@ -76,11 +125,12 @@ public class RobotContainer {
         double rot;
         // double ySpeed;
         var ySpeed = joystick.getY() * MaxSpeed;
-        // if (Xbox.getBButtonPressed()) {
+        
+        // if (XboxController.button(Constants.XboxController.button.Start)) {
         //     System.out.println("Limelight activated");
-        //     final var rot_limelight = limelight_aim_proportional();
+        //     final var rot_limelight = m_vision.limelight_aim_proportional(MaxAngularRate);
         //     rot = rot_limelight;
-        //     final var forward_limelight = limelight_range_proportional();
+        //     final var forward_limelight = m_vision.limelight_range_proportional(MaxAngularRate);
         //     xSpeed = forward_limelight; 
         // }
         // else {
@@ -92,8 +142,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getX() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(joystick.getY() * MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(joystick.getY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(joystick.getX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-joystick.getTwist() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
@@ -114,6 +164,8 @@ public class RobotContainer {
         // reset the field-centric heading on middle button press
         joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        
     }
 
     // double limelight_aim_proportional() {
@@ -138,23 +190,10 @@ public class RobotContainer {
         // var rot = -joystick.getTwist() * MaxAngularRate;  
     }
 
-    // public void configureOrchestra() {
-    //     m_Orchestra.addInstrument(frontLeftDrive, 1);
-    //     m_Orchestra.addInstrument(frontLeftSteer, 2);
-    //     m_Orchestra.addInstrument(frontRightDrive, 3);
-    //     m_Orchestra.addInstrument(frontRightSteer, 4);
-    //     m_Orchestra.addInstrument(backLeftDrive, 5);
-    //     m_Orchestra.addInstrument(backLeftSteer, 6);
-    //     m_Orchestra.addInstrument(backRightDrive, 7);
-    //     m_Orchestra.addInstrument(backRightSteer, 8);
-    //     var status = m_Orchestra.loadMusic("SkyOfTrees.chrp");
-    //     Commands.print("Configuring orchestra...");
-    //     if (status.isOK()) {
-    //         Commands.print("Orchestra configured");
-    //      }
-    // }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        // return Commands.print("No autonomous command configured");
+        return autoChooser.getSelected();
     }
 }
+
