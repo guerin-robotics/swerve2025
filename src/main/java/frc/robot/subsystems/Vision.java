@@ -79,6 +79,17 @@ public class Vision extends SubsystemBase {
       }
     }
 
+    public static void limelight_align(boolean side) {
+      double kP = 0.03;
+      double alignSpeed = ((LimelightHelpers.getTX("limelight") + Math.atan(7/6)) * (Math.PI/180)) * kP;
+      if (side == true) {
+        RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(alignSpeed).withRotationalRate(0));
+      }
+      else {
+        RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(-alignSpeed).withRotationalRate(0));
+      }
+    }
+
   public static void applyLimelight(double MaxAngularRate) {
     int target = (int) LimelightHelpers.getFiducialID("");
     var angle = 0;
@@ -135,4 +146,5 @@ public class Vision extends SubsystemBase {
     // RobotContainer.drivetrain.setDefaultCommand(RobotContainer.drivetrain.applyRequest(() -> RobotContainer.drive.withVelocityX(xSpeed).withVelocityY(0).withRotationalRate(rot)));
     RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(xSpeed).withVelocityY(rot_limelight).withRotationalRate(rot_gyro));
   }
+
 }

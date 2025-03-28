@@ -111,6 +111,8 @@ public class RobotContainer {
         XboxController.pov(Constants.XboxController.dpad.Down).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown(), m_effector));
         joystick.button(Constants.Joystick.Function1).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown()));
         joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null)));
+        joystick.button(Constants.Joystick.strafeLeft).onTrue(new InstantCommand(() -> Vision.limelight_align(true)));
+        joystick.button(Constants.Joystick.strafeRight).onTrue(new InstantCommand(() -> Vision.limelight_align(false)));
         // joystick.button(Constants.Joystick.strafeLeft).onTrue(new InstantCommand(() -> Vision.strafe(true)));
         // joystick.button(Constants.Joystick.strafeRight).onTrue(new InstantCommand(() -> Vision.strafe(false)));
         XboxController.pov(Constants.XboxController.dpad.Left).onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));
