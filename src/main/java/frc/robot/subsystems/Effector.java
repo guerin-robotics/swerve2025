@@ -64,8 +64,8 @@ public class Effector extends SubsystemBase {
 
         MotionMagicConfigs effectorLeftMotion = effectorLeftConfig.MotionMagic;
         MotionMagicConfigs effectorRightMotion = effectorRightConfig.MotionMagic;
-        effectorLeftMotion.withMotionMagicCruiseVelocity(RotationsPerSecond.of(30)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(100));
-        effectorRightMotion.withMotionMagicCruiseVelocity(RotationsPerSecond.of(10)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(100));
+        effectorLeftMotion.withMotionMagicCruiseVelocity(RotationsPerSecond.of(30 * Constants.masterSpeedMultiplier)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(100 * Constants.masterSpeedMultiplier));
+        effectorRightMotion.withMotionMagicCruiseVelocity(RotationsPerSecond.of(10 * Constants.masterSpeedMultiplier)).withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(100 * Constants.masterSpeedMultiplier));
 
         var limitConfigs = new CurrentLimitsConfigs();
 
@@ -77,7 +77,7 @@ public class Effector extends SubsystemBase {
         effectorLeftConfig.Slot0.kI = 0; // Integrated error
         effectorLeftConfig.Slot0.kD = 0; // Error derivative
 
-        effectorLeftConfig.Voltage.withPeakForwardVoltage(Volts.of(8)).withPeakReverseVoltage(Volts.of(-8));
+        effectorLeftConfig.Voltage.withPeakForwardVoltage(Volts.of(8 * Constants.masterVoltageMultiplier)).withPeakReverseVoltage(Volts.of(-8 * Constants.masterVoltageMultiplier));
 
         effectorRightConfig.Slot0.kS = 0; // Static friction
         effectorRightConfig.Slot0.kV = 0; // 0.12 for Kraken X60
@@ -85,7 +85,7 @@ public class Effector extends SubsystemBase {
         effectorRightConfig.Slot0.kI = 0; // Integrated error
         effectorRightConfig.Slot0.kD = 0; // Error derivative
 
-        effectorRightConfig.Voltage.withPeakForwardVoltage(Volts.of(8)).withPeakReverseVoltage(Volts.of(-8));
+        effectorRightConfig.Voltage.withPeakForwardVoltage(Volts.of(8 * Constants.masterVoltageMultiplier)).withPeakReverseVoltage(Volts.of(-8 * Constants.masterVoltageMultiplier));
 
         effectorLeftConfig.Slot1.kS = 1; // Static friction
         effectorLeftConfig.Slot1.kV = 0; // 0.12 for Kraken X60
@@ -93,7 +93,7 @@ public class Effector extends SubsystemBase {
         effectorLeftConfig.Slot1.kI = 0; // Integrated error
         effectorLeftConfig.Slot1.kD = 0; // Error derivative
 
-        effectorLeftConfig.Voltage.withPeakForwardVoltage(Volts.of(8)).withPeakReverseVoltage(Volts.of(-8));
+        effectorLeftConfig.Voltage.withPeakForwardVoltage(Volts.of(8 * Constants.masterVoltageMultiplier)).withPeakReverseVoltage(Volts.of(-8 * Constants.masterVoltageMultiplier));
 
         effectorRightConfig.Slot1.kS = 1; // Static friction
         effectorRightConfig.Slot1.kV = 0; // 0.12 for Kraken X60
@@ -101,7 +101,7 @@ public class Effector extends SubsystemBase {
         effectorRightConfig.Slot1.kI = 0; // Integrated error
         effectorRightConfig.Slot1.kD = 0; // Error derivative
 
-        effectorRightConfig.Voltage.withPeakForwardVoltage(Volts.of(8)).withPeakReverseVoltage(Volts.of(-8));
+        effectorRightConfig.Voltage.withPeakForwardVoltage(Volts.of(8 * Constants.masterVoltageMultiplier)).withPeakReverseVoltage(Volts.of(-8 * Constants.masterVoltageMultiplier));
 
         StatusCode status = StatusCode.StatusCodeNotInitialized;
         for (int i = 0; i < 5; ++i) {
@@ -123,16 +123,16 @@ public class Effector extends SubsystemBase {
                 break;
             }
             else {
-            effectorLeft.setControl(m_velocityVoltage.withVelocity(25));
-            effectorRight.setControl(m_velocityVoltage.withVelocity(-25));
+            effectorLeft.setControl(m_velocityVoltage.withVelocity(25 * Constants.masterSpeedMultiplier));
+            effectorRight.setControl(m_velocityVoltage.withVelocity(-25 * Constants.masterSpeedMultiplier));
             }
         }
         effectorTimer.stop();
         effectorTimer.reset();
         effectorTimer.start();
         while (effectorTimer.get() < 0.2) {
-            effectorLeft.setControl(m_velocityVoltage.withVelocity(20));
-            effectorRight.setControl(m_velocityVoltage.withVelocity(-20));
+            effectorLeft.setControl(m_velocityVoltage.withVelocity(20 * Constants.masterSpeedMultiplier));
+            effectorRight.setControl(m_velocityVoltage.withVelocity(-20 * Constants.masterSpeedMultiplier));
         }
         effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
         effectorRight.setControl((m_velocityVoltage.withVelocity(0)));
@@ -165,8 +165,8 @@ public class Effector extends SubsystemBase {
         }
         effectorTimer.start();
         while (effectorTimer.get() < 2) {
-            effectorLeft.setControl(m_velocityVoltage.withVelocity(motorSpeed));
-            effectorRight.setControl(m_velocityVoltage.withVelocity(-motorSpeed));
+            effectorLeft.setControl(m_velocityVoltage.withVelocity(motorSpeed * Constants.masterSpeedMultiplier));
+            effectorRight.setControl(m_velocityVoltage.withVelocity(-motorSpeed * Constants.masterSpeedMultiplier));
         }
         effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
         effectorRight.setControl(m_velocityVoltage.withVelocity(0));
@@ -183,13 +183,13 @@ public class Effector extends SubsystemBase {
             motorSpeedL = velocityLeft;
         }
         else {
-            motorSpeedL = 30;
+            motorSpeedL = 30 * Constants.masterSpeedMultiplier; // 30
         }
         if (velocityRight != null) {
             motorSpeedR = velocityRight;
         }
         else {
-            motorSpeedR = 10;
+            motorSpeedR = 10 * Constants.masterSpeedMultiplier; // 10
         }
         effectorTimer.start();
         while (effectorTimer.get() < 1.5) {
@@ -209,7 +209,7 @@ public class Effector extends SubsystemBase {
         if (velocityRight == null) {
             velocityRight = -velocityLeft;
         }
-        effectorLeft.setControl(m_velocityVoltage.withVelocity(velocityLeft));
+        effectorLeft.setControl(m_velocityVoltage.withVelocity(velocityLeft * Constants.masterSpeedMultiplier));
         // effectorRight.setControl(m_velocityVoltage.withVelocity(velocityRight));
     }
 

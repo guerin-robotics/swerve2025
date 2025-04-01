@@ -6,6 +6,7 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
@@ -43,7 +44,7 @@ public class Vision extends SubsystemBase {
       double kP = 0.03;
       double targetingForwardSpeed = LimelightHelpers.getTY("limelight") * kP;
       targetingForwardSpeed *= MaxAngularSpeed;
-      targetingForwardSpeed *= -1;
+      targetingForwardSpeed *= -1 * Constants.masterSpeedMultiplier;
       return targetingForwardSpeed;
     }
   
@@ -53,7 +54,7 @@ public class Vision extends SubsystemBase {
       double alignSpeed = (RobotContainer.drivetrain.getRotation3d().getZ() + angle)%360 * kP;
 
       alignSpeed *= MaxAngularSpeed;
-      alignSpeed *= -1;
+      alignSpeed *= -1 * Constants.masterSpeedMultiplier;
       System.out.println(alignSpeed);
 
       return alignSpeed;
@@ -140,7 +141,7 @@ public class Vision extends SubsystemBase {
     final var rot_limelight = limelight_aim_proportional(MaxAngularRate);
     rot = rot_limelight;
     final var forward_limelight = limelight_range_proportional(MaxAngularRate);
-    xSpeed = forward_limelight * 1;
+    xSpeed = forward_limelight * 1 * Constants.masterSpeedMultiplier;
     // System.out.println("Rotation: " + rot_limelight + "Distance: " + forward_limelight);
 
     // RobotContainer.drivetrain.setDefaultCommand(RobotContainer.drivetrain.applyRequest(() -> RobotContainer.drive.withVelocityX(xSpeed).withVelocityY(0).withRotationalRate(rot)));

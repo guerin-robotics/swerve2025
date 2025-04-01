@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class Constants {
+    public static final double masterSpeedMultiplier = 1;   // For troubleshooting/testing
+    public static final double masterVoltageMultiplier = 1;
 
     public static final class Joystick {
         public static final int Function1 = 10;
@@ -80,9 +82,13 @@ public class Constants {
     }
 
     public static final class effector {
-        public static final int EffectorLeft = 14; //Should be 12. Just testing hang motor.
+        public static final int EffectorLeft = 12;
         public static final int EffectorRight = 13;
         public static final double defaultVelocity = 15;
+    }
+
+    public static final class hang {
+        public static final int hangMotor = 14;
     }
     
     public static void setL4() {

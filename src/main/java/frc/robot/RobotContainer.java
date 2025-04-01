@@ -118,6 +118,12 @@ public class RobotContainer {
         XboxController.pov(Constants.XboxController.dpad.Left).onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));
         XboxController.pov(Constants.XboxController.dpad.Right).onTrue(new InstantCommand(() -> Elevator.manualOffset(false)));
 
+        XboxController.button(Constants.XboxController.bumper.Right).onTrue(new InstantCommand(() -> Hang.activateHang(false)));
+        XboxController.button(Constants.XboxController.bumper.Left).onTrue(new InstantCommand(() -> Hang.activateHang(true)));
+        XboxController.button(Constants.XboxController.bumper.Right).onFalse(new InstantCommand(() -> Hang.stopHang()));
+        XboxController.button(Constants.XboxController.bumper.Left).onFalse(new InstantCommand(() -> Hang.stopHang()));
+        
+
         // XboxController.button(Constants.XboxController.button.Window).onTrue(new InstantCommand(() -> Elevator.resetLift()));
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
