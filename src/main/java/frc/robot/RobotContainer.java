@@ -106,13 +106,14 @@ public class RobotContainer {
         XboxController.button(Constants.XboxController.button.X).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
         XboxController.button(Constants.XboxController.button.B).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
         XboxController.button(Constants.XboxController.button.Y).onTrue(new InstantCommand(() -> Elevator.toPosition(0)));
-        XboxController.button(Constants.XboxController.button.Start).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate)));
+        XboxController.button(Constants.XboxController.button.Window).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate, "limelight-right")));
+        XboxController.button(Constants.XboxController.button.Start).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate, "limelight-left")));
         XboxController.pov(Constants.XboxController.dpad.Up).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null), m_effector));
         XboxController.pov(Constants.XboxController.dpad.Down).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown(), m_effector));
         joystick.button(Constants.Joystick.Function1).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown()));
         joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null)));
-        joystick.button(Constants.Joystick.strafeLeft).onTrue(new InstantCommand(() -> Vision.limelight_align(true)));
-        joystick.button(Constants.Joystick.strafeRight).onTrue(new InstantCommand(() -> Vision.limelight_align(false)));
+        joystick.button(Constants.Joystick.strafeLeft).whileTrue(new RunCommand(() -> Vision.limelight_align(MaxAngularRate, true)));
+        joystick.button(Constants.Joystick.strafeRight).whileTrue(new RunCommand(() -> Vision.limelight_align(MaxAngularRate, false)));
         // joystick.button(Constants.Joystick.strafeLeft).onTrue(new InstantCommand(() -> Vision.strafe(true)));
         // joystick.button(Constants.Joystick.strafeRight).onTrue(new InstantCommand(() -> Vision.strafe(false)));
         XboxController.pov(Constants.XboxController.dpad.Left).onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));
@@ -157,9 +158,9 @@ public class RobotContainer {
         );
 
         joystick.trigger().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.button(4).whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getY(), -joystick.getX()))
-        ));
+        // joystick.button(4).whileTrue(drivetrain.applyRequest(() ->
+        //     point.withModuleDirection(new Rotation2d(-joystick.getY(), -joystick.getX()))
+        // ));
 
 
         // Run SysId routines when holding back/start and X/Y.

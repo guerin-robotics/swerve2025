@@ -210,7 +210,7 @@ public class Effector extends SubsystemBase {
             velocityRight = -velocityLeft;
         }
         effectorLeft.setControl(m_velocityVoltage.withVelocity(velocityLeft * Constants.masterSpeedMultiplier));
-        // effectorRight.setControl(m_velocityVoltage.withVelocity(velocityRight));
+        effectorRight.setControl(m_velocityVoltage.withVelocity(velocityRight * Constants.masterSpeedMultiplier));
     }
 
     public static void algaeEffectorUp(Double time) {

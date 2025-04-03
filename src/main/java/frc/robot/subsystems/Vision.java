@@ -14,13 +14,16 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class Vision extends SubsystemBase {
   private static Timer yTimer = new Timer();
-      public static double limelight_aim_proportional(double MaxAngularSpeed)
+      public static double limelight_aim_proportional(double MaxAngularSpeed, int position)
     {    
       // kP (constant of proportionality)
       // this is a hand-tuned number that determines the aggressiveness of our proportional control loop
       // if it is too high, the robot will oscillate around.
       // if it is too low, the robot will never reach its target
       // if the robot never turns in the correct direction, kP should be inverted.
+      if (position == 1) {
+        double targetOffset = 20;
+      }
       double kP = 0.01;
   
       // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of 
@@ -40,9 +43,9 @@ public class Vision extends SubsystemBase {
     // simple proportional ranging control with Limelight's "ty" value
     // this works best if your Limelight's mount height and target mount height are different.
     // if your limelight and target are mounted at the same or similar heights, use "ta" (area) for target ranging rather than "ty"
-    public static double limelight_range_proportional(double MaxAngularSpeed) {    
+    public static double limelight_range_proportional(double MaxAngularSpeed, String name) {    
       double kP = 0.03;
-      double targetingForwardSpeed = LimelightHelpers.getTY("limelight") * kP;
+      double targetingForwardSpeed = LimelightHelpers.getTY(name) * kP;
       targetingForwardSpeed *= MaxAngularSpeed;
       targetingForwardSpeed *= -1 * Constants.masterSpeedMultiplier;
       return targetingForwardSpeed;
@@ -68,31 +71,35 @@ public class Vision extends SubsystemBase {
 
     // }
 
-    public static void strafe(boolean side) {
-      yTimer.start();
-      while (yTimer.get() < 1) {
-        if (side == true) {
-          RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(1).withRotationalRate(0));
-        }
-        else {
-          RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(-1).withRotationalRate(0));
-        }
-      }
-    }
+    // public static void strafe(boolean side) {
+    //   yTimer.start();
+    //   while (yTimer.get() < 1) {
+    //     if (side == true) {
+    //       RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(1).withRotationalRate(0));
+    //     }
+    //     else {
+    //       RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(-1).withRotationalRate(0));
+    //     }
+    //   }
+    // }
 
-    public static void limelight_align(boolean side) {
-      double kP = 0.03;
+    public static void limelight_align(double MaxAngularRate, boolean side) {
+      double rotation = rotateToTarget(MaxAngularRate, "limelight_left");
+      double kP = 10.33;
       double alignSpeed = ((LimelightHelpers.getTX("limelight") + Math.atan(7/6)) * (Math.PI/180)) * kP;
+      // double alignSpeed = 1;
+      System.out.println("Aligning at speed: " + alignSpeed);
       if (side == true) {
+        System.out.println("Driving right");
         RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(alignSpeed).withRotationalRate(0));
       }
       else {
-        RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(-alignSpeed).withRotationalRate(0));
+        RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(alignSpeed).withRotationalRate(0));
       }
     }
 
-  public static void applyLimelight(double MaxAngularRate) {
-    int target = (int) LimelightHelpers.getFiducialID("");
+  public static void applyLimelight(double MaxAngularRate, String name) {
+    int target = (int) LimelightHelpers.getFiducialID(name);
     var angle = 0;
     switch (target) {
       case 6:
@@ -139,13 +146,60 @@ public class Vision extends SubsystemBase {
     final var rot_gyro = alignRobot(MaxAngularRate, angle);
     // System.out.println("Limelight activated");
     final var rot_limelight = limelight_aim_proportional(MaxAngularRate);
-    rot = rot_limelight;
-    final var forward_limelight = limelight_range_proportional(MaxAngularRate);
-    xSpeed = forward_limelight * 1 * Constants.masterSpeedMultiplier;
+    rot = rot_limelight * 0.65;
+    final var forward_limelight = limelight_range_proportional(MaxAngularRate, name);
+    xSpeed = forward_limelight * 0.65 * Constants.masterSpeedMultiplier;
     // System.out.println("Rotation: " + rot_limelight + "Distance: " + forward_limelight);
 
     // RobotContainer.drivetrain.setDefaultCommand(RobotContainer.drivetrain.applyRequest(() -> RobotContainer.drive.withVelocityX(xSpeed).withVelocityY(0).withRotationalRate(rot)));
     RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(xSpeed).withVelocityY(rot_limelight).withRotationalRate(rot_gyro));
   }
 
+  private static double rotateToTarget(double MaxAngularRate, String name) {
+    int target = (int) LimelightHelpers.getFiducialID(name);
+    var angle = 0;
+    switch (target) {
+      case 6:
+        angle = 0; //300 normally
+        break;
+      case 7:
+        angle = 0;
+        break;
+      case 8:
+        angle = 60;
+        break;
+      case 9:
+        angle = 120;
+        break;
+      case 10:
+        angle = 180;
+        break;
+      case 11:
+        angle = 240;
+        break;
+      case 17:
+        angle = 240;
+        break;
+      case 18:
+        angle = 180;
+        break;
+      case 19:
+        angle = 120;
+        break;
+      case 20:
+        angle = 60;
+        break;
+      case 21:
+        angle = 0;
+        break;
+      case 22:
+        angle = 300;
+        break;
+      default:
+        angle = 0;
+        break;
+    }
+    final var rot_gyro = alignRobot(MaxAngularRate, angle);
+    return rot_gyro;
+  }
 }

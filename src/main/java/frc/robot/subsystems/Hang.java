@@ -3,7 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -13,7 +13,7 @@ import frc.robot.Constants;
 public class Hang extends SubsystemBase{
     public static TalonFX hangMotor = new TalonFX(Constants.hang.hangMotor);
     public final static VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
-    private final static NeutralOut m_brake = new NeutralOut();
+    private final static StaticBrake m_brake = new StaticBrake();
 
 
     public static void activateHang(Boolean reverseDirection) {
@@ -28,7 +28,7 @@ public class Hang extends SubsystemBase{
     }
 
     public static void stopHang() {
-        hangMotor.setControl(m_brake);
+        hangMotor.setControl(m_velocityVoltage.withVelocity(1));
     }
 
 
@@ -38,6 +38,7 @@ public class Hang extends SubsystemBase{
         hangConfig.Slot0.kP = 1;
         hangConfig.Slot0.kI = 0;
         hangConfig.Slot0.kD = 0;
+        hangConfig.Slot0.kS = 5;
     }
 
 }
