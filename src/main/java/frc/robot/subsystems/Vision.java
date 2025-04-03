@@ -14,7 +14,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class Vision extends SubsystemBase {
   private static Timer yTimer = new Timer();
-      public static double limelight_aim_proportional(double MaxAngularSpeed, int position)
+      public static double limelight_aim_proportional(double MaxAngularSpeed, int position, String name)
     {    
       // kP (constant of proportionality)
       // this is a hand-tuned number that determines the aggressiveness of our proportional control loop
@@ -28,7 +28,7 @@ public class Vision extends SubsystemBase {
   
       // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of 
       // your limelight 3 feed, tx should return roughly 31 degrees.
-      double targetingAngularVelocity = LimelightHelpers.getTX("limelight") * kP;
+      double targetingAngularVelocity = LimelightHelpers.getTX(name) * kP;
       // System.out.println(LimelightHelpers.getFiducialID("limelight"));
   
       // convert to radians per second for our drive method
@@ -44,10 +44,10 @@ public class Vision extends SubsystemBase {
     // this works best if your Limelight's mount height and target mount height are different.
     // if your limelight and target are mounted at the same or similar heights, use "ta" (area) for target ranging rather than "ty"
     public static double limelight_range_proportional(double MaxAngularSpeed, String name) {    
-      double kP = 0.03;
+      double kP = -0.01;
       double targetingForwardSpeed = LimelightHelpers.getTY(name) * kP;
       targetingForwardSpeed *= MaxAngularSpeed;
-      targetingForwardSpeed *= -1 * Constants.masterSpeedMultiplier;
+      targetingForwardSpeed *= 1 * Constants.masterSpeedMultiplier;
       return targetingForwardSpeed;
     }
   
@@ -85,13 +85,13 @@ public class Vision extends SubsystemBase {
 
     public static void limelight_align(double MaxAngularRate, boolean side) {
       double rotation = rotateToTarget(MaxAngularRate, "limelight_left");
-      double kP = 10.33;
+      double kP = 30;
       double alignSpeed = ((LimelightHelpers.getTX("limelight") + Math.atan(7/6)) * (Math.PI/180)) * kP;
       // double alignSpeed = 1;
       System.out.println("Aligning at speed: " + alignSpeed);
       if (side == true) {
         System.out.println("Driving right");
-        RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(alignSpeed).withRotationalRate(0));
+        RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(-alignSpeed).withRotationalRate(0));
       }
       else {
         RobotContainer.drivetrain.setControl(RobotContainer.drive.withVelocityX(0).withVelocityY(alignSpeed).withRotationalRate(0));
@@ -145,7 +145,7 @@ public class Vision extends SubsystemBase {
 
     final var rot_gyro = alignRobot(MaxAngularRate, angle);
     // System.out.println("Limelight activated");
-    final var rot_limelight = limelight_aim_proportional(MaxAngularRate);
+    final var rot_limelight = limelight_aim_proportional(MaxAngularRate, 0, name);
     rot = rot_limelight * 0.65;
     final var forward_limelight = limelight_range_proportional(MaxAngularRate, name);
     xSpeed = forward_limelight * 0.65 * Constants.masterSpeedMultiplier;

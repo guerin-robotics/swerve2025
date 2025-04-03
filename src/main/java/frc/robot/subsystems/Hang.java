@@ -28,7 +28,7 @@ public class Hang extends SubsystemBase{
     }
 
     public static void stopHang() {
-        hangMotor.setControl(m_velocityVoltage.withVelocity(1));
+        hangMotor.setControl(m_velocityVoltage.withVelocity(0));
     }
 
 
