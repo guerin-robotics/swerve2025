@@ -103,22 +103,22 @@ public class Vision extends SubsystemBase {
     var angle = 0;
     switch (target) {
       case 6:
-        angle = 0; //300 normally
+        angle = 120; //300 normally
         break;
       case 7:
-        angle = 0;
-        break;
-      case 8:
-        angle = 60;
-        break;
-      case 9:
-        angle = 120;
-        break;
-      case 10:
         angle = 180;
         break;
-      case 11:
+      case 8:
         angle = 240;
+        break;
+      case 9:
+        angle = 300;
+        break;
+      case 10:
+        angle = 0;
+        break;
+      case 11:
+        angle = 60;
         break;
       case 17:
         angle = 240;
