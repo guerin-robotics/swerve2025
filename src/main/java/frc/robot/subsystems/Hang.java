@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -14,6 +15,9 @@ public class Hang extends SubsystemBase{
     public static TalonFX hangMotor = new TalonFX(Constants.hang.hangMotor);
     public final static VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
     private final static StaticBrake m_brake = new StaticBrake();
+
+    private static Servo ratchetServo = new Servo(0);
+    private static double ratchetPosition = 0;
 
 
     public static void activateHang(Boolean reverseDirection) {
@@ -23,11 +27,15 @@ public class Hang extends SubsystemBase{
         }
         else {
             System.out.println("Moving climber down");
-            hangMotor.setControl(m_velocityVoltage.withVelocity(-30 * Constants.masterSpeedMultiplier));
+            hangMotor.setControl(m_velocityVoltage.withVelocity(-100 * Constants.masterSpeedMultiplier));
         }
     }
 
     public static void stopHang() {
+        hangMotor.setControl(new StaticBrake());
+    }
+
+    public static void brakeHang() {
         hangMotor.setControl(new StaticBrake());
     }
 
@@ -39,6 +47,17 @@ public class Hang extends SubsystemBase{
         hangConfig.Slot0.kI = 0;
         hangConfig.Slot0.kD = 0;
         hangConfig.Slot0.kS = 5;
+    }
+
+    public static void toggleRatchet() {
+        if (ratchetPosition == 1) {
+            ratchetServo.setAngle(0);
+            ratchetPosition = 0;
+        }
+        else {
+            ratchetServo.setAngle(180);
+            ratchetPosition = 1;
+        }
     }
 
 }

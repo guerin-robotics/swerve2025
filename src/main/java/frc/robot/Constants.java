@@ -12,6 +12,7 @@ public class Constants {
         public static final int Function2 = 9;
         public static final int strafeLeft = 3;
         public static final int strafeRight = 4;
+        public static final int servoControl = 8;
     }
 
     public static final class buttonPanel {
@@ -95,19 +96,19 @@ public class Constants {
         System.out.println("Driver side:" + DriverStationJNI.getAllianceStation().toString());
         var driverStation = DriverStationJNI.getAllianceStation().toString();
         if (driverStation == ("Blue1")) {
-            elevator.level.L4 = 71.0;
+            elevator.level.L4 = 72.0;
             System.out.println("Setting blue side L4");
         }
         else if (driverStation == ("Blue2")) {
-            elevator.level.L4 = 71.0;
+            elevator.level.L4 = 72.0;
             System.out.println("Setting blue side L4");
         }
         else if (driverStation == ("Blue3")) {
-            elevator.level.L4 = 71.0;
+            elevator.level.L4 = 72.0;
             System.out.println("Setting blue side L4");
         }
         else {
-            elevator.level.L4 = 73.5; //74.0 for good wheels
+            elevator.level.L4 = 72.5; //74.0 for good wheels
             System.out.println("Setting red side L4");
         }
     }

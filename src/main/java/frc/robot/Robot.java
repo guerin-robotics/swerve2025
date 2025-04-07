@@ -19,6 +19,7 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import au.grapplerobotics.CanBridge;
 import au.grapplerobotics.LaserCan;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Hang;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -121,5 +122,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledInit() {
+        Hang.brakeHang();
     }
 }
