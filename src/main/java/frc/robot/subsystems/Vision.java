@@ -11,7 +11,6 @@ import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.MiniPID;
 
 public class Vision extends SubsystemBase {
   private static Timer yTimer = new Timer();
