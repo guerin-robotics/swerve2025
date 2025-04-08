@@ -1,19 +1,13 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.hardware.Pigeon2;
-
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
-import frc.robot.Robot;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
+
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 
 public class Vision extends SubsystemBase {
-  private static Timer yTimer = new Timer();
   public static int target = 0;
   public static double limelight_aim_proportional(double MaxAngularSpeed, int position, String name) {
     // MiniPID aimPID = new MiniPID(0.1, 0.0, 10); 
@@ -108,7 +102,7 @@ public class Vision extends SubsystemBase {
     var angle = -1;
     switch (target) {
       case 6:
-        angle = 120; //300 normally
+        angle = 120;
         break;
       case 7:
         angle = 180;
@@ -167,7 +161,7 @@ public class Vision extends SubsystemBase {
     var angle = 0;
     switch (target) {
       case 6:
-        angle = 120; //300 normally
+        angle = 120;
         break;
       case 7:
         angle = 180;

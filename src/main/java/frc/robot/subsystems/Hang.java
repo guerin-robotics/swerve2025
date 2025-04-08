@@ -14,11 +14,9 @@ import frc.robot.Constants;
 public class Hang extends SubsystemBase{
     public static TalonFX hangMotor = new TalonFX(Constants.hang.hangMotor);
     public final static VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
-    private final static StaticBrake m_brake = new StaticBrake();
 
     private static Servo ratchetServo = new Servo(0);
     private static double ratchetPosition = 0;
-
 
     public static void activateHang(Boolean reverseDirection) {
         if (reverseDirection == false) {

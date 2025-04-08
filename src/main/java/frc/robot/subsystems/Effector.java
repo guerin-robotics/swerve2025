@@ -1,11 +1,12 @@
- package frc.robot.subsystems;
+package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import frc.robot.Constants;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
+import edu.wpi.first.wpilibj.Timer;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -15,17 +16,12 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.AbsoluteEncoder;
 
 import au.grapplerobotics.LaserCan;
-import frc.robot.Constants;
-import frc.robot.Constants.effector;
-import edu.wpi.first.wpilibj.Timer;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.*;
+import com.revrobotics.RelativeEncoder;
 
 public class Effector extends SubsystemBase {
     private static LaserCan intakeSensor;
@@ -105,8 +101,6 @@ public class Effector extends SubsystemBase {
 
         StatusCode status = StatusCode.StatusCodeNotInitialized;
         for (int i = 0; i < 5; ++i) {
-            // status = effectorLeft.getConfigurator().apply(effectorConfig);
-            // effectorRight.getConfigurator().apply(effectorConfig);
             status = effectorRight.getConfigurator().apply(effectorRightConfig);
             effectorLeft.getConfigurator().apply(effectorLeftConfig);
             if (status.isOK()) break;
@@ -197,8 +191,6 @@ public class Effector extends SubsystemBase {
             effectorRight.setControl(m_velocityVoltage.withVelocity(-motorSpeedR));
         }
 
-        // effectorLeft.setControl(motionMagicLeft.withPosition(100));
-        // effectorRight.setControl(motionMagicRight.withPosition(30));
         effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
         effectorRight.setControl(m_velocityVoltage.withVelocity(0));
         effectorTimer.stop();
@@ -230,14 +222,6 @@ public class Effector extends SubsystemBase {
 
         algaeTimer.stop();
         algaeTimer.reset();
-
-        // RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
-
-        // while (algaeEncoder.getPosition() < 0.028) {
-        //     algaeMotor.set(-80);
-        // }
-        // algaeMotor.set(0);
-        // isAlgaeOut = true;
     }
 
     public static void algaeEffectorDown() {
@@ -251,15 +235,6 @@ public class Effector extends SubsystemBase {
 
         algaeTimer.stop();
         algaeTimer.reset();        
-        
-        // RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
-
-        // while (algaeEncoder.getPosition() > 0.1 // 0.1
-        // ) {
-        //     algaeMotor.set(80);
-        // }
-        // algaeMotor.set(0);
-        // isAlgaeOut = false;
     }
 
     public static void resetAlgaePosition() {
