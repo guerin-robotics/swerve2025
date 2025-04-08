@@ -7,19 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Drive to Reef B2"
+            "pathName": "B2 Reef Straight"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "scoreL4Coral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "B2 Coral Station"
           }
         }
       ]

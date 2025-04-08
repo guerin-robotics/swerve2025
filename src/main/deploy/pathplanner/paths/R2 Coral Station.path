@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 11.819877049180327,
-        "y": 4.330686475409836
+        "x": 12.032,
+        "y": 4.005
       },
       "prevControl": null,
       "nextControl": {
-        "x": 12.819877049180327,
-        "y": 4.330686475409836
+        "x": 13.032,
+        "y": 4.005
       },
       "isLocked": false,
       "linkedName": "R2 Transition"
@@ -17,11 +17,11 @@
     {
       "anchor": {
         "x": 10.621106557377047,
-        "y": 4.22
+        "y": 4.2
       },
       "prevControl": {
         "x": 9.621106557377047,
-        "y": 4.22
+        "y": 4.2
       },
       "nextControl": null,
       "isLocked": false,
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.9093804491990902
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

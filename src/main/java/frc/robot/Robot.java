@@ -1,7 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -10,15 +8,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.Effector;
 
-import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.controls.NeutralOut;
 
 import au.grapplerobotics.CanBridge;
 import au.grapplerobotics.LaserCan;
-import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Hang;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -87,39 +83,11 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        // double joyValue = m_joystick.getLeftY();
-        // double intakeSpeed = m_joystick.getRightY();
-        // if (Math.abs(joyValue) < 0.05) joyValue = 0; // add a deadband
-
-        // double desiredRotationsPerSecond;
-        // double intakeRotationsPerSecond = intakeSpeed * -50;
-        // double liftPosition = Elevator.liftLeft.getPosition().getValueAsDouble();
-
-        // if ((joyValue < 0)) {
-        //     desiredRotationsPerSecond = 0;
-        // } else if ((liftPosition > 60) && (joyValue < 0)) {
-        //     desiredRotationsPerSecond = joyValue * -(75 - liftPosition) * 10;
-        // } else if ((liftPosition < 9) && (joyValue > 0)) {
-        //     desiredRotationsPerSecond = joyValue * -liftPosition * 10;
-        // } else {
-        //     desiredRotationsPerSecond = joyValue * -10;
-        // }
-
-        // if (!Elevator.bottomlimitSwitch.get() && (joyValue > 0)) {
-        //     Elevator.liftLeft.setControl(m_brake);
-        // } else if (!Elevator.toplimitSwitch.get() && (joyValue < 0)) {
-        //     Elevator.liftLeft.setControl(m_brake);
-        // } else {
-        //     if (m_joystick.getLeftBumperButton()) {
-        //         System.out.println("Moving elevator with speed " + desiredRotationsPerSecond);
-        //         Elevator.liftLeft.setControl(Elevator.m_velocityVoltage.withVelocity(desiredRotationsPerSecond));
-        //     } else {
-        //         Elevator.liftLeft.setControl(Elevator.m_velocityVoltage.withVelocity(0));
-        //     }
-        // }
+        
     }
 
     @Override
     public void disabledInit() {
+        Hang.brakeHang();
     }
 }

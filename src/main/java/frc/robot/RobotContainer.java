@@ -10,13 +10,8 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 
 import frc.robot.generated.TunerConstants;
@@ -60,9 +54,6 @@ public class RobotContainer {
 
     public Vision m_vision = new Vision();
 
-
-    Orchestra m_Orchestra = new Orchestra();
-
     public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public RobotContainer() {
@@ -83,8 +74,6 @@ public class RobotContainer {
         autoChooser = AutoBuilder.buildAutoChooser("");
         SmartDashboard.putData("Auto Chooser", autoChooser);
         
-        
-        // NamedCommands.registerCommand("Score L1", Effector.asymmetricalOuttake(null, null));
     }
 
     private void configureBindings() {
@@ -94,50 +83,34 @@ public class RobotContainer {
         buttonPanel.button(Constants.buttonPanel.lift.L4).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L4)));
         buttonPanel.button(Constants.buttonPanel.algae.Lower).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
         buttonPanel.button(Constants.buttonPanel.algae.Upper).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
-        //buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new InstantCommand(() -> Effector.toggleAlgae(), m_effector));
         buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new ParallelDeadlineGroup(new InstantCommand(() -> Effector.toggleAlgae(), m_effector)));
         buttonPanel.button(Constants.buttonPanel.coral.In).onTrue(new ParallelRaceGroup(new WaitCommand(5.00), new InstantCommand(() -> Effector.intakeUntilDetected(), m_effector)));
         buttonPanel.button(Constants.buttonPanel.coral.Out).onTrue(new InstantCommand(() -> Effector.outtakeUntilDetected()));
-        // XboxController.button(Constants.XboxController.bumper.Left).whileTrue(new InstantCommand(() -> Elevator.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.LeftYAxis)*10)));
         XboxController.button(Constants.XboxController.button.A).onTrue(new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2)))); // 
-        // XboxController.button(Constants.XboxController.button.A).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2)));
-        // XboxController.button(Constants.XboxController.button.A).whileTrue(new RunCommand(() -> Effector.asymmetricalOuttake(null, null)));
         XboxController.button(Constants.XboxController.bumper.Right).whileTrue(new RunCommand(() -> Effector.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.RightYAxis)*10, null)));
         XboxController.button(Constants.XboxController.button.X).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
         XboxController.button(Constants.XboxController.button.B).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
         XboxController.button(Constants.XboxController.button.Y).onTrue(new InstantCommand(() -> Elevator.toPosition(0)));
-        XboxController.button(Constants.XboxController.button.Start).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate)));
+        XboxController.button(Constants.XboxController.button.Window).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate, 2, "limelight-right")));
+        XboxController.button(Constants.XboxController.button.Start).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate, 1, "limelight-right")));
         XboxController.pov(Constants.XboxController.dpad.Up).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null), m_effector));
         XboxController.pov(Constants.XboxController.dpad.Down).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown(), m_effector));
         joystick.button(Constants.Joystick.Function1).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown()));
         joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null)));
+        joystick.button(Constants.Joystick.strafeLeft).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate, 2, "limelight-right")));
+        joystick.button(Constants.Joystick.strafeRight).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate, 1, "limelight-right")));;
+        joystick.button(Constants.Joystick.strafeLeft).onTrue(new InstantCommand(() -> Vision.setTarget("limelight-right")));
+        joystick.button(Constants.Joystick.strafeRight).onTrue(new InstantCommand(() -> Vision.setTarget("limelight-right")));
+        joystick.button(Constants.Joystick.servoControl).onTrue(new InstantCommand(() -> Hang.brakeHang()));
         // joystick.button(Constants.Joystick.strafeLeft).onTrue(new InstantCommand(() -> Vision.strafe(true)));
         // joystick.button(Constants.Joystick.strafeRight).onTrue(new InstantCommand(() -> Vision.strafe(false)));
         XboxController.pov(Constants.XboxController.dpad.Left).onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));
         XboxController.pov(Constants.XboxController.dpad.Right).onTrue(new InstantCommand(() -> Elevator.manualOffset(false)));
 
-        // XboxController.button(Constants.XboxController.button.Window).onTrue(new InstantCommand(() -> Elevator.resetLift()));
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
-
-
-        double xSpeed;
-        double rot;
-        // double ySpeed;
-        var ySpeed = joystick.getY() * MaxSpeed;
-        
-        // if (XboxController.button(Constants.XboxController.button.Start)) {
-        //     System.out.println("Limelight activated");
-        //     final var rot_limelight = m_vision.limelight_aim_proportional(MaxAngularRate);
-        //     rot = rot_limelight;
-        //     final var forward_limelight = m_vision.limelight_range_proportional(MaxAngularRate);
-        //     xSpeed = forward_limelight; 
-        // }
-        // else {
-        //     xSpeed = -joystick.getX() * MaxSpeed;
-
-        //     rot = -joystick.getTwist() * MaxAngularRate;
-        // }
+        XboxController.button(Constants.XboxController.bumper.Right).onTrue(new InstantCommand(() -> Hang.activateHang(false)));
+        XboxController.button(Constants.XboxController.bumper.Left).onTrue(new InstantCommand(() -> Hang.activateHang(true)));
+        XboxController.button(Constants.XboxController.bumper.Right).onFalse(new InstantCommand(() -> Hang.stopHang()));
+        XboxController.button(Constants.XboxController.bumper.Left).onFalse(new InstantCommand(() -> Hang.stopHang()));
 
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
@@ -149,47 +122,11 @@ public class RobotContainer {
         );
 
         joystick.trigger().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.button(4).whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getY(), -joystick.getX()))
-        ));
-
-
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-        // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on middle button press
         joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         drivetrain.registerTelemetry(logger::telemeterize);
-
-        
     }
-
-    // double limelight_aim_proportional() {
-    //     double kP = 0.035;
-    //     double targetingAngularVelocity = LimelightHelpers.getTX("limelight") * kP;
-    //     targetingAngularVelocity *= MaxSpeed;
-    //     targetingAngularVelocity *= -1.0;
-    //     return targetingAngularVelocity;
-    // }
-
-    // double limelight_range_proportional() {
-    //     double kP = 0.1;
-    //     double targetingForwardSpeed = LimelightHelpers.getTY("limelight") * kP;
-    //     targetingForwardSpeed *= MaxSpeed;
-    //     targetingForwardSpeed *= -1.0;
-    //     return targetingForwardSpeed;
-    // }
-
-    private void align(boolean fieldRelative) {
-        // var xSpeed = -joystick.getY() * MaxSpeed;
-        var ySpeed = -joystick.getX() * MaxSpeed;
-        // var rot = -joystick.getTwist() * MaxAngularRate;  
-    }
-
 
     public Command getAutonomousCommand() {
         // return Commands.print("No autonomous command configured");
