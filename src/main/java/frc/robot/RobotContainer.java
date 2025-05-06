@@ -49,17 +49,7 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     public static final CommandJoystick joystick = new CommandJoystick(0);
-    public static final CommandJoystick XboxController = new CommandJoystick(1);
-    public static final CommandJoystick buttonPanel = new CommandJoystick(2);
-
-    final DutyCycleOut m_leftRequest = new DutyCycleOut(0.0);
-    final DutyCycleOut m_rightRequest = new DutyCycleOut(0.0);
-
-    public Elevator m_elevator = new Elevator();
-    public Effector m_effector = new Effector();
-
-    public Vision m_vision = new Vision();
-
+    
 
     Orchestra m_Orchestra = new Orchestra();
 
@@ -76,10 +66,6 @@ public class RobotContainer {
 
         configureBindings();
 
-        NamedCommands.registerCommand("scoreL1Coral", new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2.0), m_elevator), new InstantCommand(() -> Effector.asymmetricalOuttake(null, null), m_effector), new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1), m_elevator)));
-        NamedCommands.registerCommand("scoreL4Coral", new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L4 - 1), m_elevator), new WaitCommand(1.5), new InstantCommand(() -> Effector.symmetricalOuttake(null), m_effector), new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1), m_elevator)));
-        NamedCommands.registerCommand("intakeCoral", new InstantCommand(() -> Effector.intakeUntilDetected()));
-
         autoChooser = AutoBuilder.buildAutoChooser("");
         SmartDashboard.putData("Auto Chooser", autoChooser);
         
@@ -87,46 +73,7 @@ public class RobotContainer {
         // NamedCommands.registerCommand("Score L1", Effector.asymmetricalOuttake(null, null));
     }
 
-    private void configureBindings() {
-        buttonPanel.button(Constants.buttonPanel.lift.L1).onTrue(new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1))));
-        buttonPanel.button(Constants.buttonPanel.lift.L2).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L2)));
-        buttonPanel.button(Constants.buttonPanel.lift.L3).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L3)));
-        buttonPanel.button(Constants.buttonPanel.lift.L4).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L4)));
-        buttonPanel.button(Constants.buttonPanel.algae.Lower).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
-        buttonPanel.button(Constants.buttonPanel.algae.Upper).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
-        //buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new InstantCommand(() -> Effector.toggleAlgae(), m_effector));
-        buttonPanel.button(Constants.buttonPanel.algae.Retract).onTrue(new ParallelDeadlineGroup(new InstantCommand(() -> Effector.toggleAlgae(), m_effector)));
-        buttonPanel.button(Constants.buttonPanel.coral.In).onTrue(new ParallelRaceGroup(new WaitCommand(5.00), new InstantCommand(() -> Effector.intakeUntilDetected(), m_effector)));
-        buttonPanel.button(Constants.buttonPanel.coral.Out).onTrue(new InstantCommand(() -> Effector.outtakeUntilDetected()));
-        // XboxController.button(Constants.XboxController.bumper.Left).whileTrue(new InstantCommand(() -> Elevator.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.LeftYAxis)*10)));
-        XboxController.button(Constants.XboxController.button.A).onTrue(new SequentialCommandGroup(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2)))); // 
-        // XboxController.button(Constants.XboxController.button.A).onTrue(new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2)));
-        // XboxController.button(Constants.XboxController.button.A).whileTrue(new RunCommand(() -> Effector.asymmetricalOuttake(null, null)));
-        XboxController.button(Constants.XboxController.bumper.Right).whileTrue(new RunCommand(() -> Effector.manualControl(XboxController.getRawAxis(Constants.XboxController.axis.RightYAxis)*10, null)));
-        XboxController.button(Constants.XboxController.button.X).onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
-        XboxController.button(Constants.XboxController.button.B).onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
-        XboxController.button(Constants.XboxController.button.Y).onTrue(new InstantCommand(() -> Elevator.toPosition(0)));
-        XboxController.button(Constants.XboxController.button.Window).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate, 2, "limelight-right")));
-        XboxController.button(Constants.XboxController.button.Start).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate, 1, "limelight-right")));
-        XboxController.pov(Constants.XboxController.dpad.Up).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null), m_effector));
-        XboxController.pov(Constants.XboxController.dpad.Down).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown(), m_effector));
-        joystick.button(Constants.Joystick.Function1).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown()));
-        joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null)));
-        joystick.button(Constants.Joystick.strafeLeft).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate, 2, "limelight-right")));
-        joystick.button(Constants.Joystick.strafeRight).whileTrue(new RunCommand(() -> Vision.applyLimelight(MaxAngularRate, 1, "limelight-right")));;
-        joystick.button(Constants.Joystick.strafeLeft).onTrue(new InstantCommand(() -> Vision.setTarget("limelight-right")));
-        joystick.button(Constants.Joystick.strafeRight).onTrue(new InstantCommand(() -> Vision.setTarget("limelight-right")));
-        joystick.button(Constants.Joystick.servoControl).onTrue(new InstantCommand(() -> Hang.brakeHang()));
-        // joystick.button(Constants.Joystick.strafeLeft).onTrue(new InstantCommand(() -> Vision.strafe(true)));
-        // joystick.button(Constants.Joystick.strafeRight).onTrue(new InstantCommand(() -> Vision.strafe(false)));
-        XboxController.pov(Constants.XboxController.dpad.Left).onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));
-        XboxController.pov(Constants.XboxController.dpad.Right).onTrue(new InstantCommand(() -> Elevator.manualOffset(false)));
-
-        XboxController.button(Constants.XboxController.bumper.Right).onTrue(new InstantCommand(() -> Hang.activateHang(false)));
-        XboxController.button(Constants.XboxController.bumper.Left).onTrue(new InstantCommand(() -> Hang.activateHang(true)));
-        XboxController.button(Constants.XboxController.bumper.Right).onFalse(new InstantCommand(() -> Hang.stopHang()));
-        XboxController.button(Constants.XboxController.bumper.Left).onFalse(new InstantCommand(() -> Hang.stopHang()));
-        
+    private void configureBindings() {  
 
         // XboxController.button(Constants.XboxController.button.Window).onTrue(new InstantCommand(() -> Elevator.resetLift()));
         // Note that X is defined as forward according to WPILib convention,

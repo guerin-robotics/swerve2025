@@ -11,15 +11,12 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.Effector;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.controls.NeutralOut;
 
 import au.grapplerobotics.CanBridge;
 import au.grapplerobotics.LaserCan;
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Hang;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -46,18 +43,6 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         // Runs the scheduler for commands
         CommandScheduler.getInstance().run();
-        if (RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.LeftTrigger) > 0) {
-            Effector.manualControl(-0.5*70* RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.LeftTrigger), null);
-        }
-        else {
-        Effector.manualControl(0.5*70*RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.RightTrigger), null);
-        }
-        if (RobotContainer.XboxController.button(Constants.XboxController.button.A).getAsBoolean()) {
-            Effector.manualControl(20.0, -6.0);
-        }
-        
-        SmartDashboard.putNumber("Tx reading", NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(1));
-        SmartDashboard.putNumber("Tv reading", NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(1));
     }
 
 
@@ -120,8 +105,4 @@ public class Robot extends TimedRobot {
         // }
     }
 
-    @Override
-    public void disabledInit() {
-        Hang.brakeHang();
-    }
 }
