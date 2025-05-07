@@ -9,8 +9,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.controls.NeutralOut;
@@ -19,17 +22,11 @@ import au.grapplerobotics.CanBridge;
 import au.grapplerobotics.LaserCan;
 
 public class Robot extends TimedRobot {
+    private CommandSwerveDrivetrain drivetrain;
     private Command m_autonomousCommand;
     private RobotContainer m_robotContainer;
-    private XboxController m_joystick = new XboxController(1);
+    private Vision vision;
 
-    private final LaserCan elevatorTop = new LaserCan(1);
-
-    private final NeutralOut m_brake = new NeutralOut();
-
-    Timer intakeTimer = new Timer();
-    static Timer liftTimer = new Timer();
-    
     public Robot() {
         // Initialize robot components
         m_robotContainer = new RobotContainer();
@@ -37,12 +34,16 @@ public class Robot extends TimedRobot {
         // elevator = new Elevator();
 
         CanBridge.runTCP();
+        vision = new Vision(drivetrain::addVisionMeasurement);
+        var curPose = drivetrain.getPose();
     }
 
     @Override
     public void robotPeriodic() {
         // Runs the scheduler for commands
         CommandScheduler.getInstance().run();
+        vision.periodic();
+        drivetrain.periodic();
     }
 
 
@@ -73,36 +74,14 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        // double joyValue = m_joystick.getLeftY();
-        // double intakeSpeed = m_joystick.getRightY();
-        // if (Math.abs(joyValue) < 0.05) joyValue = 0; // add a deadband
-
-        // double desiredRotationsPerSecond;
-        // double intakeRotationsPerSecond = intakeSpeed * -50;
-        // double liftPosition = Elevator.liftLeft.getPosition().getValueAsDouble();
-
-        // if ((joyValue < 0)) {
-        //     desiredRotationsPerSecond = 0;
-        // } else if ((liftPosition > 60) && (joyValue < 0)) {
-        //     desiredRotationsPerSecond = joyValue * -(75 - liftPosition) * 10;
-        // } else if ((liftPosition < 9) && (joyValue > 0)) {
-        //     desiredRotationsPerSecond = joyValue * -liftPosition * 10;
-        // } else {
-        //     desiredRotationsPerSecond = joyValue * -10;
-        // }
-
-        // if (!Elevator.bottomlimitSwitch.get() && (joyValue > 0)) {
-        //     Elevator.liftLeft.setControl(m_brake);
-        // } else if (!Elevator.toplimitSwitch.get() && (joyValue < 0)) {
-        //     Elevator.liftLeft.setControl(m_brake);
-        // } else {
-        //     if (m_joystick.getLeftBumperButton()) {
-        //         System.out.println("Moving elevator with speed " + desiredRotationsPerSecond);
-        //         Elevator.liftLeft.setControl(Elevator.m_velocityVoltage.withVelocity(desiredRotationsPerSecond));
-        //     } else {
-        //         Elevator.liftLeft.setControl(Elevator.m_velocityVoltage.withVelocity(0));
-        //     }
-        // }
     }
 
+    public void resetPose() {
+        // Example Only - startPose should be derived from some assumption
+        // of where your robot was placed on the field.
+        // The first pose in an autonomous path is often a good choice.
+        var startPose = new Pose2d(1, 1, new Rotation2d());
+        drivetrain.resetPose(startPose);
+        vision.resetSimPose(startPose);
+    }
 }
