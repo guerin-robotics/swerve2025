@@ -36,9 +36,11 @@ public class Robot extends TimedRobot {
         m_robotContainer = new RobotContainer();
         // CameraServer.startAutomaticCapture();
         // elevator = new Elevator();
-
+        System.out.println("Working");
         CanBridge.runTCP();
         vision = new Vision(drivetrain::addVisionMeasurement);
+        Pose2d startPose = new Pose2d(3.5, 6.0, Rotation2d.fromDegrees(90));
+        drivetrain.resetPose(startPose);
     }
 
     @Override
@@ -46,6 +48,7 @@ public class Robot extends TimedRobot {
         // Runs the scheduler for commands
         CommandScheduler.getInstance().run();
         vision.periodic();
+        System.out.println("Working");
         drivetrain.periodic();
         
     }
@@ -61,6 +64,7 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
         }
+
         // RobotContainer.drivetrain.seedFieldCentric(); // Not currently working - reverses direction on blue side
     }
 
@@ -73,7 +77,7 @@ public class Robot extends TimedRobot {
             m_autonomousCommand.cancel();
         }
         Constants.setL4();
-        
+        resetPose();
     }
 
     @Override
@@ -88,9 +92,10 @@ public class Robot extends TimedRobot {
         // Example Only - startPose should be derived from some assumption
         // of where your robot was placed on the field.
         // The first pose in an autonomous path is often a good choice.
-        var startPose = new Pose2d(3.5, 4, new Rotation2d());
+        Pose2d startPose = new Pose2d(3.5, 6.0, Rotation2d.fromDegrees(90));
         drivetrain.resetPose(startPose);
         System.out.println("Resetting pose to " + startPose);
         vision.resetSimPose(startPose);
+        
     }
 }
