@@ -11,9 +11,13 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+
+import java.util.logging.LogRecord;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.controls.NeutralOut;
@@ -30,12 +34,11 @@ public class Robot extends TimedRobot {
     public Robot() {
         // Initialize robot components
         m_robotContainer = new RobotContainer();
-        CameraServer.startAutomaticCapture();
+        // CameraServer.startAutomaticCapture();
         // elevator = new Elevator();
 
         CanBridge.runTCP();
         vision = new Vision(drivetrain::addVisionMeasurement);
-        var curPose = drivetrain.getPose();
     }
 
     @Override
@@ -44,6 +47,7 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
         vision.periodic();
         drivetrain.periodic();
+        
     }
 
 
@@ -74,14 +78,19 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
+        var curPose = drivetrain.getPose();
+        System.out.println("Working");
+
+
     }
 
     public void resetPose() {
         // Example Only - startPose should be derived from some assumption
         // of where your robot was placed on the field.
         // The first pose in an autonomous path is often a good choice.
-        var startPose = new Pose2d(1, 1, new Rotation2d());
+        var startPose = new Pose2d(3.5, 4, new Rotation2d());
         drivetrain.resetPose(startPose);
+        System.out.println("Resetting pose to " + startPose);
         vision.resetSimPose(startPose);
     }
 }
