@@ -64,13 +64,12 @@ public class RobotContainer {
             var heading = -1;
         }
 
-        configureBindings();
-
-        autoChooser = AutoBuilder.buildAutoChooser("");
-        SmartDashboard.putData("Auto Chooser", autoChooser);
+        configureBindings();        
         
-        
-        // NamedCommands.registerCommand("Score L1", Effector.asymmetricalOuttake(null, null));
+        // NamedCommands.registerCommand("scoreL1Coral", new WaitCommand(0));
+        // NamedCommands.registerCommand("scoreL4Coral", new WaitCommand(0));
+        // NamedCommands.registerCommand("intakeCoral", new WaitCommand(0));
+        // NamedCommands.registerCommand("Start", new WaitCommand(0));
     }
 
     private void configureBindings() {  
@@ -149,10 +148,5 @@ public class RobotContainer {
         // var rot = -joystick.getTwist() * MaxAngularRate;  
     }
 
-
-    public Command getAutonomousCommand() {
-        // return Commands.print("No autonomous command configured");
-        return autoChooser.getSelected();
-    }
 }
 
