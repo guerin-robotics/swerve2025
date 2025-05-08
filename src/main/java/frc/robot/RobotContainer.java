@@ -8,9 +8,6 @@ import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 
@@ -34,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 
 
 public class RobotContainer {
-    private final SendableChooser<Command> autoChooser;
 
     public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired top speed
     public static double MaxAngularRate = RotationsPerSecond.of(2.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -54,23 +50,6 @@ public class RobotContainer {
     Orchestra m_Orchestra = new Orchestra();
 
     public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-
-    public RobotContainer() {
-        drivetrain.seedFieldCentric();
-        if (SwerveRequest.ForwardPerspectiveValue.OperatorPerspective == SwerveRequest.ForwardPerspectiveValue.BlueAlliance) {
-            var heading = 1;
-        }
-        else {
-            var heading = -1;
-        }
-
-        configureBindings();        
-        
-        // NamedCommands.registerCommand("scoreL1Coral", new WaitCommand(0));
-        // NamedCommands.registerCommand("scoreL4Coral", new WaitCommand(0));
-        // NamedCommands.registerCommand("intakeCoral", new WaitCommand(0));
-        // NamedCommands.registerCommand("Start", new WaitCommand(0));
-    }
 
     private void configureBindings() {  
 

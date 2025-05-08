@@ -30,7 +30,7 @@ public class Robot extends TimedRobot {
     public Robot() {
         // Initialize robot components
         m_robotContainer = new RobotContainer();
-        CameraServer.startAutomaticCapture();
+        // CameraServer.startAutomaticCapture();
         // elevator = new Elevator();
 
         CanBridge.runTCP();
@@ -52,26 +52,8 @@ public class Robot extends TimedRobot {
     public void disabledPeriodic() {}
 
     @Override
-    public void autonomousInit() {
-        // Start the selected autonomous command
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.schedule();
-        }
-        // RobotContainer.drivetrain.seedFieldCentric(); // Not currently working - reverses direction on blue side
-    }
-
-    @Override
-    public void autonomousPeriodic() {}
-
-    @Override
     public void teleopInit() {
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.cancel();
-        }
         resetPose();
-        Constants.setL4();
-        
     }
 
     @Override
