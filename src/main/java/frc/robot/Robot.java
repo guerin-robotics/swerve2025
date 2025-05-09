@@ -11,9 +11,13 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+
+import java.util.logging.LogRecord;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.controls.NeutralOut;
@@ -32,11 +36,8 @@ public class Robot extends TimedRobot {
         m_robotContainer = new RobotContainer();
         // CameraServer.startAutomaticCapture();
         // elevator = new Elevator();
-
+        System.out.println("Working");
         CanBridge.runTCP();
-        vision = new Vision(drivetrain::addVisionMeasurement);
-        var curPose = drivetrain.getPose();
-
     }
 
     @Override
@@ -44,28 +45,41 @@ public class Robot extends TimedRobot {
         // Runs the scheduler for commands
         CommandScheduler.getInstance().run();
         vision.periodic();
+        System.out.println("Working");
         drivetrain.periodic();
+        
     }
 
 
     @Override
     public void disabledPeriodic() {}
 
+
+    @Override
+    public void autonomousPeriodic() {}
+
     @Override
     public void teleopInit() {
+        Constants.setL4();
         resetPose();
     }
 
     @Override
     public void teleopPeriodic() {
+        var curPose = drivetrain.getPose();
+        System.out.println("Working");
+
+
     }
 
     public void resetPose() {
         // Example Only - startPose should be derived from some assumption
         // of where your robot was placed on the field.
         // The first pose in an autonomous path is often a good choice.
-        var startPose = new Pose2d(7, 1, new Rotation2d());
+        Pose2d startPose = new Pose2d(3.5, 6.0, Rotation2d.fromDegrees(90));
         drivetrain.resetPose(startPose);
+        System.out.println("Resetting pose to " + startPose);
         vision.resetSimPose(startPose);
+        
     }
 }

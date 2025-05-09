@@ -52,6 +52,9 @@ public class RobotContainer {
     public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     private void configureBindings() {  
+        
+        drivetrain.seedFieldCentric();
+
 
         // XboxController.button(Constants.XboxController.button.Window).onTrue(new InstantCommand(() -> Elevator.resetLift()));
         // Note that X is defined as forward according to WPILib convention,
@@ -104,7 +107,7 @@ public class RobotContainer {
 
         
     }
-
+    
     // double limelight_aim_proportional() {
     //     double kP = 0.035;
     //     double targetingAngularVelocity = LimelightHelpers.getTX("limelight") * kP;
