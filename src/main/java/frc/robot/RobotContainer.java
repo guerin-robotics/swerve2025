@@ -45,39 +45,22 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     public static final CommandJoystick joystick = new CommandJoystick(0);
-    
 
     Orchestra m_Orchestra = new Orchestra();
 
     public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final Vision vision;
 
+    public RobotContainer() {
+        vision = new Vision(drivetrain::addVisionMeasurement);
+        configureBindings();
+    }
     private void configureBindings() {  
         
         drivetrain.seedFieldCentric();
 
-
-        // XboxController.button(Constants.XboxController.button.Window).onTrue(new InstantCommand(() -> Elevator.resetLift()));
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
-
-
-        double xSpeed;
-        double rot;
-        // double ySpeed;
-        var ySpeed = joystick.getY() * MaxSpeed;
-        
-        // if (XboxController.button(Constants.XboxController.button.Start)) {
-        //     System.out.println("Limelight activated");
-        //     final var rot_limelight = m_vision.limelight_aim_proportional(MaxAngularRate);
-        //     rot = rot_limelight;
-        //     final var forward_limelight = m_vision.limelight_range_proportional(MaxAngularRate);
-        //     xSpeed = forward_limelight; 
-        // }
-        // else {
-        //     xSpeed = -joystick.getX() * MaxSpeed;
-
-        //     rot = -joystick.getTwist() * MaxAngularRate;
-        // }
 
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
@@ -108,27 +91,6 @@ public class RobotContainer {
         
     }
     
-    // double limelight_aim_proportional() {
-    //     double kP = 0.035;
-    //     double targetingAngularVelocity = LimelightHelpers.getTX("limelight") * kP;
-    //     targetingAngularVelocity *= MaxSpeed;
-    //     targetingAngularVelocity *= -1.0;
-    //     return targetingAngularVelocity;
-    // }
-
-    // double limelight_range_proportional() {
-    //     double kP = 0.1;
-    //     double targetingForwardSpeed = LimelightHelpers.getTY("limelight") * kP;
-    //     targetingForwardSpeed *= MaxSpeed;
-    //     targetingForwardSpeed *= -1.0;
-    //     return targetingForwardSpeed;
-    // }
-
-    private void align(boolean fieldRelative) {
-        // var xSpeed = -joystick.getY() * MaxSpeed;
-        var ySpeed = -joystick.getX() * MaxSpeed;
-        // var rot = -joystick.getTwist() * MaxAngularRate;  
-    }
 
 }
 

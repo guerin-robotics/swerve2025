@@ -19,7 +19,6 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 import java.util.logging.LogRecord;
 
-import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.controls.NeutralOut;
 
 import au.grapplerobotics.CanBridge;
@@ -33,11 +32,6 @@ public class Robot extends TimedRobot {
 
     public Robot() {
         // Initialize robot components
-        m_robotContainer = new RobotContainer();
-        // CameraServer.startAutomaticCapture();
-        // elevator = new Elevator();
-        System.out.println("Working");
-        CanBridge.runTCP();
     }
 
     @Override
@@ -45,8 +39,8 @@ public class Robot extends TimedRobot {
         // Runs the scheduler for commands
         CommandScheduler.getInstance().run();
         vision.periodic();
-        System.out.println("Working");
         drivetrain.periodic();
+        
         
     }
 
@@ -60,18 +54,23 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        Constants.setL4();
         resetPose();
     }
 
     @Override
     public void teleopPeriodic() {
-        var curPose = drivetrain.getPose();
-        System.out.println("Working");
 
 
     }
-
+    @Override
+    public void robotInit() {
+        m_robotContainer = new RobotContainer();
+        drivetrain = m_robotContainer.drivetrain;
+        vision = m_robotContainer.vision;
+        CanBridge.runTCP();
+        CameraServer.startAutomaticCapture();
+    }
+    
     public void resetPose() {
         // Example Only - startPose should be derived from some assumption
         // of where your robot was placed on the field.
