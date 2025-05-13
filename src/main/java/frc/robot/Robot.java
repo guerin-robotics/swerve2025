@@ -32,6 +32,9 @@ public class Robot extends TimedRobot {
 
     public Robot() {
         // Initialize robot components
+        var inst = NetworkTableInstance.getDefault();
+        inst.startServer();
+        System.out.println( "Starting NetworkTables server on port " + inst );
     }
 
     @Override
@@ -59,6 +62,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
+  
 
 
     }
@@ -69,6 +73,7 @@ public class Robot extends TimedRobot {
         vision = m_robotContainer.vision;
         CanBridge.runTCP();
         CameraServer.startAutomaticCapture();
+        
     }
     
     public void resetPose() {

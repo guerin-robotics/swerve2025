@@ -35,6 +35,7 @@
  import edu.wpi.first.wpilibj.smartdashboard.Field2d;
  import java.util.List;
  import java.util.Optional;
+ import java.util.stream.Collectors;
  import org.photonvision.EstimatedRobotPose;
  import org.photonvision.PhotonCamera;
  import org.photonvision.PhotonPoseEstimator;
@@ -43,7 +44,10 @@
  import org.photonvision.simulation.SimCameraProperties;
  import org.photonvision.simulation.VisionSystemSim;
  import org.photonvision.targeting.PhotonTrackedTarget;
- 
+ import edu.wpi.first.networktables.NetworkTable;
+ import edu.wpi.first.networktables.NetworkTableEntry;
+ import edu.wpi.first.networktables.NetworkTableInstance;
+
  public class Vision {
      private final PhotonCamera camera;
      private final PhotonPoseEstimator photonEstimator;
@@ -53,6 +57,12 @@
      // Simulation
      private PhotonCameraSim cameraSim;
      private VisionSystemSim visionSim;
+
+     // NetworkTables entries for publishing vision pose
+     private final NetworkTable visionTable;
+     private final NetworkTableEntry visionX;
+     private final NetworkTableEntry visionY;
+     private final NetworkTableEntry visionHeading;
  
      /**
       * @param estConsumer Lamba that will accept a pose estimate and pass it to your desired {@link
@@ -87,6 +97,11 @@
  
              cameraSim.enableDrawWireframe(true);
          }
+         // Initialize NetworkTables entries for external monitoring
+         visionTable = NetworkTableInstance.getDefault().getTable("Vision");
+         visionX = visionTable.getEntry("X");
+         visionY = visionTable.getEntry("Y");
+         visionHeading = visionTable.getEntry("Heading");
      }
  
      public void periodic() {
@@ -106,14 +121,28 @@
                          });
              }
  
-             visionEst.ifPresent(
-                     est -> {
-                         // Change our trust in the measurement based on the tags we can see
-                         var estStdDevs = getEstimationStdDevs();
- 
-                         estConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
-                     });
+             visionEst.ifPresent(est -> {
+                 // Log when PhotonVision produces an estimate
+                 System.out.println("PhotonVision: detected " 
+                     + change.getTargets().size() 
+                     + " tags, pose=" 
+                     + est.estimatedPose.toPose2d());
+                 // Proceed with your existing fusion
+                 var estStdDevs = getEstimationStdDevs();
+                 estConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+             });
          }
+         // Log when no vision targets were seen this cycle
+         if (visionEst.isEmpty()) {
+             System.out.println("PhotonVision: no targets detected this cycle");
+         }
+         // Publish the latest vision-estimated pose to NetworkTables
+         visionEst.ifPresent(est -> {
+             Pose2d p = est.estimatedPose.toPose2d();
+             visionX.setDouble(p.getX());
+             visionY.setDouble(p.getY());
+             visionHeading.setDouble(p.getRotation().getDegrees());
+         });
      }
  
      /**
