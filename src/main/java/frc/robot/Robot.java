@@ -51,6 +51,15 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {}
 
+    @Override
+    public void autonomousInit() {
+        // Start the selected autonomous command
+        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+        if (m_autonomousCommand != null) {
+            m_autonomousCommand.schedule();
+        }
+        // RobotContainer.drivetrain.seedFieldCentric(); // Not currently working - reverses direction on blue side
+    }
 
     @Override
     public void autonomousPeriodic() {}
@@ -58,6 +67,9 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         resetPose();
+        if (m_autonomousCommand != null) {
+            m_autonomousCommand.cancel();
+        }
     }
 
     @Override
@@ -66,6 +78,8 @@ public class Robot extends TimedRobot {
 
 
     }
+
+
     @Override
     public void robotInit() {
         m_robotContainer = new RobotContainer();

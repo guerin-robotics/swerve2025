@@ -29,8 +29,12 @@ import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 
 public class RobotContainer {
+    private final SendableChooser<Command> autoChooser;
 
     public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired top speed
     public static double MaxAngularRate = RotationsPerSecond.of(2.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -52,12 +56,16 @@ public class RobotContainer {
     public final Vision vision;
 
     public RobotContainer() {
+        drivetrain.seedFieldCentric();
         vision = new Vision(drivetrain::addVisionMeasurement);
         configureBindings();
+        autoChooser = AutoBuilder.buildAutoChooser("");
+        SmartDashboard.putData("Auto Chooser", autoChooser);
     }
+
     private void configureBindings() {  
         
-        drivetrain.seedFieldCentric();
+        
 
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
@@ -89,6 +97,11 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
 
         
+    }
+    
+    public Command getAutonomousCommand() {
+        // return Commands.print("No autonomous command configured");
+        return autoChooser.getSelected();
     }
     
 
