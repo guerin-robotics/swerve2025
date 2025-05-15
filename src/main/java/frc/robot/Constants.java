@@ -25,6 +25,9 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import static frc.robot.Constants.Vision.*;
 
+import java.util.Optional;
+import edu.wpi.first.math.geometry.Pose2d;
+
 public class Constants {
 
     public static final String kCameraName = "HoundEye04";
@@ -38,8 +41,16 @@ public class Constants {
 
     // The standard deviations of our vision estimated poses, which affect correction rate
     // (Fake values. Experiment and determine estimation noise on an actual robot.)
-    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
-    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(
+        0.10,               // σₓ: odometry may drift ±10 cm 
+        0.10,               // σᵧ: same sideways 
+        Math.toRadians(5)   // σθ: roughly ±5° heading error
+);
+public static final Matrix<N3, N1> kMultiTagStdDevs  = VecBuilder.fill(
+        0.05,               // σₓ: vision ±5 cm 
+        0.05,               // σᵧ: ±5 cm 
+        Math.toRadians(2)   // σθ: ±2° 
+);
 
     public static final double masterSpeedMultiplier = 1;   // For troubleshooting/testing
     public static final double masterVoltageMultiplier = 1;
@@ -61,5 +72,12 @@ public class Constants {
         public static final AprilTagFieldLayout kTagLayout = Constants.kTagLayout;
         public static final Matrix<N3, N1> kSingleTagStdDevs = Constants.kSingleTagStdDevs;
         public static final Matrix<N3, N1> kMultiTagStdDevs  = Constants.kMultiTagStdDevs;
+
+        /** Odometry update rate in Hz for the SwerveDrivePoseEstimator */
+        public static final double kOdometryUpdateHz = 250.0;
+
+        /** PhotonVision pipeline index to use (0-based) */
+        public static final int kPipelineIndex = 0;
+
     }
 }

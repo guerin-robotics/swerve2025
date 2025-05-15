@@ -70,7 +70,9 @@
       */
      public Vision(EstimateConsumer estConsumer) {
          this.estConsumer = estConsumer;
-         camera = new PhotonCamera(kCameraName);
+        camera = new PhotonCamera(kCameraName);
+        // Select the PhotonVision pipeline (0-based index) to use for processing
+        camera.setPipelineIndex(0);
  
          photonEstimator =
                  new PhotonPoseEstimator(kTagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToCam);
@@ -105,38 +107,29 @@
      }
  
      public void periodic() {
-         Optional<EstimatedRobotPose> visionEst = Optional.empty();
-         for (var change : camera.getAllUnreadResults()) {
-             visionEst = photonEstimator.update(change);
-             updateEstimationStdDevs(visionEst, change.getTargets());
- 
-             if (Robot.isSimulation()) {
-                 visionEst.ifPresentOrElse(
-                         est ->
-                                 getSimDebugField()
-                                         .getObject("VisionEstimation")
-                                         .setPose(est.estimatedPose.toPose2d()),
-                         () -> {
-                             getSimDebugField().getObject("VisionEstimation").setPoses();
-                         });
-             }
- 
-             visionEst.ifPresent(est -> {
-                 // Log when PhotonVision produces an estimate
-                 System.out.println("PhotonVision: detected " 
-                     + change.getTargets().size() 
-                     + " tags, pose=" 
-                     + est.estimatedPose.toPose2d());
-                 // Proceed with your existing fusion
-                 var estStdDevs = getEstimationStdDevs();
-                 estConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
-             });
+         // Always fetch the latest pipeline result to ensure we see current detections
+         var result = camera.getLatestResult();
+         Optional<EstimatedRobotPose> visionEst = photonEstimator.update(result);
+         updateEstimationStdDevs(visionEst, result.getTargets());
+
+         if (Robot.isSimulation()) {
+             visionEst.ifPresentOrElse(
+                 est -> getSimDebugField().getObject("VisionEstimation").setPose(est.estimatedPose.toPose2d()),
+                 ()  -> getSimDebugField().getObject("VisionEstimation").setPoses()
+             );
          }
-         // Log when no vision targets were seen this cycle
-         if (visionEst.isEmpty()) {
+
+         // Log detections or misses
+         if (visionEst.isPresent()) {
+             var est = visionEst.get();
+             System.out.println("PhotonVision: detected " + result.getTargets().size()
+                 + " tags, pose=" + est.estimatedPose.toPose2d());
+             estConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, getEstimationStdDevs());
+         } else {
              System.out.println("PhotonVision: no targets detected this cycle");
          }
-         // Publish the latest vision-estimated pose to NetworkTables
+
+         // Publish to NetworkTables
          visionEst.ifPresent(est -> {
              Pose2d p = est.estimatedPose.toPose2d();
              visionX.setDouble(p.getX());
@@ -213,6 +206,15 @@
      /** Reset pose history of the robot in the vision system simulation. */
      public void resetSimPose(Pose2d pose) {
          if (Robot.isSimulation()) visionSim.resetRobotPose(pose);
+     }
+ 
+     /**
+      * Returns the latest raw vision-based pose estimate (without odometry fusion).
+      */
+     public Optional<Pose2d> getLatestRawVisionPose() {
+         var result = camera.getLatestResult();
+         var est = photonEstimator.update(result);
+         return est.map(e -> e.estimatedPose.toPose2d());
      }
  
      /** A Field2d for visualizing our robot and objects on the field. */

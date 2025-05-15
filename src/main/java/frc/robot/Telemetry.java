@@ -51,6 +51,12 @@ public class Telemetry {
     private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
     private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
 
+    // Publisher for raw vision-only pose
+    private final StructPublisher<Pose2d> visionRawPosePub =
+        inst.getTable("VisionRaw")
+            .getStructTopic("Pose", Pose2d.struct)
+            .publish();
+
     /* Mechanisms to represent the swerve module states */
     private final Mechanism2d[] m_moduleMechanisms = new Mechanism2d[] {
         new Mechanism2d(1, 1),
@@ -120,5 +126,10 @@ public class Telemetry {
 
             SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
         }
+    }
+
+    /** Publish the raw vision-based pose (no fusion). */
+    public void telemeterRawVision(Pose2d rawPose) {
+        visionRawPosePub.set(rawPose);
     }
 }

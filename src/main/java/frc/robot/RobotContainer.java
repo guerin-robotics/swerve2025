@@ -2,7 +2,9 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
+
 package frc.robot;
+
 
 import static edu.wpi.first.units.Units.*;
 
@@ -25,6 +27,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 
 import frc.robot.generated.TunerConstants;
+import static frc.robot.Constants.Vision.kOdometryUpdateHz;
+import static frc.robot.Constants.Vision.kSingleTagStdDevs;
+import static frc.robot.Constants.Vision.kMultiTagStdDevs;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
@@ -46,13 +51,23 @@ public class RobotContainer {
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-    private final Telemetry logger = new Telemetry(MaxSpeed);
+    public final Telemetry logger = new Telemetry(MaxSpeed);
 
     public static final CommandJoystick joystick = new CommandJoystick(0);
 
     Orchestra m_Orchestra = new Orchestra();
 
-    public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final static CommandSwerveDrivetrain drivetrain =
+        new CommandSwerveDrivetrain(
+            TunerConstants.DrivetrainConstants,
+            kOdometryUpdateHz,
+            kSingleTagStdDevs,
+            kMultiTagStdDevs,
+            TunerConstants.FrontLeft,
+            TunerConstants.FrontRight,
+            TunerConstants.BackLeft,
+            TunerConstants.BackRight
+        );
     public final Vision vision;
 
     public RobotContainer() {
