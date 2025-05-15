@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import java.util.Optional;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -48,6 +49,8 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
         vision.periodic();
         drivetrain.periodic();
+        // Raw-vision telemetry: publish camera-only pose
+        vision.getLatestRawVisionPose().ifPresent(p -> m_robotContainer.logger.telemeterRawVision(p));
     }
 
 
@@ -96,7 +99,7 @@ public class Robot extends TimedRobot {
         // Example Only - startPose should be derived from some assumption
         // of where your robot was placed on the field.
         // The first pose in an autonomous path is often a good choice.
-        Pose2d startPose = new Pose2d(6, 4, Rotation2d.fromDegrees(-180));
+        Pose2d startPose = new Pose2d(7.89, 4.026, Rotation2d.fromDegrees(-180));
         drivetrain.resetPose(startPose);
         System.out.println("Resetting pose to " + startPose);
         vision.resetSimPose(startPose);

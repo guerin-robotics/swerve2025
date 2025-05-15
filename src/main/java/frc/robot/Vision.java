@@ -28,11 +28,12 @@
  
  import edu.wpi.first.math.Matrix;
  import edu.wpi.first.math.VecBuilder;
- import edu.wpi.first.math.geometry.Pose2d;
- import edu.wpi.first.math.geometry.Rotation2d;
- import edu.wpi.first.math.numbers.N1;
- import edu.wpi.first.math.numbers.N3;
- import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.Timer;
  import java.util.List;
  import java.util.Optional;
  import java.util.stream.Collectors;
@@ -69,7 +70,7 @@
       *     edu.wpi.first.math.estimator.SwerveDrivePoseEstimator}
       */
      public Vision(EstimateConsumer estConsumer) {
-         this.estConsumer = estConsumer;
+        this.estConsumer = estConsumer;
         camera = new PhotonCamera(kCameraName);
         // Select the PhotonVision pipeline (0-based index) to use for processing
         camera.setPipelineIndex(0);
@@ -120,14 +121,15 @@
          }
 
          // Log detections or misses
-         if (visionEst.isPresent()) {
-             var est = visionEst.get();
-             System.out.println("PhotonVision: detected " + result.getTargets().size()
-                 + " tags, pose=" + est.estimatedPose.toPose2d());
-             estConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, getEstimationStdDevs());
-         } else {
-             System.out.println("PhotonVision: no targets detected this cycle");
-         }
+        if (visionEst.isPresent()) {
+            var est = visionEst.get();
+            System.out.println("PhotonVision: detected " + result.getTargets().size()
+                + " tags, pose=" + est.estimatedPose.toPose2d());
+            // Use FPGA timestamp directly for filter updates
+            estConsumer.accept(est.estimatedPose.toPose2d(), Timer.getFPGATimestamp(), getEstimationStdDevs());
+        } else {
+            System.out.println("PhotonVision: no targets detected this cycle");
+        }
 
          // Publish to NetworkTables
          visionEst.ifPresent(est -> {
@@ -150,13 +152,14 @@
          if (estimatedPose.isEmpty()) {
              // No pose input. Default to single-tag std devs
              curStdDevs = kSingleTagStdDevs;
+             System.out.println("PhotonVision: no pose estimate");
  
          } else {
              // Pose present. Start running Heuristic
              var estStdDevs = kSingleTagStdDevs;
              int numTags = 0;
              double avgDist = 0;
- 
+             System.out.println("PhotonVision: pose estimate=" + estimatedPose.get().estimatedPose.toPose2d());
              // Precalculation - see how many tags we found, and calculate an average-distance metric
              for (var tgt : targets) {
                  var tagPose = photonEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
@@ -172,9 +175,12 @@
  
              if (numTags == 0) {
                  // No tags visible. Default to single-tag std devs
+                 System.out.println("PhotonVision: no tags visible");
                  curStdDevs = kSingleTagStdDevs;
              } else {
                  // One or more tags visible, run the full heuristic.
+                 System.out.println(
+                         "PhotonVision: " + numTags + " tags visible, avg distance=" + (avgDist / numTags));
                  avgDist /= numTags;
                  // Decrease std devs if multiple targets are visible
                  if (numTags > 1) estStdDevs = kMultiTagStdDevs;
@@ -194,7 +200,8 @@
       * only be used when there are targets visible.
       */
      public Matrix<N3, N1> getEstimationStdDevs() {
-         return curStdDevs;
+        System.out.println(curStdDevs);
+        return curStdDevs;
      }
  
      // ----- Simulation

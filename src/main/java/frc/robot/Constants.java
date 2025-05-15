@@ -42,13 +42,13 @@ public class Constants {
     // The standard deviations of our vision estimated poses, which affect correction rate
     // (Fake values. Experiment and determine estimation noise on an actual robot.)
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(
-        0.10,               // σₓ: odometry may drift ±10 cm 
-        0.10,               // σᵧ: same sideways 
+        100,               // σₓ: odometry may drift ±10 cm 
+        100,               // σᵧ: same sideways 
         Math.toRadians(5)   // σθ: roughly ±5° heading error
 );
 public static final Matrix<N3, N1> kMultiTagStdDevs  = VecBuilder.fill(
-        0.05,               // σₓ: vision ±5 cm 
-        0.05,               // σᵧ: ±5 cm 
+        0.00005,               // σₓ: vision ±0.5 cm 
+        0.00005,               // σᵧ: ±0.5 cm 
         Math.toRadians(2)   // σθ: ±2° 
 );
 

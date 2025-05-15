@@ -70,13 +70,7 @@ public class RobotContainer {
         );
     public final Vision vision;
 
-    public RobotContainer() {
-        drivetrain.seedFieldCentric();
-        vision = new Vision(drivetrain::addVisionMeasurement);
-        configureBindings();
-        autoChooser = AutoBuilder.buildAutoChooser("");
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-    }
+
 
     private void configureBindings() {  
         
@@ -113,6 +107,18 @@ public class RobotContainer {
 
         
     }
+
+    public RobotContainer() {
+        drivetrain.seedFieldCentric();
+        vision = new Vision((pose, timestamp, stdDevs) ->
+            drivetrain.addVisionMeasurement(pose, timestamp, stdDevs)
+        );
+        configureBindings();
+        // Temporary “no-op” chooser until PathPlannerAutoBuilder is configured
+            autoChooser = new SendableChooser<>();
+            autoChooser.setDefaultOption("No Auto", Commands.none());
+            SmartDashboard.putData("Auto Chooser", autoChooser);
+    }
     
     public Command getAutonomousCommand() {
         // return Commands.print("No autonomous command configured");
@@ -121,4 +127,3 @@ public class RobotContainer {
     
 
 }
-
