@@ -70,7 +70,7 @@ public static final Matrix<N3, N1> kMultiTagStdDevs  = VecBuilder.fill(
         public static final String kCameraName    = Constants.kCameraName;
         public static final Transform3d kRobotToCam   = Constants.kRobotToCam;
         public static final AprilTagFieldLayout kTagLayout = Constants.kTagLayout;
-        public static final Matrix<N3, N1> kSingleTagStdDevs = Constants.kSingleTagStdDevs;
+        public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = Constants.kSingleTagStdDevs;
         public static final Matrix<N3, N1> kMultiTagStdDevs  = Constants.kMultiTagStdDevs;
 
         /** Odometry update rate in Hz for the SwerveDrivePoseEstimator */

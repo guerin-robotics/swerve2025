@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 
 import frc.robot.generated.TunerConstants;
 import static frc.robot.Constants.Vision.kOdometryUpdateHz;
-import static frc.robot.Constants.Vision.kSingleTagStdDevs;
+import static frc.robot.Constants.Vision.SINGLE_TAG_STD_DEVS;
 import static frc.robot.Constants.Vision.kMultiTagStdDevs;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -48,6 +48,7 @@ public class RobotContainer {
     public static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
@@ -61,7 +62,7 @@ public class RobotContainer {
         new CommandSwerveDrivetrain(
             TunerConstants.DrivetrainConstants,
             kOdometryUpdateHz,
-            kSingleTagStdDevs,
+            SINGLE_TAG_STD_DEVS,
             kMultiTagStdDevs,
             TunerConstants.FrontLeft,
             TunerConstants.FrontRight,
