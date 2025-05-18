@@ -33,6 +33,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import frc.robot.Logger.Level;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +50,8 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableType;
+import edu.wpi.first.networktables.NetworkTableValue;
 
 public class Vision {
     private final PhotonCamera camera;
@@ -61,10 +64,8 @@ public class Vision {
     private VisionSystemSim visionSim;
 
     // NetworkTables entries for publishing vision pose
-    private final NetworkTable visionTable;
-    private final NetworkTableEntry visionX;
-    private final NetworkTableEntry visionY;
-    private final NetworkTableEntry visionHeading;
+    // private final NetworkTable visionTable;
+    private Pose2d confidentPose2d;
 
     /**
      * @param estConsumer Lamba that will accept a pose estimate and pass it to your
@@ -73,6 +74,7 @@ public class Vision {
      */
     public Vision(EstimateConsumer estConsumer) {
         this.estConsumer = estConsumer;
+
         camera = new PhotonCamera(kCameraName);
         // Select the PhotonVision pipeline (0-based index) to use for processing
         camera.setPipelineIndex(0);
@@ -106,38 +108,42 @@ public class Vision {
             cameraSim.enableDrawWireframe(true);
         }
         // Initialize NetworkTables entries for external monitoring
-        visionTable = NetworkTableInstance.getDefault().getTable("Vision");
-        visionX = visionTable.getEntry("X");
-        visionY = visionTable.getEntry("Y");
-        visionHeading = visionTable.getEntry("Heading");
+        // visionTable = NetworkTableInstance.getDefault().getTable("Vision");
+        confidentPose2d = new Pose2d();
+        Logger.debug("x [{}] y [{}] heading [{}]]", confidentPose2d.getX(), confidentPose2d.getY(), confidentPose2d.getRotation().getDegrees());
+    }
+
+    private void setNetworkTablePose(Pose2d pose) {
+        confidentPose2d = pose;
+    }
+    private Pose2d getNetworkTablePose() {
+        return confidentPose2d;
     }
 
     public void periodic() {
         // Always fetch the latest pipeline result to ensure we see current detections
         var results = camera.getAllUnreadResults();
-        System.out.println("PhotonVision: pipeline results=" + results.size());
+        Logger.debug("pipeline results [{}]", results.size());
 
         // get latest result
         if (results.isEmpty()) {
-            System.out.println("PhotonVision: pipeline no results");
+            Logger.debug("pipeline no results");
             return;
         }
         var lastestResult = results.get(results.size()-1);
         var visionEst = photonEstimator.update(lastestResult);
         if (!visionEst.isPresent()) {
-            System.out.println("PhotonVision: no targets detected this cycle");
-            curStdDevs = SINGLE_TAG_STD_DEVS;
+            Logger.debug("no targets detected this cycle");
+            curStdDevs = kSingleTagStdDevs;
             return;
         }
 
         var est = visionEst.get();
-        System.out.printf("PhotonVision: pose estimate [%s]\n", est.estimatedPose.toPose2d());
-
         var targets = lastestResult.getTargets();
-        System.out.printf("PhotonVision: tags [%s] estimated pose [%s]\n", targets.size(), est.estimatedPose.toPose2d());
+        Logger.debug("tags [{}] estimated pose [{}]", targets.size(), est.estimatedPose.toPose2d());
 
         // Pose present. Start running Heuristic
-        var estStdDevs = SINGLE_TAG_STD_DEVS;
+        var estStdDevs = kSingleTagStdDevs;
         int numTags = 0;
         double avgDist = 0;
 
@@ -145,7 +151,7 @@ public class Vision {
         for (var tgt : targets) {
             var tagPose = photonEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
             if (tagPose.isEmpty()) {
-                System.out.println("updateEstimationStdDevs: tagPose is empty");
+                Logger.warn("tagPose is empty");
                 continue;
             }
             numTags++;
@@ -158,11 +164,11 @@ public class Vision {
 
         if (numTags == 0) {
             // No tags visible. Default to single-tag std devs
-            System.out.println("PhotonVision: no tags visible");
-            curStdDevs = SINGLE_TAG_STD_DEVS;
+            Logger.debug("no tags visible");
+            curStdDevs = kSingleTagStdDevs;
         } else {
             // One or more tags visible, run the full heuristic.
-            System.out.println("PhotonVision: " + numTags + " tags visible, avg distance=" + (avgDist / numTags));
+            Logger.debug("num tags [{}] avg distance [{}]", numTags, (avgDist / numTags));
             avgDist /= numTags;
             // Decrease std devs if multiple targets are visible
             if (numTags > 1)
@@ -179,10 +185,8 @@ public class Vision {
         estConsumer.accept(est.estimatedPose.toPose2d(), Timer.getFPGATimestamp(), getEstimationStdDevs());
 
         // Publish to NetworkTables
-        Pose2d p = est.estimatedPose.toPose2d();
-        visionX.setDouble(p.getX());
-        visionY.setDouble(p.getY());
-        visionHeading.setDouble(p.getRotation().getDegrees());
+        Logger.debug("filtered pose {},{},{}", est.estimatedPose.toPose2d().getX(), est.estimatedPose.toPose2d().getY(), est.estimatedPose.toPose2d().getRotation().getDegrees());
+        setNetworkTablePose(est.estimatedPose.toPose2d());
     }
 
 
@@ -194,7 +198,7 @@ public class Vision {
      * only be used when there are targets visible.
      */
     public Matrix<N3, N1> getEstimationStdDevs() {
-        System.out.printf("getEstimationStdDevs: current std dev [%s]\n", curStdDevs);
+        Logger.debug("current std dev [{}]", curStdDevs);
         return curStdDevs;
     }
 
@@ -214,10 +218,24 @@ public class Vision {
      * Returns the latest raw vision-based pose estimate (without odometry fusion).
      */
     public Optional<Pose2d> getLatestRawVisionPose() {
-        var result = camera.getLatestResult();
-        var est = photonEstimator.update(result);
-        
+        var results = camera.getAllUnreadResults();
+        if (results.isEmpty()) {
+            Logger.debug("pipeline no update");
+            return Optional.empty();
+        }
+        var lastestResult = results.get(results.size()-1);
+
+        var est = photonEstimator.update(lastestResult);
+        if (est.isEmpty()) {
+            Logger.debug("pipeline no est update");
+            return Optional.empty();
+        }    
+        Logger.debug("raw pose [{}]", est.get().estimatedPose.toPose2d());
         return est.map(e -> e.estimatedPose.toPose2d());
+    }
+
+    public Optional<Pose2d> getLatestConfidentVisionPose() {
+        return Optional.of(getNetworkTablePose());
     }
 
     /** A Field2d for visualizing our robot and objects on the field. */

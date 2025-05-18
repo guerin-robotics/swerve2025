@@ -57,6 +57,14 @@ public class Telemetry {
             .getStructTopic("Pose", Pose2d.struct)
             .publish();
 
+    // Publisher for confident vision pose
+    private final StructPublisher<Pose2d> visionConfidentPosePub = 
+        inst.getTable("VisionConfident")
+        .getStructTopic("Pose", Pose2d.struct)
+        .publish(); 
+    private final DoubleArrayPublisher visionConfidentCoordinatePub = inst.getTable("VisionConfident").getDoubleArrayTopic("Coordinate").publish();
+     
+
     /* Mechanisms to represent the swerve module states */
     private final Mechanism2d[] m_moduleMechanisms = new Mechanism2d[] {
         new Mechanism2d(1, 1),
@@ -132,4 +140,14 @@ public class Telemetry {
     public void telemeterRawVision(Pose2d rawPose) {
         visionRawPosePub.set(rawPose);
     }
+    public void telemeterConfidentVision(Pose2d confidentPose) {
+        // used to show the map
+        visionConfidentPosePub.set(confidentPose);
+
+        // used to show the current coordinate rounded to 4 decimal places
+        double x = Math.round(confidentPose.getX() * 10_000.0) / 10_000.0;
+        double y = Math.round(confidentPose.getY() * 10_000.0) / 10_000.0;
+        visionConfidentCoordinatePub.set(new double[] {x,y});
+    }
+    
 }

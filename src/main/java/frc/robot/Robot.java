@@ -51,6 +51,7 @@ public class Robot extends TimedRobot {
         drivetrain.periodic();
         // Raw-vision telemetry: publish camera-only pose
         vision.getLatestRawVisionPose().ifPresent(p -> m_robotContainer.logger.telemeterRawVision(p));
+        vision.getLatestConfidentVisionPose().ifPresent(p -> m_robotContainer.logger.telemeterConfidentVision(p));
     }
 
 
@@ -82,6 +83,8 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
         vision.getLatestRawVisionPose()
             .ifPresent(p -> m_robotContainer.logger.telemeterRawVision(p));
+        vision.getLatestConfidentVisionPose()
+            .ifPresent(p -> m_robotContainer.logger.telemeterConfidentVision(p));
     }
 
 

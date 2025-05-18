@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 
 import frc.robot.generated.TunerConstants;
 import static frc.robot.Constants.Vision.kOdometryUpdateHz;
-import static frc.robot.Constants.Vision.SINGLE_TAG_STD_DEVS;
+import static frc.robot.Constants.Vision.kSingleTagStdDevs;
 import static frc.robot.Constants.Vision.kMultiTagStdDevs;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -62,7 +62,7 @@ public class RobotContainer {
         new CommandSwerveDrivetrain(
             TunerConstants.DrivetrainConstants,
             kOdometryUpdateHz,
-            SINGLE_TAG_STD_DEVS,
+            kSingleTagStdDevs,
             kMultiTagStdDevs,
             TunerConstants.FrontLeft,
             TunerConstants.FrontRight,

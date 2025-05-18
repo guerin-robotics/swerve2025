@@ -32,27 +32,26 @@ public class Constants {
 
     public static final String kCameraName = "HoundEye04";
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center.
-    public static final Transform3d kRobotToCam =
-            new Transform3d(new Translation3d(0.36, 0.0064, 0.15), new Rotation3d(0, 0, 0));
+    public static final Transform3d kRobotToCam = new Transform3d(new Translation3d(0.36, 0.0064, 0.15),
+            new Rotation3d(0, 0, 0));
 
     // The layout of the AprilTags on the field
-    public static final AprilTagFieldLayout kTagLayout =
-            AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
     // The standard deviations of our vision estimated poses, which affect correction rate
     // (Fake values. Experiment and determine estimation noise on an actual robot.)
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(
-        100,               // σₓ: odometry may drift ±10 cm 
-        100,               // σᵧ: same sideways 
-        Math.toRadians(5)   // σθ: roughly ±5° heading error
-);
-public static final Matrix<N3, N1> kMultiTagStdDevs  = VecBuilder.fill(
-        0.00005,               // σₓ: vision ±0.5 cm 
-        0.00005,               // σᵧ: ±0.5 cm 
-        Math.toRadians(2)   // σθ: ±2° 
-);
+            100, // σₓ: odometry may drift ±10 cm
+            100, // σᵧ: same sideways
+            Math.toRadians(5) // σθ: roughly ±5° heading error
+    );
+    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(
+            0.00005, // σₓ: vision ±0.5 cm
+            0.00005, // σᵧ: ±0.5 cm
+            Math.toRadians(2) // σθ: ±2°
+    );
 
-    public static final double masterSpeedMultiplier = 1;   // For troubleshooting/testing
+    public static final double masterSpeedMultiplier = 1; // For troubleshooting/testing
     public static final double masterVoltageMultiplier = 1;
 
     public static final class Joystick {
@@ -67,11 +66,11 @@ public static final Matrix<N3, N1> kMultiTagStdDevs  = VecBuilder.fill(
      * Vision-specific constants grouped for NetworkTables and PhotonVision use.
      */
     public static class Vision {
-        public static final String kCameraName    = Constants.kCameraName;
-        public static final Transform3d kRobotToCam   = Constants.kRobotToCam;
+        public static final String kCameraName = Constants.kCameraName;
+        public static final Transform3d kRobotToCam = Constants.kRobotToCam;
         public static final AprilTagFieldLayout kTagLayout = Constants.kTagLayout;
-        public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = Constants.kSingleTagStdDevs;
-        public static final Matrix<N3, N1> kMultiTagStdDevs  = Constants.kMultiTagStdDevs;
+        public static final Matrix<N3, N1> kSingleTagStdDevs = Constants.kSingleTagStdDevs;
+        public static final Matrix<N3, N1> kMultiTagStdDevs = Constants.kMultiTagStdDevs;
 
         /** Odometry update rate in Hz for the SwerveDrivePoseEstimator */
         public static final double kOdometryUpdateHz = 250.0;
