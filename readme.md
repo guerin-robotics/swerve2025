@@ -32,3 +32,11 @@ ssh admin@@10.100.21.2
 
 ps -af | grep swerve
 kill <pid>
+
+### TODO
+* Find and use java style guide (lint)
+* consistant member variable naming convention (don't use '''m_''')
+* consistant initialization (member var initializated in constructor)
+* consistant class member order: static var, constructor first method
+* update logger: add per topic/file logging level
+

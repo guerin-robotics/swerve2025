@@ -7,12 +7,12 @@ import java.lang.StackWalker;
 
 public class Logger {
     public enum Level {
-        DEBUG(4), 
-        INFO(3), 
-        WARN(2), 
-        ERROR(1), 
+        DEBUG(4),
+        INFO(3),
+        WARN(2),
+        ERROR(1),
         OFF(0);
-        
+
         public final int value;
 
         Level(int value) {
@@ -20,7 +20,7 @@ public class Logger {
         }
     }
 
-    private static Level currentLevel = Level.INFO;
+    private static Level currentLevel = Level.WARN;
 
     public static void setLevel(Level level) {
         System.out.println("[ALWAYS] Logger::setLevel " + level);
@@ -32,26 +32,23 @@ public class Logger {
     }
 
     // StackWalker and cache for caller info to avoid reflection overhead
-    private static final StackWalker STACK_WALKER =
-        StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
-    private static final ConcurrentMap<String, String> callerInfoCache =
-        new ConcurrentHashMap<>();
+    private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+    private static final ConcurrentMap<String, String> callerInfoCache = new ConcurrentHashMap<>();
 
     /**
      * Returns a short "[Class#method] " prefix for the calling method,
      * caching results to avoid repeated reflection.
      */
     private static String getCallerInfo() {
-        StackWalker.StackFrame frame = STACK_WALKER.walk(frames ->
-            frames.filter(f -> !f.getClassName().equals(Logger.class.getName()))
-                  .findFirst().orElse(null));
+        StackWalker.StackFrame frame = STACK_WALKER
+                .walk(frames -> frames.filter(f -> !f.getClassName().equals(Logger.class.getName()))
+                        .findFirst().orElse(null));
         if (frame == null) {
             return "";
         }
         String key = frame.getClassName() + "#" + frame.getMethodName();
-        return callerInfoCache.computeIfAbsent(key, k ->
-            "[" + frame.getDeclaringClass().getSimpleName()
-            + "#" + frame.getMethodName() + "] ");
+        return callerInfoCache.computeIfAbsent(key, k -> "[" + frame.getDeclaringClass().getSimpleName()
+                + "#" + frame.getMethodName() + "] ");
     }
 
     public static void debug(String msg) {
