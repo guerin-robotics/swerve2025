@@ -31,35 +31,49 @@ import edu.wpi.first.math.geometry.Pose2d;
 public class Constants {
 
     public static final String kCameraName = "HoundEye04";
-    // Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+    // Cam mounted facing forward, half a meter forward of center, half a meter up
+    // from center.
     public static final Transform3d kRobotToCam = new Transform3d(new Translation3d(0.36, 0.0064, 0.15),
             new Rotation3d(0, 0, 0));
+
+    public static final class Joystick {
+        public static final int Function1 = 10;
+    }
 
     // The layout of the AprilTags on the field
     public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
-    // The standard deviations of our vision estimated poses, which affect correction rate
+    // The standard deviations of our vision estimated poses, which affect
+    // correction rate
     // (Fake values. Experiment and determine estimation noise on an actual robot.)
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(
-            100, // σₓ: odometry may drift ±10 cm
-            100, // σᵧ: same sideways
-            Math.toRadians(5) // σθ: roughly ±5° heading error
+            .0005, // σₓ: odometry may drift ±10 cm
+            .0005, // σᵧ: same sideways
+            Math.toRadians(1) // σθ: roughly ±5° heading error
     );
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(
-            0.00005, // σₓ: vision ±0.5 cm
-            0.00005, // σᵧ: ±0.5 cm
+            0.0005, // σₓ: vision ±0.5 cm
+            0.0005, // σᵧ: ±0.5 cm
             Math.toRadians(2) // σθ: ±2°
     );
-
+    public static final Matrix<N3, N1> kOdometryStdDevs = VecBuilder.fill(
+            0.5, // 2 cm
+            0.5, // 2 cm
+            Math.toRadians(2) // 2°
+    );
     public static final double masterSpeedMultiplier = 1; // For troubleshooting/testing
     public static final double masterVoltageMultiplier = 1;
 
-    public static final class Joystick {
-        public static final int Function1 = 10;
-        public static final int Function2 = 9;
-        public static final int strafeLeft = 3;
-        public static final int strafeRight = 4;
-        public static final int servoControl = 8;
+    public static class Pathfinding {
+        // max translation m/s
+        public static final double MaxSpeed = 2;
+        // max accel m/s²
+        public static final double MaxAccel = 2;
+        // max rot deg/s
+        public static final double MaxRotSpeed = 600;
+        // max rot accel deg/s²
+        public static final double MaxRotAccel = 600;
+
     }
 
     /**
@@ -71,6 +85,7 @@ public class Constants {
         public static final AprilTagFieldLayout kTagLayout = Constants.kTagLayout;
         public static final Matrix<N3, N1> kSingleTagStdDevs = Constants.kSingleTagStdDevs;
         public static final Matrix<N3, N1> kMultiTagStdDevs = Constants.kMultiTagStdDevs;
+        public static final Matrix<N3, N1> kOdometryStdDevs = Constants.kOdometryStdDevs;
 
         /** Odometry update rate in Hz for the SwerveDrivePoseEstimator */
         public static final double kOdometryUpdateHz = 250.0;

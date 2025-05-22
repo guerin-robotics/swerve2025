@@ -53,6 +53,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableType;
 import edu.wpi.first.networktables.NetworkTableValue;
 
+
 public class Vision {
     private final PhotonCamera camera;
     private final PhotonPoseEstimator photonEstimator;
@@ -110,12 +111,15 @@ public class Vision {
         // Initialize NetworkTables entries for external monitoring
         // visionTable = NetworkTableInstance.getDefault().getTable("Vision");
         confidentPose2d = new Pose2d();
-        Logger.debug("x [{}] y [{}] heading [{}]]", confidentPose2d.getX(), confidentPose2d.getY(), confidentPose2d.getRotation().getDegrees());
+        Logger.debug("x [{}] y [{}] heading [{}]]", confidentPose2d.getX(), confidentPose2d.getY(),
+                confidentPose2d.getRotation().getDegrees());
     }
 
     private void setNetworkTablePose(Pose2d pose) {
+        // This is really the filtered vision without the use of odemetry
         confidentPose2d = pose;
     }
+
     private Pose2d getNetworkTablePose() {
         return confidentPose2d;
     }
@@ -130,7 +134,7 @@ public class Vision {
             Logger.debug("pipeline no results");
             return;
         }
-        var lastestResult = results.get(results.size()-1);
+        var lastestResult = results.get(results.size() - 1);
         var visionEst = photonEstimator.update(lastestResult);
         if (!visionEst.isPresent()) {
             Logger.debug("no targets detected this cycle");
@@ -147,7 +151,8 @@ public class Vision {
         int numTags = 0;
         double avgDist = 0;
 
-        // Precalculation - see how many tags we found, and calculate an average-distance metric
+        // Precalculation - see how many tags we found, and calculate an
+        // average-distance metric
         for (var tgt : targets) {
             var tagPose = photonEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
             if (tagPose.isEmpty()) {
@@ -180,15 +185,15 @@ public class Vision {
                 estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
             curStdDevs = estStdDevs;
         }
-        
+
         // Use FPGA timestamp directly for filter updates
         estConsumer.accept(est.estimatedPose.toPose2d(), Timer.getFPGATimestamp(), getEstimationStdDevs());
 
         // Publish to NetworkTables
-        Logger.debug("filtered pose {},{},{}", est.estimatedPose.toPose2d().getX(), est.estimatedPose.toPose2d().getY(), est.estimatedPose.toPose2d().getRotation().getDegrees());
+        Logger.debug("filtered pose {},{},{}", est.estimatedPose.toPose2d().getX(), est.estimatedPose.toPose2d().getY(),
+                est.estimatedPose.toPose2d().getRotation().getDegrees());
         setNetworkTablePose(est.estimatedPose.toPose2d());
     }
-
 
     /**
      * Returns the latest standard deviations of the estimated pose from {@link
@@ -223,13 +228,13 @@ public class Vision {
             Logger.debug("pipeline no update");
             return Optional.empty();
         }
-        var lastestResult = results.get(results.size()-1);
+        var lastestResult = results.get(results.size() - 1);
 
         var est = photonEstimator.update(lastestResult);
         if (est.isEmpty()) {
             Logger.debug("pipeline no est update");
             return Optional.empty();
-        }    
+        }
         Logger.debug("raw pose [{}]", est.get().estimatedPose.toPose2d());
         return est.map(e -> e.estimatedPose.toPose2d());
     }
@@ -240,7 +245,7 @@ public class Vision {
 
     /** A Field2d for visualizing our robot and objects on the field. */
     public Field2d getSimDebugField() {
-       
+
         if (!Robot.isSimulation()) {
             return null;
         }

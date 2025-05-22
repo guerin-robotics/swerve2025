@@ -40,7 +40,7 @@ public class Robot extends TimedRobot {
         // Initialize robot components
         var inst = NetworkTableInstance.getDefault();
         inst.startServer();
-        System.out.println( "Starting NetworkTables server on port " + inst );
+        System.out.println("Starting NetworkTables server on port " + inst);
     }
 
     @Override
@@ -54,9 +54,9 @@ public class Robot extends TimedRobot {
         vision.getLatestConfidentVisionPose().ifPresent(p -> m_robotContainer.logger.telemeterConfidentVision(p));
     }
 
-
     @Override
-    public void disabledPeriodic() {}
+    public void disabledPeriodic() {
+    }
 
     @Override
     public void autonomousInit() {
@@ -65,15 +65,18 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
         }
-        // RobotContainer.drivetrain.seedFieldCentric(); // Not currently working - reverses direction on blue side
+        // RobotContainer.drivetrain.seedFieldCentric(); // Not currently working -
+        // reverses direction on blue side
     }
 
     @Override
-    public void autonomousPeriodic() {}
+    public void autonomousPeriodic() {
+    }
 
     @Override
     public void teleopInit() {
         resetPose();
+
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
@@ -82,11 +85,10 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         vision.getLatestRawVisionPose()
-            .ifPresent(p -> m_robotContainer.logger.telemeterRawVision(p));
+                .ifPresent(p -> m_robotContainer.logger.telemeterRawVision(p));
         vision.getLatestConfidentVisionPose()
-            .ifPresent(p -> m_robotContainer.logger.telemeterConfidentVision(p));
+                .ifPresent(p -> m_robotContainer.logger.telemeterConfidentVision(p));
     }
-
 
     @Override
     public void robotInit() {
@@ -95,9 +97,9 @@ public class Robot extends TimedRobot {
         vision = m_robotContainer.vision;
         CanBridge.runTCP();
         CameraServer.startAutomaticCapture();
-        
+
     }
-    
+
     public void resetPose() {
         // Example Only - startPose should be derived from some assumption
         // of where your robot was placed on the field.
@@ -106,6 +108,6 @@ public class Robot extends TimedRobot {
         drivetrain.resetPose(startPose);
         System.out.println("Resetting pose to " + startPose);
         vision.resetSimPose(startPose);
-        
+
     }
 }
