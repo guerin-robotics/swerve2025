@@ -25,6 +25,7 @@
 package frc.robot;
 
 import static frc.robot.Constants.Vision.*;
+import static frc.robot.generated.TunerConstants.DrivetrainConstants;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -52,7 +53,8 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableType;
 import edu.wpi.first.networktables.NetworkTableValue;
-
+import frc.robot.RobotContainer;
+import com.ctre.phoenix6.Utils;
 
 public class Vision {
     private final PhotonCamera camera;
@@ -114,7 +116,7 @@ public class Vision {
         Logger.debug("x [{}] y [{}] heading [{}]]", confidentPose2d.getX(), confidentPose2d.getY(),
                 confidentPose2d.getRotation().getDegrees());
     }
-
+    
     private void setNetworkTablePose(Pose2d pose) {
         // This is really the filtered vision without the use of odemetry
         confidentPose2d = pose;
@@ -166,12 +168,19 @@ public class Vision {
                     .getTranslation()
                     .getDistance(est.estimatedPose.toPose2d().getTranslation());
         }
-
+        double distanceTag = frc.robot.RobotContainer.drivetrain.getPose().getTranslation()
+                        .getDistance(est.estimatedPose.toPose2d().getTranslation());
+                         
         if (numTags == 0) {
             // No tags visible. Default to single-tag std devs
             Logger.debug("no tags visible");
             curStdDevs = kSingleTagStdDevs;
+            
         } else {
+            if (distanceTag >1.5){
+                curStdDevs = 10;
+                return;
+            }
             // One or more tags visible, run the full heuristic.
             Logger.debug("num tags [{}] avg distance [{}]", numTags, (avgDist / numTags));
             avgDist /= numTags;
@@ -186,12 +195,16 @@ public class Vision {
             curStdDevs = estStdDevs;
         }
 
-        // Use FPGA timestamp directly for filter updates
-        estConsumer.accept(est.estimatedPose.toPose2d(), Timer.getFPGATimestamp(), getEstimationStdDevs());
+        // Update Drivetrain vision measurements
+        frc.robot.RobotContainer.drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds),
+                getEstimationStdDevs());
 
         // Publish to NetworkTables
         Logger.debug("filtered pose {},{},{}", est.estimatedPose.toPose2d().getX(), est.estimatedPose.toPose2d().getY(),
                 est.estimatedPose.toPose2d().getRotation().getDegrees());
+        Logger.debug("Drivetrain pose {},{},{}", frc.robot.RobotContainer.drivetrain.getPose().getX(),
+                frc.robot.RobotContainer.drivetrain.getPose().getY(),
+                frc.robot.RobotContainer.drivetrain.getPose().getRotation());
         setNetworkTablePose(est.estimatedPose.toPose2d());
     }
 

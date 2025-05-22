@@ -47,18 +47,18 @@ public class Constants {
     // correction rate
     // (Fake values. Experiment and determine estimation noise on an actual robot.)
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(
-            .0005, // σₓ: odometry may drift ±10 cm
-            .0005, // σᵧ: same sideways
-            Math.toRadians(1) // σθ: roughly ±5° heading error
+            .05, // σₓ: odometry may drift ±10 cm
+            .05, // σᵧ: same sideways
+            Math.toRadians(.1) // σθ: roughly ±5° heading error
     );
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(
-            0.0005, // σₓ: vision ±0.5 cm
-            0.0005, // σᵧ: ±0.5 cm
-            Math.toRadians(2) // σθ: ±2°
+            0.005, // σₓ: vision ±0.5 cm
+            0.005, // σᵧ: ±0.5 cm
+            Math.toRadians(.1) // σθ: ±2°
     );
     public static final Matrix<N3, N1> kOdometryStdDevs = VecBuilder.fill(
-            0.5, // 2 cm
-            0.5, // 2 cm
+            .5, // 2 cm
+            .5, // 2 cm
             Math.toRadians(2) // 2°
     );
     public static final double masterSpeedMultiplier = 1; // For troubleshooting/testing

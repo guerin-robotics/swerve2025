@@ -50,8 +50,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
 
 public class RobotContainer {
-
-    private final SendableChooser<Command> autoChooser;
+    public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired
                                                                                             // top speed
@@ -64,16 +63,16 @@ public class RobotContainer {
             .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
 
+    public static final CommandJoystick joystick = new CommandJoystick(0);
+
+    private final SendableChooser<Command> autoChooser;
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     public final Telemetry logger = new Telemetry(MaxSpeed);
 
-    public static final CommandJoystick joystick = new CommandJoystick(0);
+    Orchestra orchestra = new Orchestra(); // TODO is this used? Move to constructor
 
-    Orchestra orchestra = new Orchestra();
-
-    public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Vision vision;
 
     public RobotContainer() {
