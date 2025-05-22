@@ -117,7 +117,7 @@ public class RobotContainer {
         drivetrain.configureAutoBuilder();
         // Button commands
 
-        joystick.button(Constants.Joystick.Function1).onTrue(makeGoToPose(7.89, 4.026, 180));
+        joystick.button(Constants.Joystick.Function1).onTrue(makeGoToPose(5.89, 4.026, 180));
 
         joystick.trigger().whileTrue(drivetrain.applyRequest(() -> brake));
 

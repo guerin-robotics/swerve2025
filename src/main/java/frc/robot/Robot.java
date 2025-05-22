@@ -23,6 +23,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import java.util.logging.LogRecord;
 
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.ctre.phoenix6.SignalLogger;
 
 import frc.robot.Telemetry;
@@ -40,6 +41,7 @@ public class Robot extends TimedRobot {
         // Initialize robot components
         var inst = NetworkTableInstance.getDefault();
         inst.startServer();
+        PathfindingCommand.warmupCommand().schedule();
         System.out.println("Starting NetworkTables server on port " + inst);
     }
 
@@ -50,8 +52,6 @@ public class Robot extends TimedRobot {
         vision.periodic();
         drivetrain.periodic();
         // Raw-vision telemetry: publish camera-only pose
-        vision.getLatestRawVisionPose().ifPresent(p -> m_robotContainer.logger.telemeterRawVision(p));
-        vision.getLatestConfidentVisionPose().ifPresent(p -> m_robotContainer.logger.telemeterConfidentVision(p));
     }
 
     @Override
@@ -84,10 +84,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        vision.getLatestRawVisionPose()
-                .ifPresent(p -> m_robotContainer.logger.telemeterRawVision(p));
-        vision.getLatestConfidentVisionPose()
-                .ifPresent(p -> m_robotContainer.logger.telemeterConfidentVision(p));
     }
 
     @Override
@@ -107,7 +103,6 @@ public class Robot extends TimedRobot {
         Pose2d startPose = new Pose2d(7.89, 4.026, Rotation2d.fromDegrees(-180));
         drivetrain.resetPose(startPose);
         System.out.println("Resetting pose to " + startPose);
-        vision.resetSimPose(startPose);
 
     }
 }

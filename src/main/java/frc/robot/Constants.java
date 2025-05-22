@@ -30,7 +30,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 
 public class Constants {
 
-    public static final String kCameraName = "HoundEye04";
+    public static final String kCameraName = "HoundEye";
     // Cam mounted facing forward, half a meter forward of center, half a meter up
     // from center.
     public static final Transform3d kRobotToCam = new Transform3d(new Translation3d(0.36, 0.0064, 0.15),
@@ -47,28 +47,28 @@ public class Constants {
     // correction rate
     // (Fake values. Experiment and determine estimation noise on an actual robot.)
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(
-            .05, // σₓ: odometry may drift ±10 cm
-            .05, // σᵧ: same sideways
-            Math.toRadians(.1) // σθ: roughly ±5° heading error
+            0.6, // σₓ: odometry may drift ±10 cm
+            0.6, // σᵧ: same sideways
+            Math.toRadians(.5) // σθ: roughly ±5° heading error
     );
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(
-            0.005, // σₓ: vision ±0.5 cm
-            0.005, // σᵧ: ±0.5 cm
-            Math.toRadians(.1) // σθ: ±2°
+            0.6, // σₓ: vision ±0.5 cm
+            0.6, // σᵧ: ±0.5 cm
+            Math.toRadians(.5) // σθ: ±2°
     );
     public static final Matrix<N3, N1> kOdometryStdDevs = VecBuilder.fill(
-            .5, // 2 cm
-            .5, // 2 cm
-            Math.toRadians(2) // 2°
+            0.03, // 2 cm
+            0.03, // 2 cm
+            Math.toRadians(.3) // 2°
     );
     public static final double masterSpeedMultiplier = 1; // For troubleshooting/testing
     public static final double masterVoltageMultiplier = 1;
 
     public static class Pathfinding {
         // max translation m/s
-        public static final double MaxSpeed = 2;
+        public static final double MaxSpeed = 4;
         // max accel m/s²
-        public static final double MaxAccel = 2;
+        public static final double MaxAccel = 4;
         // max rot deg/s
         public static final double MaxRotSpeed = 600;
         // max rot accel deg/s²

@@ -1,27 +1,3 @@
-/*
- * MIT License
- *
- * Copyright (c) PhotonVision
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package frc.robot;
 
 import static frc.robot.Constants.Vision.*;
@@ -57,155 +33,107 @@ import frc.robot.RobotContainer;
 import com.ctre.phoenix6.Utils;
 
 public class Vision {
-    private final PhotonCamera camera;
+    private final PhotonCamera camera0 = new PhotonCamera(kCameraName + "04");
+    // private final PhotonCamera camera1 = new PhotonCamera(kCameraName + "5");
+
     private final PhotonPoseEstimator photonEstimator;
     private Matrix<N3, N1> curStdDevs;
     private final EstimateConsumer estConsumer;
-
-    // Simulation
-    private PhotonCameraSim cameraSim;
-    private VisionSystemSim visionSim;
-
-    // NetworkTables entries for publishing vision pose
-    // private final NetworkTable visionTable;
-    private Pose2d confidentPose2d;
 
     /**
      * @param estConsumer Lamba that will accept a pose estimate and pass it to your
      *                    desired {@link
      *                    edu.wpi.first.math.estimator.SwerveDrivePoseEstimator}
      */
+
     public Vision(EstimateConsumer estConsumer) {
         this.estConsumer = estConsumer;
 
-        camera = new PhotonCamera(kCameraName);
         // Select the PhotonVision pipeline (0-based index) to use for processing
-        camera.setPipelineIndex(0);
+
+        // camera1.setPipelineIndex(0);
+
+        camera0.setPipelineIndex(0);
 
         photonEstimator = new PhotonPoseEstimator(kTagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToCam);
         photonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
-        // ----- Simulation
-        if (Robot.isSimulation()) {
-            // Create the vision system simulation which handles cameras and targets on the
-            // field.
-            visionSim = new VisionSystemSim("main");
-            // Add all the AprilTags inside the tag layout as visible targets to this
-            // simulated field.
-            visionSim.addAprilTags(kTagLayout);
-            // Create simulated camera properties. These can be set to mimic your actual
-            // camera.
-            var cameraProp = new SimCameraProperties();
-            cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(90));
-            cameraProp.setCalibError(0.35, 0.10);
-            cameraProp.setFPS(15);
-            cameraProp.setAvgLatencyMs(50);
-            cameraProp.setLatencyStdDevMs(15);
-            // Create a PhotonCameraSim which will update the linked PhotonCamera's values
-            // with visible
-            // targets.
-            cameraSim = new PhotonCameraSim(camera, cameraProp);
-            // Add the simulated camera to view the targets on this simulated field.
-            visionSim.addCamera(cameraSim, kRobotToCam);
-
-            cameraSim.enableDrawWireframe(true);
-        }
         // Initialize NetworkTables entries for external monitoring
-        // visionTable = NetworkTableInstance.getDefault().getTable("Vision");
-        confidentPose2d = new Pose2d();
-        Logger.debug("x [{}] y [{}] heading [{}]]", confidentPose2d.getX(), confidentPose2d.getY(),
-                confidentPose2d.getRotation().getDegrees());
-    }
-    
-    private void setNetworkTablePose(Pose2d pose) {
-        // This is really the filtered vision without the use of odemetry
-        confidentPose2d = pose;
-    }
-
-    private Pose2d getNetworkTablePose() {
-        return confidentPose2d;
     }
 
     public void periodic() {
         // Always fetch the latest pipeline result to ensure we see current detections
-        var results = camera.getAllUnreadResults();
-        Logger.debug("pipeline results [{}]", results.size());
+        processFrame(camera0, 1);
+    }
 
-        // get latest result
+    private void processFrame(PhotonCamera cam, int camId) {
+        var results = cam.getAllUnreadResults();
+        Logger.debug("Cam {} pipeline results [{}]", camId, results.size());
         if (results.isEmpty()) {
-            Logger.debug("pipeline no results");
-            return;
-        }
-        var lastestResult = results.get(results.size() - 1);
-        var visionEst = photonEstimator.update(lastestResult);
-        if (!visionEst.isPresent()) {
-            Logger.debug("no targets detected this cycle");
-            curStdDevs = kSingleTagStdDevs;
+            Logger.debug("Cam {} pipeline no results", camId);
             return;
         }
 
-        var est = visionEst.get();
-        var targets = lastestResult.getTargets();
-        Logger.debug("tags [{}] estimated pose [{}]", targets.size(), est.estimatedPose.toPose2d());
+        var last = results.get(results.size() - 1);
+        var maybeEst = photonEstimator.update(last);
+        if (maybeEst.isEmpty()) {
+            Logger.debug("Cam {} no targets detected this cycle", camId);
+            return;
+        }
 
-        // Pose present. Start running Heuristic
-        var estStdDevs = kSingleTagStdDevs;
+        var visionEst = maybeEst.get();
+        var visionPose = visionEst.estimatedPose.toPose2d();
+        var targets = last.getTargets();
+
+        // Heuristic: pick σ based on # tags & average tag‐to‐vision distance
+        Matrix<N3, N1> stdDevs = kSingleTagStdDevs;
         int numTags = 0;
-        double avgDist = 0;
-
-        // Precalculation - see how many tags we found, and calculate an
-        // average-distance metric
+        double avgTagDist = 0;
         for (var tgt : targets) {
-            var tagPose = photonEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+            var tagPose = photonEstimator.getFieldTags().getTagPose(
+                    tgt.getFiducialId());
             if (tagPose.isEmpty()) {
                 Logger.warn("tagPose is empty");
                 continue;
             }
             numTags++;
-            avgDist += tagPose
+            avgTagDist += tagPose
                     .get()
                     .toPose2d()
                     .getTranslation()
-                    .getDistance(est.estimatedPose.toPose2d().getTranslation());
+                    .getDistance(visionPose.getTranslation());
+            ;
         }
-        double distanceTag = frc.robot.RobotContainer.drivetrain.getPose().getTranslation()
-                        .getDistance(est.estimatedPose.toPose2d().getTranslation());
-                         
-        if (numTags == 0) {
+        if (numTags > 0) {
+            avgTagDist /= numTags;
+            if (numTags > 1) {
+                stdDevs = kMultiTagStdDevs;
+            }
+            if (numTags == 1 && avgTagDist > 4.0) {
+                stdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+            } else {
+                stdDevs = stdDevs.times(1 + (avgTagDist * avgTagDist / 30.0));
+            }
+        } else {
             // No tags visible. Default to single-tag std devs
             Logger.debug("no tags visible");
             curStdDevs = kSingleTagStdDevs;
-            
-        } else {
-            if (distanceTag >1.5){
-                curStdDevs = 10;
-                return;
-            }
-            // One or more tags visible, run the full heuristic.
-            Logger.debug("num tags [{}] avg distance [{}]", numTags, (avgDist / numTags));
-            avgDist /= numTags;
-            // Decrease std devs if multiple targets are visible
-            if (numTags > 1)
-                estStdDevs = kMultiTagStdDevs;
-            // Increase std devs based on (average) distance
-            if (numTags == 1 && avgDist > 4)
-                estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-            else
-                estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
-            curStdDevs = estStdDevs;
         }
 
-        // Update Drivetrain vision measurements
-        frc.robot.RobotContainer.drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds),
-                getEstimationStdDevs());
+        // Now check how far visionPose is from our current odometry pose:
+        double distanceToRobot = frc.robot.RobotContainer.drivetrain.getPose().getTranslation()
+                .getDistance(visionEst.estimatedPose.toPose2d().getTranslation());
+        if (distanceToRobot < .5) {
+            Logger.debug("Cam {} fusing vision ({} tags, avgTagDist={:.2f}, robotDist={:.2f})",
+                    camId, numTags, avgTagDist, distanceToRobot);
 
-        // Publish to NetworkTables
-        Logger.debug("filtered pose {},{},{}", est.estimatedPose.toPose2d().getX(), est.estimatedPose.toPose2d().getY(),
-                est.estimatedPose.toPose2d().getRotation().getDegrees());
-        Logger.debug("Drivetrain pose {},{},{}", frc.robot.RobotContainer.drivetrain.getPose().getX(),
-                frc.robot.RobotContainer.drivetrain.getPose().getY(),
-                frc.robot.RobotContainer.drivetrain.getPose().getRotation());
-        setNetworkTablePose(est.estimatedPose.toPose2d());
+            RobotContainer.drivetrain.addVisionMeasurement(
+                    visionPose,
+                    Utils.fpgaToCurrentTime(visionEst.timestampSeconds),
+                    stdDevs);
+        } else {
+            Logger.debug("Cam {} skipping fusion; {:.2f} m away", camId, distanceToRobot);
+        }
     }
 
     /**
@@ -218,51 +146,6 @@ public class Vision {
     public Matrix<N3, N1> getEstimationStdDevs() {
         Logger.debug("current std dev [{}]", curStdDevs);
         return curStdDevs;
-    }
-
-    // ----- Simulation
-
-    public void simulationPeriodic(Pose2d robotSimPose) {
-        visionSim.update(robotSimPose);
-    }
-
-    /** Reset pose history of the robot in the vision system simulation. */
-    public void resetSimPose(Pose2d pose) {
-        if (Robot.isSimulation())
-            visionSim.resetRobotPose(pose);
-    }
-
-    /**
-     * Returns the latest raw vision-based pose estimate (without odometry fusion).
-     */
-    public Optional<Pose2d> getLatestRawVisionPose() {
-        var results = camera.getAllUnreadResults();
-        if (results.isEmpty()) {
-            Logger.debug("pipeline no update");
-            return Optional.empty();
-        }
-        var lastestResult = results.get(results.size() - 1);
-
-        var est = photonEstimator.update(lastestResult);
-        if (est.isEmpty()) {
-            Logger.debug("pipeline no est update");
-            return Optional.empty();
-        }
-        Logger.debug("raw pose [{}]", est.get().estimatedPose.toPose2d());
-        return est.map(e -> e.estimatedPose.toPose2d());
-    }
-
-    public Optional<Pose2d> getLatestConfidentVisionPose() {
-        return Optional.of(getNetworkTablePose());
-    }
-
-    /** A Field2d for visualizing our robot and objects on the field. */
-    public Field2d getSimDebugField() {
-
-        if (!Robot.isSimulation()) {
-            return null;
-        }
-        return visionSim.getDebugField();
     }
 
     @FunctionalInterface
