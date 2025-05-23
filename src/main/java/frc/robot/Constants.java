@@ -30,14 +30,16 @@ import edu.wpi.first.math.geometry.Pose2d;
 
 public class Constants {
 
-    public static final String kCameraName = "HoundEye";
+    public static final String kCameraName = "EagleEye";
     // Cam mounted facing forward, half a meter forward of center, half a meter up
     // from center.
     public static final Transform3d kRobotToCam = new Transform3d(new Translation3d(0.36, 0.0064, 0.15),
             new Rotation3d(0, 0, 0));
 
     public static final class Joystick {
-        public static final int Function1 = 10;
+        public static final int strafeLeft = 3;
+        public static final int strafeRight = 4;
+        public static final int Button1 = 10;
     }
 
     // The layout of the AprilTags on the field

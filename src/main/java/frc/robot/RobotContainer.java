@@ -2,6 +2,8 @@ package frc.robot;
 
 import static frc.robot.generated.TunerConstants.createDrivetrain;
 
+import frc.robot.*;
+
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -31,6 +33,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.util.TagSide;
+import frc.robot.util.TagUtils;
+
 import static frc.robot.Constants.Vision.kOdometryUpdateHz;
 import static frc.robot.Constants.Vision.kSingleTagStdDevs;
 import static frc.robot.Constants.Vision.kMultiTagStdDevs;
@@ -101,6 +106,16 @@ public class RobotContainer {
                 0.0);
     }
 
+    private Command makeGoToTag(int tagId, TagSide side, double offsetMeters) {
+        Pose2d goal = TagUtils.computeTagAdjacencyPose(tagId, side, offsetMeters);
+        PathConstraints constraints = new PathConstraints(
+                frc.robot.Constants.Pathfinding.MaxSpeed, // max translation m/s
+                frc.robot.Constants.Pathfinding.MaxAccel, // max accel m/s²
+                Units.degreesToRadians(frc.robot.Constants.Pathfinding.MaxRotSpeed), // max rot rad/s
+                Units.degreesToRadians(frc.robot.Constants.Pathfinding.MaxRotAccel)); // max rot accel rad/s²
+        return AutoBuilder.pathfindToPose(goal, constraints, 0.0);
+    }
+
     private void configureBindings() {
 
         // Note that X is defined as forward according to WPILib convention,
@@ -117,7 +132,9 @@ public class RobotContainer {
         drivetrain.configureAutoBuilder();
         // Button commands
 
-        joystick.button(Constants.Joystick.Function1).onTrue(makeGoToPose(5.89, 4.026, 180));
+        joystick.button(Constants.Joystick.strafeLeft).onTrue(makeGoToTag(vision.getLastSeenTagId(), TagSide.LEFT, 0.164338));
+        joystick.button(Constants.Joystick.strafeRight).onTrue(makeGoToTag(vision.getLastSeenTagId(), TagSide.RIGHT, 0.164338));
+
 
         joystick.trigger().whileTrue(drivetrain.applyRequest(() -> brake));
 

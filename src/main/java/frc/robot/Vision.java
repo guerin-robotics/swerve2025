@@ -6,13 +6,16 @@ import static frc.robot.generated.TunerConstants.DrivetrainConstants;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.Logger.Level;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.photonvision.EstimatedRobotPose;
@@ -39,6 +42,14 @@ public class Vision {
     private final PhotonPoseEstimator photonEstimator;
     private Matrix<N3, N1> curStdDevs;
     private final EstimateConsumer estConsumer;
+
+    // ID of the last AprilTag seen (or -1 if none)
+    private int lastSeenTagId = -1;
+
+    /** @return the fiducial ID of the last tag processed, or -1 if none */
+    public int getLastSeenTagId() {
+      return lastSeenTagId;
+    }
 
     /**
      * @param estConsumer Lamba that will accept a pose estimate and pass it to your
@@ -96,6 +107,8 @@ public class Vision {
                 Logger.warn("tagPose is empty");
                 continue;
             }
+            // record which tag we just processed
+            lastSeenTagId = tgt.getFiducialId();
             numTags++;
             avgTagDist += tagPose
                     .get()
@@ -104,6 +117,7 @@ public class Vision {
                     .getDistance(visionPose.getTranslation());
             ;
         }
+        
         if (numTags > 0) {
             avgTagDist /= numTags;
             if (numTags > 1) {
