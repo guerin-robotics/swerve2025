@@ -55,98 +55,93 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
 
 public class RobotContainer {
-    public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+  public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired
-                                                                                            // top speed
-    public static double MaxAngularRate = RotationsPerSecond.of(2.5).in(RadiansPerSecond); // 3/4 of a rotation per
-                                                                                           // second max angular
-                                                                                           // velocity
+  public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 1; // kSpeedAt12Volts desired
+                                                                                          // top speed
+  public static double MaxAngularRate = RotationsPerSecond.of(1.75).in(RadiansPerSecond); // 3/4 of a rotation per
+                                                                                          // second max angular
+                                                                                          // velocity
 
-    /* Setting up bindings for necessary control of the swerve drive platform */
-    public static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+  /* Setting up bindings for necessary control of the swerve drive platform */
+  public static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+      .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01) // Add a 10% deadband
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
 
-    public static final CommandJoystick joystick = new CommandJoystick(0);
+  public static final CommandJoystick joystick = new CommandJoystick(0);
 
-    private final SendableChooser<Command> autoChooser;
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+  private final SendableChooser<Command> autoChooser;
+  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-    public final Telemetry logger = new Telemetry(MaxSpeed);
+  public final Telemetry logger = new Telemetry(MaxSpeed);
 
-    Orchestra orchestra = new Orchestra(); // TODO is this used? Move to constructor
+  Orchestra orchestra = new Orchestra(); // TODO is this used? Move to constructor
 
-    public final Vision vision;
+  public final Vision vision;
 
-    public RobotContainer() {
-        drivetrain.seedFieldCentric();
-        vision = new Vision((pose, timestamp, stdDevs) -> drivetrain.addVisionMeasurement(pose, timestamp, stdDevs));
-        configureBindings();
-        // Temporary “no-op” chooser until PathPlannerAutoBuilder is configured
-        autoChooser = new SendableChooser<>();
-        autoChooser.setDefaultOption("No Auto", Commands.none());
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-    }
+  public RobotContainer() {
+    drivetrain.seedFieldCentric();
+    vision = new Vision((pose, timestamp, stdDevs) -> drivetrain.addVisionMeasurement(pose, timestamp, stdDevs));
+    configureBindings();
+    // Temporary “no-op” chooser until PathPlannerAutoBuilder is configured
+    autoChooser = new SendableChooser<>();
+    autoChooser.setDefaultOption("No Auto", Commands.none());
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+  }
 
-    private Command makeGoToPose(double X, double Y, double rotation) {
-        Pose2d targetPose = new Pose2d(X, Y, Rotation2d.fromDegrees(rotation));
-        Logger.debug("pose [{}]", targetPose);
-        PathConstraints constraints = new PathConstraints(
-                frc.robot.Constants.Pathfinding.MaxSpeed, // max translation m/s
-                frc.robot.Constants.Pathfinding.MaxAccel, // max accel m/s²
-                Units.degreesToRadians(frc.robot.Constants.Pathfinding.MaxRotSpeed), // max rot rad/s
-                Units.degreesToRadians(frc.robot.Constants.Pathfinding.MaxRotAccel) // max rot accel rad/s²
-        );
+  private Command makeGoToTag(int tagId, TagSide side, double offsetMeters, double frontoffsetMeters) {
+    Pose2d goal = TagUtils.computeTagAdjacencyPose(tagId, side, offsetMeters, frontoffsetMeters);
+    Logger.debug("pose [{}]", goal);
+    PathConstraints constraints = new PathConstraints(
+        frc.robot.Constants.Pathfinding.MaxSpeed, // max translation m/s
+        frc.robot.Constants.Pathfinding.MaxAccel, // max accel m/s²
+        Units.degreesToRadians(frc.robot.Constants.Pathfinding.MaxRotSpeed), // max rot rad/s
+        Units.degreesToRadians(frc.robot.Constants.Pathfinding.MaxRotAccel)); // max rot accel rad/s²
+    return AutoBuilder.pathfindToPose(goal, constraints, 0.0);
+  }
 
-        return AutoBuilder.pathfindToPose(
-                targetPose,
-                constraints,
-                0.0);
-    }
+  private Command goToLastSeenTag(TagSide side, double offsetMeters, double frontoffsetMeters) {
+    return new InstantCommand(() -> {
+      int tagId = vision.getLastSeenTagId();
+      if (tagId < 0) {
+        Logger.warn("No tag seen");
+        return;
+      }
+      makeGoToTag(tagId, side, offsetMeters, frontoffsetMeters).schedule();
+    }, drivetrain);
+  }
 
-    private Command makeGoToTag(int tagId, TagSide side, double offsetMeters) {
-        Pose2d goal = TagUtils.computeTagAdjacencyPose(tagId, side, offsetMeters);
-        PathConstraints constraints = new PathConstraints(
-                frc.robot.Constants.Pathfinding.MaxSpeed, // max translation m/s
-                frc.robot.Constants.Pathfinding.MaxAccel, // max accel m/s²
-                Units.degreesToRadians(frc.robot.Constants.Pathfinding.MaxRotSpeed), // max rot rad/s
-                Units.degreesToRadians(frc.robot.Constants.Pathfinding.MaxRotAccel)); // max rot accel rad/s²
-        return AutoBuilder.pathfindToPose(goal, constraints, 0.0);
-    }
+  private void configureBindings() {
 
-    private void configureBindings() {
+    // Note that X is defined as forward according to WPILib convention,
+    // and Y is defined as to the left according to WPILib convention.
 
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
+    drivetrain.setDefaultCommand(
+        // Drivetrain will execute this command periodically
+        drivetrain.applyRequest(() -> drive.withVelocityX(joystick.getY() * MaxSpeed) // Drive forward with
+                                                                                      // negative Y (forward)
+            .withVelocityY(joystick.getX() * MaxSpeed) // Drive left with negative X (left)
+            .withRotationalRate(-joystick.getTwist() * MaxAngularRate) // Drive counterclockwise with
+                                                                       // negative X (left)
+        ));
+    drivetrain.configureAutoBuilder();
+    // Button commands
 
-        drivetrain.setDefaultCommand(
-                // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> drive.withVelocityX(joystick.getY() * MaxSpeed) // Drive forward with
-                                                                                              // negative Y (forward)
-                        .withVelocityY(joystick.getX() * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(-joystick.getTwist() * MaxAngularRate) // Drive counterclockwise with
-                                                                                   // negative X (left)
-                ));
-        drivetrain.configureAutoBuilder();
-        // Button commands
+    joystick.button(Constants.Joystick.strafeLeft).onTrue(goToLastSeenTag(TagSide.LEFT, 0.164338, 0.4579)); // 0.44
+    joystick.button(Constants.Joystick.strafeRight).onTrue(goToLastSeenTag(TagSide.RIGHT, 0.164338, 0.4579)); // 0.44
 
-        joystick.button(Constants.Joystick.strafeLeft).onTrue(makeGoToTag(vision.getLastSeenTagId(), TagSide.LEFT, 0.164338));
-        joystick.button(Constants.Joystick.strafeRight).onTrue(makeGoToTag(vision.getLastSeenTagId(), TagSide.RIGHT, 0.164338));
+    joystick.trigger().whileTrue(drivetrain.applyRequest(() -> brake));
 
+    // reset the field-centric heading on middle button press
+    joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+    drivetrain.registerTelemetry(logger::telemeterize);
 
-        joystick.trigger().whileTrue(drivetrain.applyRequest(() -> brake));
+  }
 
-        // reset the field-centric heading on middle button press
-        joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-        drivetrain.registerTelemetry(logger::telemeterize);
-
-    }
-
-    public Command getAutonomousCommand() {
-        // return Commands.print("No autonomous command configured");
-        return autoChooser.getSelected();
-    }
+  public Command getAutonomousCommand() {
+    // return Commands.print("No autonomous command configured");
+    return autoChooser.getSelected();
+  }
 
 }

@@ -29,12 +29,23 @@ import java.util.Optional;
 import edu.wpi.first.math.geometry.Pose2d;
 
 public class Constants {
+    // Right Camera
+    public static final String CameraName1 = "EagleEye01";
 
-    public static final String kCameraName = "EagleEye";
+    // Left Camera
+    public static final String CameraName2 = "EagleEye02";
+
+
     // Cam mounted facing forward, half a meter forward of center, half a meter up
     // from center.
-    public static final Transform3d kRobotToCam = new Transform3d(new Translation3d(0.36, 0.0064, 0.15),
-            new Rotation3d(0, 0, 0));
+
+    // Right Cam
+    public static final Transform3d RobotToCam1 = new Transform3d(new Translation3d(0.2786892, -0.2726416, 0.1499719),
+            new Rotation3d(0, -0.3490659, 0.1745329));
+
+    // Left Cam
+    public static final Transform3d RobotToCam2 = new Transform3d(new Translation3d(0.2764772, 0.2724549, 0.1499719),
+            new Rotation3d(0, -0.3490659, -0.1745329));
 
     public static final class Joystick {
         public static final int strafeLeft = 3;
@@ -49,19 +60,19 @@ public class Constants {
     // correction rate
     // (Fake values. Experiment and determine estimation noise on an actual robot.)
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(
-            0.6, // σₓ: odometry may drift ±10 cm
-            0.6, // σᵧ: same sideways
-            Math.toRadians(.5) // σθ: roughly ±5° heading error
+            0.25, // σₓ: odometry may drift ±10 cm
+            0.25, // σᵧ: same sideways
+            Math.toRadians(.05) // σθ: roughly ±5° heading error
     );
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(
-            0.6, // σₓ: vision ±0.5 cm
-            0.6, // σᵧ: ±0.5 cm
-            Math.toRadians(.5) // σθ: ±2°
+            0.18, // σₓ: vision ±0.5 cm
+            0.18, // σᵧ: ±0.5 cm
+            Math.toRadians(.025) // σθ: ±2°
     );
     public static final Matrix<N3, N1> kOdometryStdDevs = VecBuilder.fill(
-            0.03, // 2 cm
-            0.03, // 2 cm
-            Math.toRadians(.3) // 2°
+            0.075, // 2 cm
+            0.075, // 2 cm
+            Math.toRadians(.6) // 2°
     );
     public static final double masterSpeedMultiplier = 1; // For troubleshooting/testing
     public static final double masterVoltageMultiplier = 1;
@@ -82,8 +93,10 @@ public class Constants {
      * Vision-specific constants grouped for NetworkTables and PhotonVision use.
      */
     public static class Vision {
-        public static final String kCameraName = Constants.kCameraName;
-        public static final Transform3d kRobotToCam = Constants.kRobotToCam;
+        public static final String CameraName1 = Constants.CameraName1;
+        public static final Transform3d RobotToCam1 = Constants.RobotToCam1;
+        public static final String CameraName2 = Constants.CameraName2;
+        public static final Transform3d RobotToCam2 = Constants.RobotToCam2;
         public static final AprilTagFieldLayout kTagLayout = Constants.kTagLayout;
         public static final Matrix<N3, N1> kSingleTagStdDevs = Constants.kSingleTagStdDevs;
         public static final Matrix<N3, N1> kMultiTagStdDevs = Constants.kMultiTagStdDevs;

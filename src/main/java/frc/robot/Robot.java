@@ -51,6 +51,7 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
         vision.periodic();
         drivetrain.periodic();
+        
         // Raw-vision telemetry: publish camera-only pose
     }
 
@@ -100,7 +101,10 @@ public class Robot extends TimedRobot {
         // Example Only - startPose should be derived from some assumption
         // of where your robot was placed on the field.
         // The first pose in an autonomous path is often a good choice.
-        Pose2d startPose = new Pose2d(7.89, 4.026, Rotation2d.fromDegrees(-180));
+
+        Pose2d startPose = new Pose2d(7.89, 4.026, Rotation2d.fromDegrees(180)); // id 21
+        // Pose2d startPose = new Pose2d(6, 5.5, Rotation2d.fromDegrees(240)); // id 20
+
         drivetrain.resetPose(startPose);
         System.out.println("Resetting pose to " + startPose);
 

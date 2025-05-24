@@ -25,3 +25,18 @@ The idea is that the robot is always updating which April Tag is the closest. Wi
 Then for the commands for the button I have ```makeGoToTag(vision.getLastSeenTagId(), TagSide.LEFT, 0.164338)``` This creates a command that should make it move directly to the position. I have not yet tested it as I do not have the robot, but I am planning to come in early and hopefully test it.
 
 Tuesday will be the true test of how well it works. We also have to get on making mounts for the Trifty Cams so that we can mount them on top of the swerves. If anyone wants to start working on those let me know 
+
+
+### 2025 May 24
+
+EagleEye is a go! I have integrated the 2 Thrifty Bot Cameras into the code and have them working. I also went ahead and calibrated each camera with over 600 images, really locking them in.
+
+The mount that they are on is at a 10º inward tilt with a 20º tilt backwards. After physically messing with the camera before finalizing the mount, I found that this seemed like a pretty good compromise between total POV and seeing the tag up close.
+
+On the coding front, it was just a bit more challenging to add the multiple cameras, but nothing crazy. I had to add the translations for where the cameras are on the bot, and was able to make that nice and precise using the CAD. I took the mounts and put them into the practice bot CAD and got the translation of each camera.
+
+I also realized on Friday that when it calls ```Pose2d tagPose = getTagPose2d(tagId)```, it returns the exact coordinates of the tag, and when the bot is told to go to the spot, it tries to put the center of the robot at that. This is an issue and so I added some more logic using Trig to make it offset even on the hexagonal sides. It also has left and right offsets for all sides as well.
+
+I also tuned the vision standard deviations. So now it is much more confident in the vision poses. It's now so much better with multiple cameras and really isn't "glitching" around like it does when the vision is too confident. I also tested with other tags, and things seem to be working just as intended even with the other angles
+
+We should now be good to go to test on the reef at Carmel on Tuesday!!

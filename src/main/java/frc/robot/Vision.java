@@ -36,10 +36,13 @@ import frc.robot.RobotContainer;
 import com.ctre.phoenix6.Utils;
 
 public class Vision {
-    private final PhotonCamera camera0 = new PhotonCamera(kCameraName + "04");
+    private final PhotonCamera camera1 = new PhotonCamera(CameraName1);
+    private final PhotonCamera camera2 = new PhotonCamera(CameraName2);
+
     // private final PhotonCamera camera1 = new PhotonCamera(kCameraName + "5");
 
-    private final PhotonPoseEstimator photonEstimator;
+    private final PhotonPoseEstimator estimator1;
+    private final PhotonPoseEstimator estimator2;
     private Matrix<N3, N1> curStdDevs;
     private final EstimateConsumer estConsumer;
 
@@ -48,7 +51,8 @@ public class Vision {
 
     /** @return the fiducial ID of the last tag processed, or -1 if none */
     public int getLastSeenTagId() {
-      return lastSeenTagId;
+        Logger.warn("Last Tag Id [{}]", lastSeenTagId);
+        return lastSeenTagId;
     }
 
     /**
@@ -64,20 +68,32 @@ public class Vision {
 
         // camera1.setPipelineIndex(0);
 
-        camera0.setPipelineIndex(0);
+        camera1.setPipelineIndex(0);
+        camera2.setPipelineIndex(0);
 
-        photonEstimator = new PhotonPoseEstimator(kTagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToCam);
-        photonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+        estimator1 = new PhotonPoseEstimator(
+                Constants.Vision.kTagLayout,
+                PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                RobotToCam1);
+        estimator2 = new PhotonPoseEstimator(
+                Constants.Vision.kTagLayout,
+                PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                RobotToCam2);
+
+        estimator1.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+        estimator2.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
         // Initialize NetworkTables entries for external monitoring
     }
 
     public void periodic() {
         // Always fetch the latest pipeline result to ensure we see current detections
-        processFrame(camera0, 1);
+        processFrame(camera1, 1, estimator1);
+        processFrame(camera2, 2, estimator2);
+
     }
 
-    private void processFrame(PhotonCamera cam, int camId) {
+    private void processFrame(PhotonCamera cam, int camId, PhotonPoseEstimator estimator) {
         var results = cam.getAllUnreadResults();
         Logger.debug("Cam {} pipeline results [{}]", camId, results.size());
         if (results.isEmpty()) {
@@ -86,7 +102,7 @@ public class Vision {
         }
 
         var last = results.get(results.size() - 1);
-        var maybeEst = photonEstimator.update(last);
+        var maybeEst = estimator.update(last);
         if (maybeEst.isEmpty()) {
             Logger.debug("Cam {} no targets detected this cycle", camId);
             return;
@@ -101,7 +117,7 @@ public class Vision {
         int numTags = 0;
         double avgTagDist = 0;
         for (var tgt : targets) {
-            var tagPose = photonEstimator.getFieldTags().getTagPose(
+            var tagPose = estimator.getFieldTags().getTagPose(
                     tgt.getFiducialId());
             if (tagPose.isEmpty()) {
                 Logger.warn("tagPose is empty");
@@ -117,7 +133,7 @@ public class Vision {
                     .getDistance(visionPose.getTranslation());
             ;
         }
-        
+
         if (numTags > 0) {
             avgTagDist /= numTags;
             if (numTags > 1) {
@@ -137,7 +153,7 @@ public class Vision {
         // Now check how far visionPose is from our current odometry pose:
         double distanceToRobot = frc.robot.RobotContainer.drivetrain.getPose().getTranslation()
                 .getDistance(visionEst.estimatedPose.toPose2d().getTranslation());
-        if (distanceToRobot < .5) {
+        if (distanceToRobot < 2) {
             Logger.debug("Cam {} fusing vision ({} tags, avgTagDist={:.2f}, robotDist={:.2f})",
                     camId, numTags, avgTagDist, distanceToRobot);
 
