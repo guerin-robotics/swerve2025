@@ -1,35 +1,18 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import edu.wpi.first.cameraserver.CameraServer;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import java.util.Optional;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
-import java.util.logging.LogRecord;
-
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.pathplanner.lib.commands.PathfindingCommand;
-import com.ctre.phoenix6.SignalLogger;
-
-import frc.robot.Telemetry;
-
 import au.grapplerobotics.CanBridge;
-import au.grapplerobotics.LaserCan;
 
 public class Robot extends TimedRobot {
     private CommandSwerveDrivetrain drivetrain;

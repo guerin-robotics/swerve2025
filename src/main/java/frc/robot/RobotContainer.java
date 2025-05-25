@@ -1,58 +1,28 @@
 package frc.robot;
 
-import static frc.robot.generated.TunerConstants.createDrivetrain;
-
-import frc.robot.*;
-
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.Orchestra;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import static edu.wpi.first.wpilibj2.command.Commands.*;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.util.TagSide;
 import frc.robot.util.TagUtils;
 
-import static frc.robot.Constants.Vision.kOdometryUpdateHz;
-import static frc.robot.Constants.Vision.kSingleTagStdDevs;
-import static frc.robot.Constants.Vision.kMultiTagStdDevs;
-import static frc.robot.Constants.Vision.kOdometryStdDevs;
-
-import static frc.robot.Constants.Pathfinding.MaxSpeed;
-import static frc.robot.Constants.Pathfinding.MaxAccel;
-import static frc.robot.Constants.Pathfinding.MaxRotSpeed;
-import static frc.robot.Constants.Pathfinding.MaxRotAccel;
-
-import frc.robot.subsystems.*;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.path.PathConstraints;
+import static frc.robot.Constants.stearingMultiplier;
 
 public class RobotContainer {
   public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -72,7 +42,6 @@ public class RobotContainer {
 
   private final SendableChooser<Command> autoChooser;
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
   public final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -90,15 +59,34 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
-  private Command makeGoToTag(int tagId, TagSide side, double offsetMeters, double frontoffsetMeters) {
-    Pose2d goal = TagUtils.computeTagAdjacencyPose(tagId, side, offsetMeters, frontoffsetMeters);
-    Logger.debug("pose [{}]", goal);
+  private Command makeGoToTag(
+      int tagId,
+      TagSide side,
+      double offsetMeters,
+      double frontOffsetMeters) {
+    // 1) compute the goal pose with your two offsets
+    Pose2d goal = TagUtils.computeTagAdjacencyPose(
+        tagId,
+        side,
+        offsetMeters,
+        frontOffsetMeters);
+    Logger.debug("computed adjacency goal: {}", goal);
+
+    // 2) build your PathPlanner command as before
     PathConstraints constraints = new PathConstraints(
-        frc.robot.Constants.Pathfinding.MaxSpeed, // max translation m/s
-        frc.robot.Constants.Pathfinding.MaxAccel, // max accel m/s²
-        Units.degreesToRadians(frc.robot.Constants.Pathfinding.MaxRotSpeed), // max rot rad/s
-        Units.degreesToRadians(frc.robot.Constants.Pathfinding.MaxRotAccel)); // max rot accel rad/s²
-    return AutoBuilder.pathfindToPose(goal, constraints, 0.0);
+        Constants.Pathfinding.MaxSpeed,
+        Constants.Pathfinding.MaxAccel,
+        Units.degreesToRadians(Constants.Pathfinding.MaxRotSpeed),
+        Units.degreesToRadians(Constants.Pathfinding.MaxRotAccel));
+    Command pathCmd = AutoBuilder.pathfindToPose(goal, constraints, 0.0);
+
+    // 3) make a "canceller" that finishes as soon as the stick moves >40%
+    Command cancelOnStick = waitUntil(() -> Math.abs(joystick.getY()) > 0.4 ||
+        Math.abs(joystick.getX()) > 0.4 ||
+        Math.abs(joystick.getTwist()) > 0.4);
+
+    // 4) race them: whichever completes first wins and cancels the other
+    return race(pathCmd, cancelOnStick);
   }
 
   private Command goToLastSeenTag(TagSide side, double offsetMeters, double frontoffsetMeters) {
@@ -118,16 +106,30 @@ public class RobotContainer {
     // and Y is defined as to the left according to WPILib convention.
 
     drivetrain.setDefaultCommand(
-        // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> drive.withVelocityX(joystick.getY() * MaxSpeed) // Drive forward with
-                                                                                      // negative Y (forward)
-            .withVelocityY(joystick.getX() * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-joystick.getTwist() * MaxAngularRate) // Drive counterclockwise with
-                                                                       // negative X (left)
-        ));
-    drivetrain.configureAutoBuilder();
-    // Button commands
+        drivetrain.applyRequest(() -> {
+          double rawY = joystick.getY();
+          double rawX = joystick.getX();
+          double rawRot = -joystick.getTwist();
 
+          // cubic expo
+          double yCub = Math.copySign(rawY * rawY * rawY, rawY);
+          double xCub = Math.copySign(rawX * rawX * rawX, rawX);
+          double rCub = Math.copySign(rawRot * rawRot * rawRot, rawRot);
+
+          // blend linear + cubic
+          double yOut = stearingMultiplier * yCub + (1 - stearingMultiplier) * rawY;
+          double xOut = stearingMultiplier * xCub + (1 - stearingMultiplier) * rawX;
+          double rotOut = stearingMultiplier * rCub + (1 - stearingMultiplier) * rawRot;
+
+          return drive
+              .withVelocityX(yOut * MaxSpeed)
+              .withVelocityY(xOut * MaxSpeed)
+              .withRotationalRate(rotOut * MaxAngularRate);
+        }));
+
+    drivetrain.configureAutoBuilder();
+
+    // Button commands
     joystick.button(Constants.Joystick.strafeLeft).onTrue(goToLastSeenTag(TagSide.LEFT, 0.164338, 0.4579)); // 0.44
     joystick.button(Constants.Joystick.strafeRight).onTrue(goToLastSeenTag(TagSide.RIGHT, 0.164338, 0.4579)); // 0.44
 
