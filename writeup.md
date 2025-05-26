@@ -40,3 +40,15 @@ I also realized on Friday that when it calls ```Pose2d tagPose = getTagPose2d(ta
 I also tuned the vision standard deviations. So now it is much more confident in the vision poses. It's now so much better with multiple cameras and really isn't "glitching" around like it does when the vision is too confident. I also tested with other tags, and things seem to be working just as intended even with the other angles
 
 We should now be good to go to test on the reef at Carmel on Tuesday!!
+
+### 2025 May 25
+
+Today I did not really do much, but I was not sure of what else needed to be done. I went ahead and added some nice things that I think are good things to add instead. One thing that I added was the exponential drive. I think that this could really help our driving, and if we do not like it then it is super easy to remove/turn off. I also inverted the stick drive so that the robot is automatically moving in the correct direction based on the field orientation. 
+
+Another thing that I did was I added some code to allow the driver to override the auto-align command. I made it so that if the driver uses over 20% stick in any direction, it will cancel and give control back to the driver. 
+
+I also tested the entire blue side of the reef, ensuring every side worked. There were a few issues, notably the issues on id 21 and 18 (the straight on ones), the front offset was about 0.15m off. So I added that and think I got everything dialed.
+
+Also, when testing the bot, I found that one camera, especially, really liked to disconnect. I know that Thrifty makes the locking USB-C connectors, and I would say that those are super important because things are noticeably less accurate when one of them disconnects.
+
+ I am currently just starting to look into how to add the start of autons automatically to the starting pose of the robot. If you guys can think of anything that I am forgetting to add or should look into, let me know.
