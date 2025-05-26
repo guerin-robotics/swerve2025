@@ -58,7 +58,7 @@ public class TagUtils {
       } else /* assume RIGHT */ {
         override = new Translation2d(0, +offsetMeters);
       }
-      front = new Translation2d(+frontoffsetMeters, 0);
+      front = new Translation2d(+frontoffsetMeters + 0.107, 0);
       return new Pose2d(
           tagPose.getTranslation().plus(override).plus(front),
           tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
@@ -103,7 +103,7 @@ public class TagUtils {
       } else /* assume RIGHT */ {
         override = new Translation2d(0, -offsetMeters);
       }
-      front = new Translation2d(-frontoffsetMeters,0);
+      front = new Translation2d(-frontoffsetMeters - 0.107,0);
       return new Pose2d(
           tagPose.getTranslation().plus(override).plus(front),
           tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
@@ -148,7 +148,7 @@ public class TagUtils {
       } else /* assume RIGHT */ {
         override = new Translation2d(0, -offsetMeters);
       }
-      front = new Translation2d(-frontoffsetMeters, 0);
+      front = new Translation2d(-frontoffsetMeters - 0.107, 0);
       return new Pose2d(
           tagPose.getTranslation().plus(override).plus(front),
           tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
@@ -193,7 +193,7 @@ public class TagUtils {
       } else /* assume RIGHT */ {
         override = new Translation2d(0, +offsetMeters);
       }
-      front = new Translation2d(+frontoffsetMeters, 0);
+      front = new Translation2d(+frontoffsetMeters + 0.107, 0);
       return new Pose2d(
           tagPose.getTranslation().plus(override).plus(front),
           tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
@@ -209,7 +209,7 @@ public class TagUtils {
       } else /* assume RIGHT */ {
         override = new Translation2d(+offsetMeters * (Math.sqrt(3) / 2), +offsetMeters / 2);
       }
-      
+      front = new Translation2d(+frontoffsetMeters / Math.sqrt(3), -frontoffsetMeters * 2 / Math.sqrt(3));
       return new Pose2d(
           tagPose.getTranslation().plus(override).plus(front),
           tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));

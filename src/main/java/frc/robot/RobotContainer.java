@@ -35,7 +35,7 @@ public class RobotContainer {
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   public static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01) // Add a 10% deadband
+      .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
 
   public static final CommandJoystick joystick = new CommandJoystick(0);
@@ -81,9 +81,9 @@ public class RobotContainer {
     Command pathCmd = AutoBuilder.pathfindToPose(goal, constraints, 0.0);
 
     // 3) make a "canceller" that finishes as soon as the stick moves >40%
-    Command cancelOnStick = waitUntil(() -> Math.abs(joystick.getY()) > 0.4 ||
-        Math.abs(joystick.getX()) > 0.4 ||
-        Math.abs(joystick.getTwist()) > 0.4);
+    Command cancelOnStick = waitUntil(() -> Math.abs(joystick.getY()) > 0.2 ||
+        Math.abs(joystick.getX()) > 0.2 ||
+        Math.abs(joystick.getTwist()) > 0.2);
 
     // 4) race them: whichever completes first wins and cancels the other
     return race(pathCmd, cancelOnStick);
@@ -107,8 +107,8 @@ public class RobotContainer {
 
     drivetrain.setDefaultCommand(
         drivetrain.applyRequest(() -> {
-          double rawY = joystick.getY();
-          double rawX = joystick.getX();
+          double rawY = -joystick.getY();
+          double rawX = -joystick.getX();
           double rawRot = -joystick.getTwist();
 
           // cubic expo
@@ -130,8 +130,8 @@ public class RobotContainer {
     drivetrain.configureAutoBuilder();
 
     // Button commands
-    joystick.button(Constants.Joystick.strafeLeft).onTrue(goToLastSeenTag(TagSide.LEFT, 0.164338, 0.4579)); // 0.44
-    joystick.button(Constants.Joystick.strafeRight).onTrue(goToLastSeenTag(TagSide.RIGHT, 0.164338, 0.4579)); // 0.44
+    joystick.button(Constants.Joystick.strafeLeft).onTrue(goToLastSeenTag(TagSide.LEFT, 0.164338, 0.355)); // 0.44
+    joystick.button(Constants.Joystick.strafeRight).onTrue(goToLastSeenTag(TagSide.RIGHT, 0.164338, 0.355)); // 0.44
 
     joystick.trigger().whileTrue(drivetrain.applyRequest(() -> brake));
 

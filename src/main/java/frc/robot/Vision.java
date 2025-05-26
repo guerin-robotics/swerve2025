@@ -115,7 +115,7 @@ public class Vision {
             if (numTags > 1) {
                 stdDevs = kMultiTagStdDevs;
             }
-            if (numTags == 1 && avgTagDist > 4.0) {
+            if (numTags == 1 && avgTagDist > 2.0) {
                 stdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
             } else {
                 stdDevs = stdDevs.times(1 + (avgTagDist * avgTagDist / 30.0));
@@ -129,7 +129,7 @@ public class Vision {
         // Now check how far visionPose is from our current odometry pose:
         double distanceToRobot = frc.robot.RobotContainer.drivetrain.getPose().getTranslation()
                 .getDistance(visionEst.estimatedPose.toPose2d().getTranslation());
-        if (distanceToRobot < 2) {
+        if (distanceToRobot < 5) {
             Logger.debug("Cam {} fusing vision ({} tags, avgTagDist={:.2f}, robotDist={:.2f})",
                     camId, numTags, avgTagDist, distanceToRobot);
 

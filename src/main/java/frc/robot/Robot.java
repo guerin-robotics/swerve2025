@@ -87,6 +87,7 @@ public class Robot extends TimedRobot {
 
         Pose2d startPose = new Pose2d(7.89, 4.026, Rotation2d.fromDegrees(180)); // id 21
         // Pose2d startPose = new Pose2d(6, 5.5, Rotation2d.fromDegrees(240)); // id 20
+        // Pose2d startPose = new Pose2d(4, 5.5, Rotation2d.fromDegrees(30)); // id 22
 
         drivetrain.resetPose(startPose);
         System.out.println("Resetting pose to " + startPose);

@@ -58,13 +58,13 @@ public class Constants {
     );
     public static final double masterSpeedMultiplier = 1; // For troubleshooting/testing
     public static final double masterVoltageMultiplier = 1;
-    public static final double stearingMultiplier = 0.5; // 0.3-0.7 is pretty normal 
+    public static final double stearingMultiplier = 0.7; // 0.3-0.7 is pretty norma. Higher is more smoothed better for small ajustments
 
     public static class Pathfinding {
         // max translation m/s
-        public static final double MaxSpeed = 4;
+        public static final double MaxSpeed = 2;
         // max accel m/s²
-        public static final double MaxAccel = 4;
+        public static final double MaxAccel = 2;
         // max rot deg/s
         public static final double MaxRotSpeed = 600;
         // max rot accel deg/s²
