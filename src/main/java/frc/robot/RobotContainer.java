@@ -207,8 +207,8 @@ public class RobotContainer {
     drivetrain.registerTelemetry(logger::telemeterize);
 
     // Button commands
-    joystick.button(Constants.Joystick.strafeLeft).onTrue(goToLastSeenTag(tagSide.LEFT, 0.164338, 0.355)); // 0.44
-    joystick.button(Constants.Joystick.strafeRight).onTrue(goToLastSeenTag(tagSide.RIGHT, 0.164338, 0.355)); // 0.44
+    joystick.button(Constants.Joystick.strafeLeft).onTrue(goToLastSeenTag(tagSide.LEFT, 0.164338, 0.35)); // 0.44
+    joystick.button(Constants.Joystick.strafeRight).onTrue(goToLastSeenTag(tagSide.RIGHT, 0.164338, 0.35)); // 0.44
 
   }
 

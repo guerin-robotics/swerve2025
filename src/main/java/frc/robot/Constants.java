@@ -52,9 +52,9 @@ public class Constants {
     );
     public static class Pathfinding {
         // max translation m/s
-        public static final double MaxSpeed = 2;
+        public static final double MaxSpeed = 4;
         // max accel m/s²
-        public static final double MaxAccel = 2;
+        public static final double MaxAccel = 3;
         // max rot deg/s
         public static final double MaxRotSpeed = 600;
         // max rot accel deg/s²
