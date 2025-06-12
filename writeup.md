@@ -1,0 +1,7 @@
+# Code Write Ups
+
+### 2025 June 12
+Good morning, all! I have been looking over the code and have made some changes.
+I would say that the biggest one is using a hash map. A hash map is a data structure that stores data as key-value pairs, allowing you to quickly retrieve a value using its key. It works by passing the key through a hash function, which converts it into a number (the hash), then uses that number to find the correct index in an internal array where the value is stored. This makes access time almost instant, much faster than searching through every item one by one. Hash maps are efficient, especially for large datasets, because they avoid unnecessary comparisons by jumping directly to where the data should be.
+I also believe to have added the jumping around between poses. The robot now gets the distance to all tags and finds the closest one. Then, with that, it is able to drive to that, but if the stick is moved left or right by 20% within 5 seconds (just an arbitrary number), it will switch the tag either clockwise or counterclockwise to the next "node".
+Also, in hopes of making vision even better, I added some logic that makes the slandered deviations ramp up steeper, so hopefully vision can still help over 2 m without too much glittering (edited) 

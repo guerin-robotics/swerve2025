@@ -34,7 +34,8 @@ public class Constants {
     public static final Transform3d RobotToCam2 = new Transform3d(new Translation3d(0.2764772, 0.2724549, 0.1499719),
             new Rotation3d(0, -0.3490659, -0.1745329));
     
-    public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    // Andymark Field Layout
+    public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(
             0.25, // σₓ: odometry may drift ±10 cm
             0.25, // σᵧ: same sideways

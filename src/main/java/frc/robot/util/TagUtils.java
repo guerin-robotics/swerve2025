@@ -1,7 +1,8 @@
-// src/main/java/frc/robot/util/TagUtils.java
 package frc.robot.util;
 
 import java.util.Optional;
+import java.util.Map;
+import static java.util.Map.entry;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -12,6 +13,80 @@ import frc.robot.Logger;
 import frc.robot.RobotContainer;
 
 public class TagUtils {
+  private static class TagOffsetConfig {
+    final Translation2d leftDir;
+    final Translation2d rightDir;
+    final Translation2d frontDir;
+    TagOffsetConfig(Translation2d leftDir, Translation2d rightDir, Translation2d frontDir) {
+      this.leftDir = leftDir;
+      this.rightDir = rightDir;
+      this.frontDir = frontDir;
+    }
+  }
+
+  private static final Map<Integer, TagOffsetConfig> kTagConfigs = Map.ofEntries(
+    entry(6,  new TagOffsetConfig(
+      new Translation2d(-Math.sqrt(3)/2, -0.5),
+      new Translation2d( Math.sqrt(3)/2,  0.5),
+      new Translation2d( 1/Math.sqrt(3), -2/Math.sqrt(3))
+    )),
+    entry(7,  new TagOffsetConfig(
+      new Translation2d( 0, -1),
+      new Translation2d( 0,  1),
+      new Translation2d( 1,  0)
+    )),
+    entry(8, new TagOffsetConfig(
+      new Translation2d( Math.sqrt(3)/2, -0.5),
+      new Translation2d(-Math.sqrt(3)/2,  0.5),
+      new Translation2d( 1/Math.sqrt(3),  2/Math.sqrt(3))
+    )),
+    entry(9, new TagOffsetConfig(
+      new Translation2d( Math.sqrt(3)/2,  0.5),
+      new Translation2d(-Math.sqrt(3)/2, -0.5),
+      new Translation2d(-1/Math.sqrt(3),  2/Math.sqrt(3))
+    )),
+    entry(10, new TagOffsetConfig(
+      new Translation2d( 0,  1),
+      new Translation2d( 0, -1),
+      new Translation2d(-1,  0) // Adjust front offset with -0.107 removed
+    )),
+    entry(11, new TagOffsetConfig(
+      new Translation2d(-Math.sqrt(3)/2,  0.5),
+      new Translation2d( Math.sqrt(3)/2, -0.5),
+      new Translation2d(-1/Math.sqrt(3), -2/Math.sqrt(3))
+    )),
+    entry(17, new TagOffsetConfig(
+      new Translation2d(-Math.sqrt(3)/2,  0.5),
+      new Translation2d( Math.sqrt(3)/2, -0.5),
+      new Translation2d(-1/Math.sqrt(3), -2/Math.sqrt(3))
+    )),
+    entry(18, new TagOffsetConfig(
+      new Translation2d( 0,  1),
+      new Translation2d( 0, -1),
+      new Translation2d(-1,  0)
+    )),
+    entry(19, new TagOffsetConfig(
+      new Translation2d( Math.sqrt(3)/2,  0.5),
+      new Translation2d(-Math.sqrt(3)/2, -0.5),
+      new Translation2d(-1/Math.sqrt(3),  2/Math.sqrt(3))
+    )),
+    entry(20, new TagOffsetConfig(
+      new Translation2d( Math.sqrt(3)/2, -0.5),
+      new Translation2d(-Math.sqrt(3)/2,  0.5),
+      new Translation2d( 1/Math.sqrt(3),  2/Math.sqrt(3))
+    )),
+    entry(21, new TagOffsetConfig(
+      new Translation2d( 0, -1),
+      new Translation2d( 0,  1),
+      new Translation2d( 1,  0)
+    )),
+    entry(22, new TagOffsetConfig(
+      new Translation2d(-Math.sqrt(3)/2, -0.5),
+      new Translation2d( Math.sqrt(3)/2,  0.5),
+      new Translation2d( 1/Math.sqrt(3), -2/Math.sqrt(3))
+    ))
+  );
+
   // Pull in your field’s AprilTag layout
   private static final AprilTagFieldLayout kTagLayout = Constants.Vision.kTagLayout;
 
@@ -35,189 +110,19 @@ public class TagUtils {
   public static Pose2d computeTagAdjacencyPose(int tagId, tagSide side, double offsetMeters, double frontoffsetMeters) {
     Pose2d tagPose = getTagPose2d(tagId)
         .orElse(RobotContainer.drivetrain.getPose());
-    // Tag 6
-    if (tagId == 6) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(-offsetMeters * (Math.sqrt(3) / 2), -offsetMeters / 2);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(+offsetMeters * (Math.sqrt(3) / 2), +offsetMeters / 2);
-      }
-      front = new Translation2d(+frontoffsetMeters / Math.sqrt(3), -frontoffsetMeters * 2 / Math.sqrt(3));
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
-    }
-    // Tag 7
-    else if (tagId == 7) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(0, -offsetMeters);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(0, +offsetMeters);
-      }
-      front = new Translation2d(+frontoffsetMeters + 0.107, 0);
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
-    }
 
-    // Tag 8
-    else if (tagId == 8) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(+offsetMeters * (Math.sqrt(3) / 2), -offsetMeters / 2);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(-offsetMeters * (Math.sqrt(3) / 2), +offsetMeters / 2);
-      }
-      front = new Translation2d(+frontoffsetMeters / Math.sqrt(3), +frontoffsetMeters * 2 / Math.sqrt(3));
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
+    TagOffsetConfig cfg = kTagConfigs.get(tagId);
+    if (cfg == null) {
+      Logger.warn("No valid tag config for ID {}", tagId);
+      return tagPose;
     }
-
-    // Tag 9
-    else if (tagId == 9) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(+offsetMeters * (Math.sqrt(3) / 2), +offsetMeters / 2);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(-offsetMeters * (Math.sqrt(3) / 2), -offsetMeters / 2);
-      }
-      front = new Translation2d(-frontoffsetMeters / Math.sqrt(3), +frontoffsetMeters * 2 / Math.sqrt(3));
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
-    }
-
-    // Tag 10
-    else if (tagId == 10) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(0, +offsetMeters);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(0, -offsetMeters);
-      }
-      front = new Translation2d(-frontoffsetMeters - 0.107, 0);
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
-    }
-
-    // Tag 11
-    else if (tagId == 11) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(-offsetMeters * (Math.sqrt(3) / 2), +offsetMeters / 2);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(+offsetMeters * (Math.sqrt(3) / 2), -offsetMeters / 2);
-      }
-      front = new Translation2d(-frontoffsetMeters / Math.sqrt(3), -frontoffsetMeters * 2 / Math.sqrt(3));
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
-    }
-
-    // Tag 17
-    else if (tagId == 17) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(-offsetMeters * (Math.sqrt(3) / 2), +offsetMeters / 2);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(+offsetMeters * (Math.sqrt(3) / 2), -offsetMeters / 2);
-      }
-      front = new Translation2d(-frontoffsetMeters / Math.sqrt(3), -frontoffsetMeters * 2 / Math.sqrt(3));
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
-    }
-
-    // Tag 18
-    else if (tagId == 18) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(0, +offsetMeters);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(0, -offsetMeters);
-      }
-      front = new Translation2d(-frontoffsetMeters - 0.107, 0);
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
-    }
-
-    // Tag 19
-    else if (tagId == 19) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(+offsetMeters * (Math.sqrt(3) / 2), +offsetMeters / 2);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(-offsetMeters * (Math.sqrt(3) / 2), -offsetMeters / 2);
-      }
-      front = new Translation2d(-frontoffsetMeters / Math.sqrt(3), +frontoffsetMeters * 2 / Math.sqrt(3));
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
-    }
-
-    // Tag 20
-    else if (tagId == 20) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(+offsetMeters * (Math.sqrt(3) / 2), -offsetMeters / 2);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(-offsetMeters * (Math.sqrt(3) / 2), +offsetMeters / 2);
-      }
-      front = new Translation2d(+frontoffsetMeters / Math.sqrt(3), +frontoffsetMeters * 2 / Math.sqrt(3));
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
-    }
-
-    // Tag 21
-    else if (tagId == 21) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(0, -offsetMeters);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(0, +offsetMeters);
-      }
-      front = new Translation2d(+frontoffsetMeters + 0.107, 0);
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
-
-    }
-
-    // Tag 22
-    else if (tagId == 22) {
-      Translation2d override = new Translation2d(0, 0);
-      Translation2d front = new Translation2d(0, 0);
-      if (side == tagSide.LEFT) {
-        override = new Translation2d(-offsetMeters * (Math.sqrt(3) / 2), -offsetMeters / 2);
-      } else /* assume RIGHT */ {
-        override = new Translation2d(+offsetMeters * (Math.sqrt(3) / 2), +offsetMeters / 2);
-      }
-      front = new Translation2d(+frontoffsetMeters / Math.sqrt(3), -frontoffsetMeters * 2 / Math.sqrt(3));
-      return new Pose2d(
-          tagPose.getTranslation().plus(override).plus(front),
-          tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
-
-    } else {
-      Logger.warn("No valid tag was found");
-    }
-    return tagPose;
+    Translation2d dir = (side == tagSide.LEFT) ? cfg.leftDir : cfg.rightDir;
+    Translation2d override = dir.times(offsetMeters);
+    Translation2d front   = cfg.frontDir.times(frontoffsetMeters);
+    return new Pose2d(
+      tagPose.getTranslation().plus(override).plus(front),
+      tagPose.getRotation().plus(Rotation2d.fromDegrees(180))
+    );
 
   }
 };

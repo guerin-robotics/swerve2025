@@ -115,10 +115,13 @@ public class Vision {
             if (numTags > 1) {
                 stdDevs = kMultiTagStdDevs;
             }
-            if (numTags == 1 && avgTagDist > 2.0) {
+            if (numTags == 1 && avgTagDist > 3.0) {
                 stdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
             } else {
-                stdDevs = stdDevs.times(1 + (avgTagDist * avgTagDist / 30.0));
+                // Steeper quadratic ramp: normalized distance over 1.5 m, squared
+                double normDist = avgTagDist / 1.5;
+                double rampFactor = 1.0 + normDist * normDist;
+                stdDevs = stdDevs.times(rampFactor);
             }
         } else {
             // No tags visible. Default to single-tag std devs
