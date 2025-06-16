@@ -28,13 +28,11 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
-import frc.robot.Constants;
 
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
-
 
 import frc.robot.util.tagSide;
 import frc.robot.util.TagUtils;
@@ -211,10 +209,7 @@ public class RobotContainer {
         joystick.button(Constants.Joystick.Function1).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown()));
         joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null)));
         joystick.button(Constants.Joystick.servoControl).onTrue(new InstantCommand(() -> Hang.brakeHang()));
-        // joystick.button(Constants.Joystick.strafeLeft).onTrue(new InstantCommand(()
-        // -> Vision.strafe(true)));
-        // joystick.button(Constants.Joystick.strafeRight).onTrue(new InstantCommand(()
-        // -> Vision.strafe(false)));
+
         XboxController.pov(Constants.XboxController.dpad.Left)
                 .onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));
         XboxController.pov(Constants.XboxController.dpad.Right)
@@ -229,12 +224,18 @@ public class RobotContainer {
 
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> drive.withVelocityX(joystick.getY() * MaxSpeed * Constants.masterSpeedMultiplier) // Drive forward with
-                                                                                              // negative Y
-                                                                                              // (forward)
-                        .withVelocityY(joystick.getX() * MaxSpeed * Constants.masterSpeedMultiplier) // Drive left with negative X (left)
-                        .withRotationalRate(-joystick.getTwist() * MaxAngularRate * Constants.masterSpeedMultiplier) // Drive counterclockwise with
-                                                                                   // negative X (left)
+                drivetrain.applyRequest(() -> drive
+                        .withVelocityX(joystick.getY() * MaxSpeed * Constants.masterSpeedMultiplier) // Drive forward
+                                                                                                     // with
+                        // negative Y
+                        // (forward)
+                        .withVelocityY(joystick.getX() * MaxSpeed * Constants.masterSpeedMultiplier) // Drive left with
+                                                                                                     // negative X
+                                                                                                     // (left)
+                        .withRotationalRate(-joystick.getTwist() * MaxAngularRate * Constants.masterSpeedMultiplier) // Drive
+                                                                                                                     // counterclockwise
+                                                                                                                     // with
+                // negative X (left)
                 ));
 
         joystick.trigger().whileTrue(drivetrain.applyRequest(() -> brake));
@@ -244,17 +245,18 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
 
         // Button commands
-        /*
         joystick.button(Constants.Joystick.strafeLeft)
-                .onTrue(new InstantCommand(() -> {
-                    mLastStrafeButtonTime = Timer.getFPGATimestamp();
-                    int closest = getClosestTagId();
-                    mCurrentTargetTag = closest;
-                    mCurrentTargetSide = tagSide.LEFT;
-                    makeGoToTag(closest, tagSide.LEFT, 0.164338, 0.35).schedule();
-                }, drivetrain));
+            .onTrue(new InstantCommand(() -> {
+                mLastStrafeButtonTime = Timer.getFPGATimestamp();
+                int closest = getClosestTagId();
+                mCurrentTargetTag = closest;
+                mCurrentTargetSide = tagSide.LEFT;
+                makeGoToTag(closest, tagSide.LEFT, 0.164338, 0.35).schedule();
+            }, drivetrain));
 
-        joystick.button(Constants.Joystick.strafeRight)
+        // Button commands and stick-based triggers for strafeRight and tag rotation
+        if (!Constants.masterNerf) {
+            joystick.button(Constants.Joystick.strafeRight)
                 .onTrue(new InstantCommand(() -> {
                     mLastStrafeButtonTime = Timer.getFPGATimestamp();
                     int closest = getClosestTagId();
@@ -262,9 +264,10 @@ public class RobotContainer {
                     mCurrentTargetSide = tagSide.RIGHT;
                     makeGoToTag(closest, tagSide.RIGHT, 0.164338, 0.35).schedule();
                 }, drivetrain));
-        // Stick-based clockwise rotation (>25%) within 5 seconds of last strafe button
-        new Trigger(() -> joystick.getX() > 0.25
-                && Timer.getFPGATimestamp() - mLastStrafeButtonTime < 5.0)
+
+            // Stick-based clockwise rotation (>25%) within 5 seconds of last strafe button
+            new Trigger(() -> joystick.getX() > 0.25
+                    && Timer.getFPGATimestamp() - mLastStrafeButtonTime < 5.0)
                 .onTrue(new InstantCommand(() -> {
                     if (mCurrentTargetTag < 0) {
                         mCurrentTargetTag = getClosestTagId();
@@ -274,10 +277,10 @@ public class RobotContainer {
                     makeGoToTag(next, mCurrentTargetSide, 0.164338, 0.35).schedule();
                 }, drivetrain));
 
-        // Stick-based counter-clockwise rotation (<-25%) within 5 seconds of last
-        // strafe button
-        new Trigger(() -> joystick.getX() < -0.25
-                && Timer.getFPGATimestamp() - mLastStrafeButtonTime < 5.0)
+            // Stick-based counter-clockwise rotation (<-25%) within 5 seconds of last
+            // strafe button
+            new Trigger(() -> joystick.getX() < -0.25
+                    && Timer.getFPGATimestamp() - mLastStrafeButtonTime < 5.0)
                 .onTrue(new InstantCommand(() -> {
                     if (mCurrentTargetTag < 0) {
                         mCurrentTargetTag = getClosestTagId();
@@ -287,8 +290,7 @@ public class RobotContainer {
                     tagSide newSide = (mCurrentTargetSide == tagSide.LEFT) ? tagSide.RIGHT : tagSide.LEFT;
                     makeGoToTag(prev, newSide, 0.164338, 0.35).schedule();
                 }, drivetrain));
-         */
-
+        }
     }
 
     public Command getAutonomousCommand() {

@@ -12,11 +12,13 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.Matrix;
 
 public class Constants {
-    public static final double masterSpeedMultiplier = 1; // For troubleshooting/testing
-    public static final double masterDriveMultiplier = 1; // For troubleshooting/testing Drivetrain
+    public static final double masterSpeedMultiplier = .25; // For troubleshooting/testing
+    public static final double masterDriveMultiplier = .25; // For troubleshooting/testing Drivetrain
+    public static final boolean masterNerf = true; // For troubleshooting/testing Drivetrain
+
 
     public static final double masterVoltageMultiplier = 1;
-    public static final double stearingMultiplier = 0.85; // 0.3-0.7 is pretty norma. Higher is more smoothed better for small ajustments
+    public static final double stearingMultiplier = 0.85; // 0.3-0.7 is pretty normal. Higher is more smoothed better for small ajustments
 
      // Right Camera
     public static final String CameraName1 = "EagleEye01";
