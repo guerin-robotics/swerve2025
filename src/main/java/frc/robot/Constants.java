@@ -13,8 +13,10 @@ import edu.wpi.first.math.Matrix;
 
 public class Constants {
     public static final double masterSpeedMultiplier = 1; // For troubleshooting/testing
+    public static final double masterDriveMultiplier = 1; // For troubleshooting/testing Drivetrain
+
     public static final double masterVoltageMultiplier = 1;
-    public static final double stearingMultiplier = 0.7; // 0.3-0.7 is pretty norma. Higher is more smoothed better for small ajustments
+    public static final double stearingMultiplier = 0.85; // 0.3-0.7 is pretty norma. Higher is more smoothed better for small ajustments
 
      // Right Camera
     public static final String CameraName1 = "EagleEye01";
@@ -53,9 +55,9 @@ public class Constants {
     );
     public static class Pathfinding {
         // max translation m/s
-        public static final double MaxSpeed = 4;
+        public static final double MaxSpeed = 1;
         // max accel m/s²
-        public static final double MaxAccel = 3;
+        public static final double MaxAccel = 1;
         // max rot deg/s
         public static final double MaxRotSpeed = 600;
         // max rot accel deg/s²
