@@ -12,20 +12,19 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.Matrix;
 
 public class Constants {
-    public static final double masterSpeedMultiplier = .25; // For troubleshooting/testing
-    public static final double masterDriveMultiplier = .25; // For troubleshooting/testing Drivetrain
-    public static final boolean masterNerf = true; // For troubleshooting/testing Drivetrain
-
+    public static final double masterSpeedMultiplier = 1; // For troubleshooting/testing
+    public static final double masterDriveMultiplier = 1; // For troubleshooting/testing Drivetrain
+    public static final boolean masterNerf = false; // For troubleshooting/testing Drivetrain
 
     public static final double masterVoltageMultiplier = 1;
-    public static final double stearingMultiplier = 0.85; // 0.3-0.7 is pretty normal. Higher is more smoothed better for small ajustments
+    public static final double stearingMultiplier = 0.65; // 0.3-0.7 is pretty normal. Higher is more smoothed better
+                                                          // for small ajustments
 
-     // Right Camera
+    // Right Camera
     public static final String CameraName1 = "EagleEye01";
 
     // Left Camera
     public static final String CameraName2 = "EagleEye02";
-
 
     // Cam mounted facing forward, half a meter forward of center, half a meter up
     // from center.
@@ -37,9 +36,10 @@ public class Constants {
     // Left Cam
     public static final Transform3d RobotToCam2 = new Transform3d(new Translation3d(0.2764772, 0.2724549, 0.1499719),
             new Rotation3d(0, -0.3490659, -0.1745329));
-    
+
     // Andymark Field Layout
-    public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+    public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout
+            .loadField(AprilTagFields.k2025ReefscapeAndyMark);
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(
             0.25, // σₓ: odometry may drift ±10 cm
             0.25, // σᵧ: same sideways
@@ -55,6 +55,7 @@ public class Constants {
             0.075, // 2 cm
             Math.toRadians(.6) // 2°
     );
+
     public static class Pathfinding {
         // max translation m/s
         public static final double MaxSpeed = 1;
@@ -178,20 +179,16 @@ public class Constants {
         if (driverStation == ("Blue1")) {
             elevator.level.L4 = 72.0;
             System.out.println("Setting blue side L4");
-        }
-        else if (driverStation == ("Blue2")) {
+        } else if (driverStation == ("Blue2")) {
             elevator.level.L4 = 72.0;
             System.out.println("Setting blue side L4");
-        }
-        else if (driverStation == ("Blue3")) {
+        } else if (driverStation == ("Blue3")) {
             elevator.level.L4 = 72.0;
             System.out.println("Setting blue side L4");
-        }
-        else {
-            elevator.level.L4 = 72.5; //74.0 for good wheels
+        } else {
+            elevator.level.L4 = 72.5; // 74.0 for good wheels
             System.out.println("Setting red side L4");
         }
     }
 
 }
-            
