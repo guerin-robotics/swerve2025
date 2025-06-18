@@ -8,6 +8,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -53,9 +54,8 @@ public class Hang extends SubsystemBase{
             ratchetPosition = 0;
         }
         else {
-            ratchetServo.setAngle(180);
+            ratchetServo.setAngle(90);
             ratchetPosition = 1;
         }
     }
-
 }
