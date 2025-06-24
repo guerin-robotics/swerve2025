@@ -191,6 +191,7 @@ public class RobotContainer {
                 new InstantCommand(() -> Effector.intakeUntilDetected(), m_effector)));
         buttonPanel.button(Constants.buttonPanel.coral.Out)
                 .onTrue(new InstantCommand(() -> Effector.outtakeUntilDetected()));
+        buttonPanel.button(Constants.buttonPanel.intake.intakeDropButton).onTrue(new InstantCommand(() -> Hang.intakeDrop()));
         XboxController.button(Constants.XboxController.button.A).onTrue(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1 + 2)))); //
@@ -208,8 +209,9 @@ public class RobotContainer {
         XboxController.pov(Constants.XboxController.dpad.Down)
                 .onTrue(new InstantCommand(() -> Effector.algaeEffectorDown(), m_effector));
         joystick.button(Constants.Joystick.Function1).onTrue(new InstantCommand(() -> Effector.algaeEffectorDown()));
-        joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null)));
+        //joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null)));
         joystick.button(Constants.Joystick.servoControl).onTrue(new InstantCommand(() -> Hang.brakeHang()));
+        joystick.button(Constants.Joystick.intakeResetButton).onTrue(new InstantCommand(() -> Hang.intakeReset()));
 
         XboxController.pov(Constants.XboxController.dpad.Left)
                 .onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));

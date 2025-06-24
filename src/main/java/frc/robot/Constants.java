@@ -88,10 +88,11 @@ public class Constants {
 
     public static final class Joystick {
         public static final int Function1 = 10;
-        public static final int Function2 = 9;
+        //public static final int Function2 = 9;
         public static final int strafeLeft = 3;
         public static final int strafeRight = 4;
         public static final int servoControl = 8;
+        public static final int intakeResetButton = 9;
     }
 
     public static final class buttonPanel {
@@ -111,6 +112,9 @@ public class Constants {
             public static final int Lower = 5;
             public static final int Upper = 9;
             public static final int Retract = 10;
+        }
+        public static final class intake {
+            public static final int intakeDropButton = 6;
         }
     }
 

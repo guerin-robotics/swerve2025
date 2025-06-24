@@ -53,7 +53,7 @@ public class Robot extends TimedRobot {
 
     private final NeutralOut m_brake = new NeutralOut();
 
-    private Spark intakeActuator = new Spark(7);
+    //private Spark intakeActuator = new Spark(7);
 
     Timer intakeTimer = new Timer();
     static Timer liftTimer = new Timer();
@@ -131,7 +131,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        intakeActuator.set(-1); // Testing only, remove later. Only use 1 or -1.
+        //intakeActuator.set(-1); // Testing only, remove later. Only use 1 or -1.
     }
 
     @Override
