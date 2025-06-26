@@ -12,6 +12,7 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -28,6 +29,9 @@ public class Effector extends SubsystemBase {
 
     private static TalonFX effectorLeft;
     private static TalonFX effectorRight;
+
+    private static TalonFX intakeRight = new TalonFX(Constants.intakeMotors.intakeRightID);
+    private static TalonFX intakeLeft = new TalonFX(Constants.intakeMotors.intakeLeftID);
 
     private static SparkMax algaeMotor = new SparkMax(1, MotorType.kBrushed);
 
@@ -113,6 +117,8 @@ public class Effector extends SubsystemBase {
     public static void intakeUntilDetected() {
         effectorTimer.start();
         while (intakeSensor.getMeasurement().distance_mm > 10) {
+            intakeRight.setControl(new Follower(intakeLeft.getDeviceID(), false));
+            intakeRight.setControl(m_velocityVoltage.withVelocity(10));
             if (effectorTimer.get() > 5) {
                 break;
             }
