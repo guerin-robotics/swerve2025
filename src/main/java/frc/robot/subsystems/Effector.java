@@ -30,8 +30,8 @@ public class Effector extends SubsystemBase {
     private static TalonFX effectorLeft;
     private static TalonFX effectorRight;
 
-    private static TalonFX intakeRight = new TalonFX(Constants.intakeMotors.intakeRightID);
-    private static TalonFX intakeLeft = new TalonFX(Constants.intakeMotors.intakeLeftID);
+    private static TalonFX intakeRight;
+    private static TalonFX intakeLeft;
 
     private static SparkMax algaeMotor = new SparkMax(1, MotorType.kBrushed);
 
@@ -51,6 +51,10 @@ public class Effector extends SubsystemBase {
         effectorLeft = new TalonFX(Constants.effector.EffectorLeft);
         effectorRight = new TalonFX(Constants.effector.EffectorRight);
 
+        intakeLeft = new TalonFX(Constants.intakeMotors.intakeLeftID);
+        intakeRight = new TalonFX(Constants.intakeMotors.intakeRightID);
+        intakeLeft.setControl(new Follower(intakeRight.getDeviceID(), false));
+
         effectorLeft.setNeutralMode(NeutralModeValue.Coast);
         effectorRight.setNeutralMode(NeutralModeValue.Coast);
         // effectorRight.setControl(new Follower(effectorLeft.getDeviceID(), true));
@@ -61,6 +65,9 @@ public class Effector extends SubsystemBase {
         TalonFXConfiguration effectorConfig = new TalonFXConfiguration();
         TalonFXConfiguration effectorLeftConfig = new TalonFXConfiguration();
         TalonFXConfiguration effectorRightConfig = new TalonFXConfiguration();
+
+        TalonFXConfiguration intakeLeftConfig = new TalonFXConfiguration();
+        TalonFXConfiguration intakeRightConfig = new TalonFXConfiguration();
 
         MotionMagicConfigs effectorLeftMotion = effectorLeftConfig.MotionMagic;
         MotionMagicConfigs effectorRightMotion = effectorRightConfig.MotionMagic;
@@ -87,6 +94,22 @@ public class Effector extends SubsystemBase {
 
         effectorRightConfig.Voltage.withPeakForwardVoltage(Volts.of(8 * Constants.masterVoltageMultiplier)).withPeakReverseVoltage(Volts.of(-8 * Constants.masterVoltageMultiplier));
 
+        intakeLeftConfig.Slot0.kS = 0;
+        intakeLeftConfig.Slot0.kV = 0;
+        intakeLeftConfig.Slot0.kP = 0.3;
+        intakeLeftConfig.Slot0.kI = 0;
+        intakeLeftConfig.Slot0.kD = 0;
+
+        intakeLeftConfig.Voltage.withPeakForwardVoltage(Volts.of(8*Constants.masterVoltageMultiplier)).withPeakReverseVoltage(Volts.of(-8*Constants.masterVoltageMultiplier));
+
+        intakeRightConfig.Slot0.kS = 0;
+        intakeRightConfig.Slot0.kV = 0;
+        intakeRightConfig.Slot0.kP = 0.3;
+        intakeRightConfig.Slot0.kI = 0;
+        intakeRightConfig.Slot0.kD = 0;
+
+        intakeRightConfig.Voltage.withPeakForwardVoltage(Volts.of(8*Constants.masterVoltageMultiplier)).withPeakReverseVoltage(Volts.of(-8*Constants.masterVoltageMultiplier));
+
         effectorLeftConfig.Slot1.kS = 1; // Static friction
         effectorLeftConfig.Slot1.kV = 0; // 0.12 for Kraken X60
         effectorLeftConfig.Slot1.kP = 1.0; // Rotational error per second
@@ -107,6 +130,8 @@ public class Effector extends SubsystemBase {
         for (int i = 0; i < 5; ++i) {
             status = effectorRight.getConfigurator().apply(effectorRightConfig);
             effectorLeft.getConfigurator().apply(effectorLeftConfig);
+            intakeLeft.getConfigurator().apply(intakeLeftConfig);
+            intakeRight.getConfigurator().apply(intakeRightConfig);
             if (status.isOK()) break;
         }
         if (!status.isOK()) {
@@ -117,14 +142,13 @@ public class Effector extends SubsystemBase {
     public static void intakeUntilDetected() {
         effectorTimer.start();
         while (intakeSensor.getMeasurement().distance_mm > 10) {
-            intakeRight.setControl(new Follower(intakeLeft.getDeviceID(), false));
-            intakeRight.setControl(m_velocityVoltage.withVelocity(10));
             if (effectorTimer.get() > 5) {
                 break;
             }
             else {
             effectorLeft.setControl(m_velocityVoltage.withVelocity(25 * Constants.masterSpeedMultiplier));
             effectorRight.setControl(m_velocityVoltage.withVelocity(-25 * Constants.masterSpeedMultiplier));
+            intakeRight.setControl(m_velocityVoltage.withVelocity(10));
             }
         }
         effectorTimer.stop();
@@ -136,6 +160,7 @@ public class Effector extends SubsystemBase {
         }
         effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
         effectorRight.setControl((m_velocityVoltage.withVelocity(0)));
+        intakeRight.setControl(m_velocityVoltage.withVelocity(0));
         effectorTimer.stop();
         effectorTimer.reset();
     }
