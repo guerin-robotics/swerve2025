@@ -61,9 +61,9 @@ public class Hang extends SubsystemBase{
         }
     }
 
-    public static void intakeDrop() {
+    public static void intakeDrop(double value) {
         if (Timer.getMatchTime() < 30) {
-            intakeActuator.set(-1);
+            intakeActuator.set(value);
         }
     }
 
