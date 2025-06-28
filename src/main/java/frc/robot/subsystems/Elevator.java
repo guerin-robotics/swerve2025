@@ -58,7 +58,7 @@ public class Elevator extends SubsystemBase{
         while (bottomlimitSwitch.get()) {
             // liftLeft.setControl(motionControl.withPosition(0));
             liftLeft.setControl(m_velocityVoltage.withVelocity(10 * Constants.masterSpeedMultiplier));
-        }   
+        }
         liftLeft.setControl(m_velocityVoltage.withVelocity(0));
     }
         

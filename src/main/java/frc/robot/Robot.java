@@ -76,7 +76,18 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
         vision.periodic();
         drivetrain.periodic();
-        
+        if (RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.LeftTrigger) > 0) {
+            Effector.manualControl(
+                    -0.5 * 70 * RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.LeftTrigger),
+                    null);
+        } else {
+            Effector.manualControl(
+                    0.5 * 70 * RobotContainer.XboxController.getRawAxis(Constants.XboxController.axis.RightTrigger),
+                    null);
+        }
+        if (RobotContainer.XboxController.button(Constants.XboxController.button.A).getAsBoolean()) {
+            Effector.manualControl(20.0, -6.0);
+        }
     }
     @Override
     public void robotInit() {

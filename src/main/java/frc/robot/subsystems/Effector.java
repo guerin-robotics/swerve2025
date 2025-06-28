@@ -30,9 +30,11 @@ public class Effector extends SubsystemBase {
 
     private static TalonFX effectorLeft;
     private static TalonFX effectorRight;
-    
     private static TalonFX intakeLeft;
     private static TalonFX intakeRight;
+
+    private static TalonFX intakeRight;
+    private static TalonFX intakeLeft;
 
     private static SparkMax algaeMotor = new SparkMax(1, MotorType.kBrushed);
 
