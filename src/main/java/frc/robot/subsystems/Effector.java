@@ -12,7 +12,6 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -55,10 +54,6 @@ public class Effector extends SubsystemBase {
         intakeLeft = new TalonFX(Constants.effector.IntakeLeft);
         intakeRight = new TalonFX(Constants.effector.IntakeRight);
 
-        intakeLeft = new TalonFX(Constants.intakeMotors.intakeLeftID);
-        intakeRight = new TalonFX(Constants.intakeMotors.intakeRightID);
-        intakeLeft.setControl(new Follower(intakeRight.getDeviceID(), false));
-
         effectorLeft.setNeutralMode(NeutralModeValue.Coast);
         effectorRight.setNeutralMode(NeutralModeValue.Coast);
         intakeLeft.setNeutralMode(NeutralModeValue.Coast);
@@ -71,9 +66,6 @@ public class Effector extends SubsystemBase {
         TalonFXConfiguration effectorConfig = new TalonFXConfiguration();
         TalonFXConfiguration effectorLeftConfig = new TalonFXConfiguration();
         TalonFXConfiguration effectorRightConfig = new TalonFXConfiguration();
-
-        TalonFXConfiguration intakeLeftConfig = new TalonFXConfiguration();
-        TalonFXConfiguration intakeRightConfig = new TalonFXConfiguration();
 
         MotionMagicConfigs effectorLeftMotion = effectorLeftConfig.MotionMagic;
         MotionMagicConfigs effectorRightMotion = effectorRightConfig.MotionMagic;
@@ -100,22 +92,6 @@ public class Effector extends SubsystemBase {
 
         effectorRightConfig.Voltage.withPeakForwardVoltage(Volts.of(8 * Constants.masterVoltageMultiplier)).withPeakReverseVoltage(Volts.of(-8 * Constants.masterVoltageMultiplier));
 
-        intakeLeftConfig.Slot0.kS = 0;
-        intakeLeftConfig.Slot0.kV = 0;
-        intakeLeftConfig.Slot0.kP = 0.3;
-        intakeLeftConfig.Slot0.kI = 0;
-        intakeLeftConfig.Slot0.kD = 0;
-
-        intakeLeftConfig.Voltage.withPeakForwardVoltage(Volts.of(8*Constants.masterVoltageMultiplier)).withPeakReverseVoltage(Volts.of(-8*Constants.masterVoltageMultiplier));
-
-        intakeRightConfig.Slot0.kS = 0;
-        intakeRightConfig.Slot0.kV = 0;
-        intakeRightConfig.Slot0.kP = 0.3;
-        intakeRightConfig.Slot0.kI = 0;
-        intakeRightConfig.Slot0.kD = 0;
-
-        intakeRightConfig.Voltage.withPeakForwardVoltage(Volts.of(8*Constants.masterVoltageMultiplier)).withPeakReverseVoltage(Volts.of(-8*Constants.masterVoltageMultiplier));
-
         effectorLeftConfig.Slot1.kS = 1; // Static friction
         effectorLeftConfig.Slot1.kV = 0; // 0.12 for Kraken X60
         effectorLeftConfig.Slot1.kP = 1.0; // Rotational error per second
@@ -136,8 +112,6 @@ public class Effector extends SubsystemBase {
         for (int i = 0; i < 5; ++i) {
             status = effectorRight.getConfigurator().apply(effectorRightConfig);
             effectorLeft.getConfigurator().apply(effectorLeftConfig);
-            intakeLeft.getConfigurator().apply(intakeLeftConfig);
-            intakeRight.getConfigurator().apply(intakeRightConfig);
             if (status.isOK()) break;
         }
         if (!status.isOK()) {
@@ -154,7 +128,6 @@ public class Effector extends SubsystemBase {
             else {
             effectorLeft.setControl(m_velocityVoltage.withVelocity(25 * Constants.masterSpeedMultiplier));
             effectorRight.setControl(m_velocityVoltage.withVelocity(-25 * Constants.masterSpeedMultiplier));
-            intakeRight.setControl(m_velocityVoltage.withVelocity(10));
             }
         }
         effectorTimer.stop();
@@ -166,7 +139,6 @@ public class Effector extends SubsystemBase {
         }
         effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
         effectorRight.setControl((m_velocityVoltage.withVelocity(0)));
-        intakeRight.setControl(m_velocityVoltage.withVelocity(0));
         effectorTimer.stop();
         effectorTimer.reset();
     }
