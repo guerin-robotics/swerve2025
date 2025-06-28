@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Drive To Reef R1"
+            "pathName": "Drive 11R"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R1 Coral Station"
+            "pathName": "11R to Station"
           }
         },
         {
@@ -31,7 +31,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R1 Coral Intake"
+            "pathName": "Drive 6L"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreL4Coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "6L to Station"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Drive 6R"
           }
         },
         {

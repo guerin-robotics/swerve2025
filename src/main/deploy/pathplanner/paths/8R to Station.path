@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 16.37025,
-        "y": 0.914749999999998
+        "x": 13.534,
+        "y": 5.232
       },
       "prevControl": null,
       "nextControl": {
-        "x": 14.824875000000002,
-        "y": 2.143249999999999
+        "x": 13.998616857556973,
+        "y": 5.548458250594385
       },
       "isLocked": false,
-      "linkedName": "R3 Coral Intake Point"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 14.322750000000001,
-        "y": 3.8202499999999993
+        "x": 16.458,
+        "y": 7.152
       },
       "prevControl": {
-        "x": 15.141750000000002,
-        "y": 3.947
+        "x": 15.713738996727335,
+        "y": 6.666449857680826
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 5.0,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 54.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Red Right",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 126.43085812016203
+    "rotation": 59.99999999999999
   },
   "useDefaultConstraints": true
 }

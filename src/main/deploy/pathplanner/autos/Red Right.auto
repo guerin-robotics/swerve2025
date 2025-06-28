@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Drive to Reef B1"
+            "pathName": "Drive 9L"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B1 Coral Station"
+            "pathName": "9L to Station"
           }
         },
         {
@@ -31,7 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B1 Coral Intake"
+            "pathName": "Drive 8R"
           }
         },
         {
@@ -43,7 +43,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Blue Calibration"
+            "pathName": "8R to Station"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Drive 8L"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreL4Coral"
           }
         }
       ]

@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.9822500000000005,
-        "y": 4.83425
+        "x": 1.099,
+        "y": 7.152
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.6354999999999995,
-        "y": 5.7848749999999995
+        "x": 1.7737022212788478,
+        "y": 6.7125328244810945
       },
       "isLocked": false,
-      "linkedName": "B3 Transition"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.2480000000000002,
-        "y": 7.223
+        "x": 4.0142,
+        "y": 5.232
       },
       "prevControl": {
-        "x": 2.2425,
-        "y": 6.45275
+        "x": 2.6898998533456204,
+        "y": 6.062744365447412
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "B3 Coral Intake"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 5.0,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -56.475526751423125
+    "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Blue Left",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -117.76105671899144
+    "rotation": 126.0
   },
   "useDefaultConstraints": true
 }

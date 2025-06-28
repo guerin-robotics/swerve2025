@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Drive to Reef B3"
+            "pathName": "Drive 22L"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B3 Coral Station"
+            "pathName": "Station Right"
           }
         },
         {
@@ -31,7 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B3 Coral Intake"
+            "pathName": "Drive 17R"
           }
         },
         {
@@ -43,7 +43,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Blue Calibration"
+            "pathName": "17R to Sation"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Drive 17L"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreL4Coral"
           }
         }
       ]
