@@ -176,6 +176,12 @@ public class Constants {
         public static final int IntakeLeft = 15;
         public static final int IntakeRight = 16;
         public static final double defaultVelocity = 15;
+
+    }
+
+    public static final class intakeMotors {
+        public static final int intakeRightID = 15;
+        public static final int intakeLeftID = 16;
     }
 
     public static final class hang {
