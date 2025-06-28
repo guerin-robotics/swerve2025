@@ -212,8 +212,6 @@ public class RobotContainer {
         //joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() -> Effector.algaeEffectorUp(null)));
         joystick.button(Constants.Joystick.servoControl).onTrue(new InstantCommand(() -> Hang.brakeHang()));
         joystick.button(Constants.Joystick.intakeResetButton).onTrue(new InstantCommand(() -> Hang.intakeReset()));
-        joystick.button(Constants.Joystick.enableIntake).onTrue(new InstantCommand(() -> Effector.runFunnel()));
-        joystick.button(Constants.Joystick.disableIntake).onTrue(new InstantCommand(() -> Effector.stopFunnel()));
 
         XboxController.pov(Constants.XboxController.dpad.Left)
                 .onTrue(new InstantCommand(() -> Elevator.manualOffset(true)));

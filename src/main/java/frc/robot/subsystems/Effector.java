@@ -16,7 +16,6 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.controls.Follower;
 
 import au.grapplerobotics.LaserCan;
 
@@ -29,8 +28,6 @@ public class Effector extends SubsystemBase {
 
     private static TalonFX effectorLeft;
     private static TalonFX effectorRight;
-    private static TalonFX intakeLeft;
-    private static TalonFX intakeRight;
 
     private static SparkMax algaeMotor = new SparkMax(1, MotorType.kBrushed);
 
@@ -38,7 +35,6 @@ public class Effector extends SubsystemBase {
     private static Timer algaeTimer = new Timer();
 
     private final static VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(0);
-    private final static VelocityVoltage intakeVelocityVoltage = new VelocityVoltage(0).withSlot(0);
 
     private final static MotionMagicVoltage motionMagicLeft = new MotionMagicVoltage(0).withSlot(1);
     private final static MotionMagicVoltage motionMagicRight = new MotionMagicVoltage(0).withSlot(1);
@@ -50,13 +46,9 @@ public class Effector extends SubsystemBase {
 
         effectorLeft = new TalonFX(Constants.effector.EffectorLeft);
         effectorRight = new TalonFX(Constants.effector.EffectorRight);
-        intakeLeft = new TalonFX(Constants.effector.IntakeLeft);
-        intakeRight = new TalonFX(Constants.effector.IntakeRight);
 
         effectorLeft.setNeutralMode(NeutralModeValue.Coast);
         effectorRight.setNeutralMode(NeutralModeValue.Coast);
-        intakeLeft.setNeutralMode(NeutralModeValue.Coast);
-        intakeRight.setControl(new Follower(Constants.effector.IntakeLeft, true));
         // effectorRight.setControl(new Follower(effectorLeft.getDeviceID(), true));
         ConfigureEffector();
     }
@@ -258,14 +250,5 @@ public class Effector extends SubsystemBase {
         else {
             algaeEffectorUp(null);
         }
-    }
-
-    public static void runFunnel() {
-        intakeLeft.setControl(intakeVelocityVoltage.withVelocity(10));
-    }
-
-    public static void stopFunnel() {
-        intakeLeft.set(0);
-        intakeRight.set(0);
     }
 }
