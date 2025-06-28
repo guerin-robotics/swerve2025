@@ -111,11 +111,12 @@ public class Constants {
         public static final class algae {
             public static final int Lower = 5;
             public static final int Upper = 9;
-            public static final int Retract = 10;
         }
         public static final class intake {
             public static final int intakeDropButton = 6;
-        }
+            public static final int cancel = 10;
+
+            }
     }
 
     public static final class XboxController {
