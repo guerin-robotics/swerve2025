@@ -7,6 +7,12 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import static edu.wpi.first.wpilibj2.command.Commands.sequence;
+import static edu.wpi.first.wpilibj2.command.Commands.run;
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -47,6 +53,9 @@ public class Effector extends SubsystemBase {
     private final static PositionVoltage m_positionVoltage = new PositionVoltage(0).withSlot(1);
 
     private volatile static boolean isAlgaeOut = false;
+
+    // for speed-controlled bump rotations
+    private double m_initialLeftRot = 0.0;
     
     public Effector() {
         intakeSensor = new LaserCan(2);
@@ -148,7 +157,37 @@ public class Effector extends SubsystemBase {
     
         effectorLeft .setControl(m_positionVoltage.withPosition(currentRotL + rotations));
         effectorRight.setControl(m_positionVoltage.withPosition(currentRotR - rotations));
-      }
+    }
+
+    /**
+     * Returns a Command that spins both wheels at a constant speed (in RPS)
+     * until the left wheel has turned the given number of rotations.
+     *
+     * @param rotations How many rotations to spin
+     * @param speedRPS Speed in rotations-per-second
+     */
+    public Command bumpSpeedRotations(double rotations, double speedRPS) {
+        final double target = Math.abs(rotations);
+        final double direction = Math.signum(rotations);
+        return sequence(
+            // 1) capture starting position
+            Commands.runOnce(() -> m_initialLeftRot = effectorLeft.getPosition().getValueAsDouble(), this),
+            // 2) spin at constant speed until we've turned enough
+            Commands.run(() -> {
+                double vel = direction * speedRPS * Constants.masterSpeedMultiplier;
+                effectorLeft.setControl(m_velocityVoltage.withVelocity(vel));
+                effectorRight.setControl(m_velocityVoltage.withVelocity(-vel));
+            }, this)
+            .until(() ->
+                Math.abs(effectorLeft.getPosition().getValueAsDouble() - m_initialLeftRot) >= target
+            ),
+            // 3) stop motors
+            Commands.runOnce(() -> {
+                effectorLeft.setControl(m_velocityVoltage.withVelocity(0));
+                effectorRight.setControl(m_velocityVoltage.withVelocity(0));
+            }, this)
+        );
+    }
 
     /**
      * Stops all intake and effector motors immediately.
@@ -171,8 +210,8 @@ public class Effector extends SubsystemBase {
 
     public void startLock() {
         // Turn on intake 
-        effectorLeft.setControl(m_velocityVoltage.withVelocity(20 * Constants.masterSpeedMultiplier));
-        effectorRight.setControl(m_velocityVoltage.withVelocity(-20 * Constants.masterSpeedMultiplier));
+        effectorLeft.setControl(m_velocityVoltage.withVelocity(15 * Constants.masterSpeedMultiplier));
+        effectorRight.setControl(m_velocityVoltage.withVelocity(-15 * Constants.masterSpeedMultiplier));
 
     }
 

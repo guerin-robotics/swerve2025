@@ -4,44 +4,47 @@
 
 package frc.robot;
 
-import java.util.List;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.wpilibj2.command.Commands.race;
+import static edu.wpi.first.wpilibj2.command.Commands.sequence;
+import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
+import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
+
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
-import static edu.wpi.first.units.Units.*;
+import javax.sound.midi.Sequence;
 
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.pathplanner.lib.path.PathConstraints;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import frc.robot.Constants.buttonPanel.intake;
-import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.*;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
-
-import com.pathplanner.lib.path.PathConstraints;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.util.Units;
-import static edu.wpi.first.wpilibj2.command.Commands.*;
-
-import frc.robot.util.tagSide;
-import frc.robot.util.TagUtils;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj.Timer;
+import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Effector;
+import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Hang;
+import frc.robot.util.TagUtils;
+import frc.robot.util.tagSide;
 
 public class RobotContainer {
         // Tracks the currently targeted AprilTag ID for stick-based rotation commands
@@ -126,6 +129,9 @@ public class RobotContainer {
                                                                 () -> Elevator.toPosition(
                                                                                 Constants.elevator.level.L4 - 0.5),
                                                                 m_elevator),
+
+                                                new WaitCommand(.9),
+
                                                 new ParallelRaceGroup(
                                                                 new StartEndCommand(
                                                                                 m_effector::startOutTake,
@@ -134,14 +140,12 @@ public class RobotContainer {
                                                                 waitUntil(m_effector::isCoralNotDetected),
                                                                 waitSeconds(2.0)),
 
-                                                new WaitCommand(.75),
-
-                                                // 3) bump the wheels 3 rotations (always runs after the
-                                                // intake group)
+                                                m_effector.bumpSpeedRotations(
+                                                                Constants.effector.scoreRotations,
+                                                                Constants.effector.scoreVelocity),
                                                 new InstantCommand(
-                                                                () -> m_effector.bumpRotations(
-                                                                                Constants.effector.scoreRotations),
-                                                                m_effector)));
+                                                                () -> Elevator.toPosition(
+                                                                                Constants.elevator.level.L1))));
 
                 NamedCommands.registerCommand("intakeCoral",
                                 sequence(
@@ -158,14 +162,9 @@ public class RobotContainer {
                                                                                 m_effector::stopIntake,
                                                                                 m_effector),
                                                                 waitUntil(m_effector::isCoralDetected),
-                                                                waitSeconds(3.0)),
-                                                // 3) bump the wheels 3 rotations (always runs after the
-                                                // intake group)
+                                                                waitSeconds(2.0))
 
-                                                new InstantCommand(
-                                                                () -> m_effector.bumpRotations(
-                                                                                Constants.intake.intakeRotations),
-                                                                m_effector)));
+                                ));
 
                 NamedCommands.registerCommand("LockCoral",
                                 sequence(
@@ -175,21 +174,25 @@ public class RobotContainer {
                                                                                 m_effector::stopIntake,
                                                                                 m_effector),
                                                                 waitUntil(m_effector::isCoralNotDetected),
-                                                                waitSeconds(2.0)),
+                                                                waitSeconds(3.0),
+                                                                waitUntil(() -> buttonPanel.button(
+                                                                                Constants.buttonPanel.intake.cancel)
+                                                                                .getAsBoolean())),
                                                 // 3) bump the wheels 3 rotations (always runs after the
                                                 // intake group)
-                                                new InstantCommand(
-                                                                () -> m_effector.bumpRotations(
-                                                                                Constants.intake.lockRotations),
-                                                                m_effector)));
+                                                m_effector.bumpSpeedRotations(
+                                                                Constants.intake.lockRotations,
+                                                                Constants.intake.lockSpeedRPS)));
 
                 autoChooser = AutoBuilder.buildAutoChooser("");
                 SmartDashboard.putData("Auto Chooser", autoChooser);
+
                 // Position chooser for autonomous starting positions
                 positionChooser = new SendableChooser<>();
                 positionChooser.setDefaultOption("Position 1", 1);
                 positionChooser.addOption("Position 2", 2);
                 positionChooser.addOption("Position 3", 3);
+
                 SmartDashboard.putData("Position Chooser", positionChooser);
 
         }
@@ -302,15 +305,28 @@ public class RobotContainer {
                                                                                                 .getAsBoolean())),
                                                                 // 3) bump the wheels 3 rotations (always runs after the
                                                                 // intake group)
-                                                                new InstantCommand(() -> m_effector.bumpRotations(
-                                                                                Constants.intake.lockRotations),
-                                                                                m_effector),
+                                                                m_effector.bumpSpeedRotations(
+                                                                                Constants.intake.lockRotations,
+                                                                                Constants.intake.lockSpeedRPS),
                                                                 new InstantCommand(() -> Elevator.toPosition(
                                                                                 Constants.elevator.level.L1),
                                                                                 m_elevator)));
 
                 buttonPanel.button(Constants.buttonPanel.coral.Out)
-                                .onTrue(new InstantCommand(() -> Effector.outtakeUntilDetected()));
+                                .onTrue(
+                                                sequence(new ParallelRaceGroup(
+                                                                new StartEndCommand(
+                                                                                m_effector::startOutTake,
+                                                                                m_effector::stopIntake,
+                                                                                m_effector),
+                                                                waitUntil(m_effector::isCoralNotDetected),
+                                                                waitSeconds(2.0)),
+
+                                                                m_effector.bumpSpeedRotations(
+                                                                                Constants.effector.scoreRotations,
+                                                                                Constants.effector.scoreVelocity))
+
+                                );
 
                 buttonPanel.button(Constants.buttonPanel.intake.intakeDropButton)
                                 .onTrue(
@@ -338,6 +354,14 @@ public class RobotContainer {
                                                 new InstantCommand(() -> Elevator
                                                                 .toPosition(Constants.elevator.level.L1 + 2))));
 
+                XboxController.button(Constants.XboxController.button.B)
+                    .onTrue(sequence(
+                        new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L3), m_elevator),
+                        new WaitCommand(.5),
+                        m_effector.bumpSpeedRotations(10, -150),
+                        new InstantCommand(() -> Elevator.toPosition(Constants.elevator.level.L1), m_elevator)
+                    ));
+
                 XboxController.button(Constants.XboxController.bumper.Right).whileTrue(new RunCommand(
                                 () -> Effector.manualControl(
                                                 XboxController.getRawAxis(Constants.XboxController.axis.RightYAxis)
@@ -345,9 +369,43 @@ public class RobotContainer {
                                                 null)));
 
                 XboxController.button(Constants.XboxController.button.X)
-                                .onTrue(new InstantCommand(() -> Sequences.removeL2Algae()));
-                XboxController.button(Constants.XboxController.button.B)
-                                .onTrue(new InstantCommand(() -> Sequences.removeL3Algae()));
+                                .onTrue(
+                                                sequence(
+                                                                // 1) move the elevator up to position 1
+                                                                new InstantCommand(() -> Elevator.toPosition(
+                                                                                Constants.elevator.level.intake),
+                                                                                m_elevator),
+                                                                // 2) run intake until coral arrives, 1s timeout, or
+                                                                // cancel button pressed
+                                                                new ParallelRaceGroup(
+                                                                                new StartEndCommand(
+                                                                                                m_effector::startIntake,
+                                                                                                m_effector::stopIntake,
+                                                                                                m_effector),
+                                                                                waitUntil(m_effector::isCoralDetected),
+                                                                                waitSeconds(5.0),
+                                                                                waitUntil(() -> buttonPanel.button(
+                                                                                                Constants.buttonPanel.intake.cancel)
+                                                                                                .getAsBoolean())),
+
+                                                                new ParallelRaceGroup(
+                                                                                new StartEndCommand(
+                                                                                                m_effector::startLock,
+                                                                                                m_effector::stopIntake,
+                                                                                                m_effector),
+                                                                                waitUntil(m_effector::isCoralNotDetected),
+                                                                                waitSeconds(3.0),
+                                                                                waitUntil(() -> buttonPanel.button(
+                                                                                                Constants.buttonPanel.intake.cancel)
+                                                                                                .getAsBoolean())),
+                                                                // 3) bump the wheels 3 rotations (always runs after the
+                                                                // intake group)
+                                                                m_effector.bumpSpeedRotations(
+                                                                                Constants.intake.lockRotations,
+                                                                                Constants.intake.lockSpeedRPS),
+                                                                new InstantCommand(() -> Elevator.toPosition(
+                                                                                Constants.elevator.level.L1),
+                                                                                m_elevator)));
 
                 XboxController.button(Constants.XboxController.button.Y)
                                 .onTrue(new InstantCommand(() -> Elevator.toPosition(0)));
@@ -430,8 +488,8 @@ public class RobotContainer {
 
                 // reset the field-centric heading on middle button press
 
-                // joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-
+                // joystick.button(2).onTrue(drivetrain.runOnce(() ->
+                // drivetrain.seedFieldCentric()));
 
                 drivetrain.registerTelemetry(logger::telemeterize);
 
@@ -455,9 +513,9 @@ public class RobotContainer {
                                         }, drivetrain));
                         // Path to the closest station
                         joystick.button(2)
-                                .onTrue(new InstantCommand(() -> {
-                                        pathToClosestStation().schedule();
-                                }, drivetrain));
+                                        .onTrue(new InstantCommand(() -> {
+                                                pathToClosestStation().schedule();
+                                        }, drivetrain));
 
                 }
         }

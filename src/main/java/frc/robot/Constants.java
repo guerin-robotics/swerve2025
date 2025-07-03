@@ -58,9 +58,9 @@ public class Constants {
 
     public static class Pathfinding {
         // max translation m/s
-        public static final double MaxSpeed = 1;
+        public static final double MaxSpeed = 4;
         // max accel m/s²
-        public static final double MaxAccel = 1;
+        public static final double MaxAccel = 4;
         // max rot deg/s
         public static final double MaxRotSpeed = 600;
         // max rot accel deg/s²
@@ -176,7 +176,9 @@ public class Constants {
         public static final int EffectorLeft = 12;
         public static final int EffectorRight = 13;
         public static final double defaultVelocity = 15;
-        public static final double scoreRotations = 3;
+        public static final double scoreRotations = 4;
+        public static final double scoreVelocity = 15;
+
         
 
     }
@@ -184,8 +186,9 @@ public class Constants {
     public static final class intake {
         public static final int intakeRightID = 15;
         public static final int intakeLeftID = 16;
-        public static final double lockRotations = -2.5;
+        public static final double lockRotations = -2.75;
         public static final double intakeRotations = 2.5;
+        public static final double lockSpeedRPS = 25;
 
 
     }
