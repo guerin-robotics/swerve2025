@@ -156,10 +156,14 @@ public class Constants {
         public static final int LiftRight = 11;
 
         public static final class level {
-            public static final double L1 = 0.05;
-            public static final double L2 = 17.5;
-            public static final double L3 = 38.0;
+            public static double L1 = 0.05;
+            public static double L2 = 17.5;
+            public static double L3 = 38.0;
             public static double L4 = 74.0;
+            public static double intake = 0.5;
+            public static double activeLevel = 1;
+
+
         }
 
         public static final class algaeLevel {
@@ -172,12 +176,18 @@ public class Constants {
         public static final int EffectorLeft = 12;
         public static final int EffectorRight = 13;
         public static final double defaultVelocity = 15;
+        public static final double scoreRotations = 3;
+        
 
     }
 
-    public static final class intakeMotors {
+    public static final class intake {
         public static final int intakeRightID = 15;
         public static final int intakeLeftID = 16;
+        public static final double lockRotations = -2.5;
+        public static final double intakeRotations = 2.5;
+
+
     }
 
     public static final class hang {

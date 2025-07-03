@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-
+import frc.robot.Constants.buttonPanel.intake;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -54,6 +54,7 @@ public class RobotContainer {
         // 1) Separate tag IDs into upper and lower groups
         private static final List<Integer> kUpperTags = List.of(6, 7, 8, 9, 10, 11);
         private static final List<Integer> kLowerTags = List.of(17, 18, 19, 20, 21, 22);
+        private static final List<Integer> kStation = List.of(1, 2, 12, 13);
 
         // 2) Find the closest tag ID to the robot (search both groups)
         private int getClosestTagId() {
@@ -65,32 +66,6 @@ public class RobotContainer {
                                                 .map(p -> p.getTranslation().getDistance(robotPose.getTranslation()))
                                                 .orElse(Double.MAX_VALUE)))
                                 .orElse(kUpperTags.get(0));
-        }
-
-        // 3) Get next tag in clockwise order within the same group
-        private int getNextClockwise(int currentTagId) {
-                if (kUpperTags.contains(currentTagId)) {
-                        int idx = kUpperTags.indexOf(currentTagId);
-                        return kUpperTags.get((idx + 1) % kUpperTags.size());
-                } else if (kLowerTags.contains(currentTagId)) {
-                        int idx = kLowerTags.indexOf(currentTagId);
-                        return kLowerTags.get((idx + 1) % kLowerTags.size());
-                } else {
-                        return getClosestTagId();
-                }
-        }
-
-        // 4) Get previous tag in clockwise order within the same group
-        private int getPrevClockwise(int currentTagId) {
-                if (kUpperTags.contains(currentTagId)) {
-                        int idx = kUpperTags.indexOf(currentTagId);
-                        return kUpperTags.get((idx + kUpperTags.size() - 1) % kUpperTags.size());
-                } else if (kLowerTags.contains(currentTagId)) {
-                        int idx = kLowerTags.indexOf(currentTagId);
-                        return kLowerTags.get((idx + kLowerTags.size() - 1) % kLowerTags.size());
-                } else {
-                        return getClosestTagId();
-                }
         }
 
         public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -144,35 +119,68 @@ public class RobotContainer {
                                                 new InstantCommand(
                                                                 () -> Elevator.toPosition(Constants.elevator.level.L1),
                                                                 m_elevator)));
+
                 NamedCommands.registerCommand("scoreL4Coral",
                                 new SequentialCommandGroup(
                                                 new InstantCommand(
                                                                 () -> Elevator.toPosition(
-                                                                                Constants.elevator.level.L4 - 1),
+                                                                                Constants.elevator.level.L4 - 0.5),
                                                                 m_elevator),
-                                                new WaitCommand(1.5),
-                                                new InstantCommand(() -> Effector.symmetricalOuttake(null), m_effector),
+                                                new ParallelRaceGroup(
+                                                                new StartEndCommand(
+                                                                                m_effector::startOutTake,
+                                                                                m_effector::stopIntake,
+                                                                                m_effector),
+                                                                waitUntil(m_effector::isCoralNotDetected),
+                                                                waitSeconds(2.0)),
+
+                                                new WaitCommand(.75),
+
+                                                // 3) bump the wheels 3 rotations (always runs after the
+                                                // intake group)
                                                 new InstantCommand(
-                                                                () -> Elevator.toPosition(Constants.elevator.level.L1),
-                                                                m_elevator)));
+                                                                () -> m_effector.bumpRotations(
+                                                                                Constants.effector.scoreRotations),
+                                                                m_effector)));
 
                 NamedCommands.registerCommand("intakeCoral",
                                 sequence(
-                                                // 1) move the elevator up to position 1
-                                                new InstantCommand(() -> Elevator.toPosition(.5),
+                                                // 1) move the elevator up to position intake
+                                                new InstantCommand(
+                                                                () -> Elevator.toPosition(
+                                                                                Constants.elevator.level.intake),
                                                                 m_elevator),
-                                                // 2) run intake until coral arrives, 1s timeout, or
-                                                // cancel button pressed
+                                                // 2) run intake until coral arrives, 3s timeout
+
                                                 new ParallelRaceGroup(
                                                                 new StartEndCommand(
                                                                                 m_effector::startIntake,
                                                                                 m_effector::stopIntake,
                                                                                 m_effector),
                                                                 waitUntil(m_effector::isCoralDetected),
-                                                                waitSeconds(5.0)),
+                                                                waitSeconds(3.0)),
                                                 // 3) bump the wheels 3 rotations (always runs after the
                                                 // intake group)
-                                                new InstantCommand(() -> m_effector.bumpRotations(2.5),
+
+                                                new InstantCommand(
+                                                                () -> m_effector.bumpRotations(
+                                                                                Constants.intake.intakeRotations),
+                                                                m_effector)));
+
+                NamedCommands.registerCommand("LockCoral",
+                                sequence(
+                                                new ParallelRaceGroup(
+                                                                new StartEndCommand(
+                                                                                m_effector::startLock,
+                                                                                m_effector::stopIntake,
+                                                                                m_effector),
+                                                                waitUntil(m_effector::isCoralNotDetected),
+                                                                waitSeconds(2.0)),
+                                                // 3) bump the wheels 3 rotations (always runs after the
+                                                // intake group)
+                                                new InstantCommand(
+                                                                () -> m_effector.bumpRotations(
+                                                                                Constants.intake.lockRotations),
                                                                 m_effector)));
 
                 autoChooser = AutoBuilder.buildAutoChooser("");
@@ -184,6 +192,35 @@ public class RobotContainer {
                 positionChooser.addOption("Position 3", 3);
                 SmartDashboard.putData("Position Chooser", positionChooser);
 
+        }
+
+        public Command pathToClosestStation() {
+                Pose2d robotPose = drivetrain.getPose();
+                Pose2d closestStationPose = TagUtils.getClosestStationPose(
+                                List.of(1, 2, 12, 13), // Station tag IDs
+                                robotPose,
+                                0.35, // Front offset (meters)
+                                0.25 // Lateral offset (meters)
+                );
+
+                Logger.debug("Pathing to closest station pose: {}", closestStationPose);
+
+                PathConstraints constraints = new PathConstraints(
+                                Constants.Pathfinding.MaxSpeed,
+                                Constants.Pathfinding.MaxAccel,
+                                Units.degreesToRadians(Constants.Pathfinding.MaxRotSpeed),
+                                Units.degreesToRadians(Constants.Pathfinding.MaxRotAccel));
+
+                // Build the path-following command
+                Command pathCmd = AutoBuilder.pathfindToPose(closestStationPose, constraints, 0.0);
+
+                // Canceller: finishes as soon as any joystick movement > 20%
+                Command cancelOnStick = waitUntil(() -> Math.abs(joystick.getY()) > 0.2 ||
+                                Math.abs(joystick.getX()) > 0.2 ||
+                                Math.abs(joystick.getTwist()) > 0.2);
+
+                // Race them: whichever ends first wins and cancels the other
+                return race(pathCmd, cancelOnStick);
         }
 
         private Command makeGoToTag(
@@ -207,8 +244,8 @@ public class RobotContainer {
                                 Units.degreesToRadians(Constants.Pathfinding.MaxRotAccel));
                 Command pathCmd = AutoBuilder.pathfindToPose(goal, constraints, 0.0);
 
-                // 3) make a "canceller" that finishes as soon as the stick moves >40%
-                Command cancelOnStick = waitUntil(() -> Math.abs(joystick.getY()) > 0.4 ||
+                // 3) make a "canceller" that finishes as soon as the stick moves >20%
+                Command cancelOnStick = waitUntil(() -> Math.abs(joystick.getY()) > 0.2 ||
                                 Math.abs(joystick.getX()) > 0.2 ||
                                 Math.abs(joystick.getTwist()) > 0.2);
 
@@ -237,7 +274,8 @@ public class RobotContainer {
                                 .onTrue(
                                                 sequence(
                                                                 // 1) move the elevator up to position 1
-                                                                new InstantCommand(() -> Elevator.toPosition(.5),
+                                                                new InstantCommand(() -> Elevator.toPosition(
+                                                                                Constants.elevator.level.intake),
                                                                                 m_elevator),
                                                                 // 2) run intake until coral arrives, 1s timeout, or
                                                                 // cancel button pressed
@@ -251,11 +289,24 @@ public class RobotContainer {
                                                                                 waitUntil(() -> buttonPanel.button(
                                                                                                 Constants.buttonPanel.intake.cancel)
                                                                                                 .getAsBoolean())),
+
+                                                                new ParallelRaceGroup(
+                                                                                new StartEndCommand(
+                                                                                                m_effector::startLock,
+                                                                                                m_effector::stopIntake,
+                                                                                                m_effector),
+                                                                                waitUntil(m_effector::isCoralNotDetected),
+                                                                                waitSeconds(3.0),
+                                                                                waitUntil(() -> buttonPanel.button(
+                                                                                                Constants.buttonPanel.intake.cancel)
+                                                                                                .getAsBoolean())),
                                                                 // 3) bump the wheels 3 rotations (always runs after the
                                                                 // intake group)
-                                                                new InstantCommand(() -> m_effector.bumpRotations(2.5),
+                                                                new InstantCommand(() -> m_effector.bumpRotations(
+                                                                                Constants.intake.lockRotations),
                                                                                 m_effector),
-                                                                new InstantCommand(() -> Elevator.toPosition(0),
+                                                                new InstantCommand(() -> Elevator.toPosition(
+                                                                                Constants.elevator.level.L1),
                                                                                 m_elevator)));
 
                 buttonPanel.button(Constants.buttonPanel.coral.Out)
@@ -378,7 +429,10 @@ public class RobotContainer {
                 joystick.trigger().whileTrue(drivetrain.applyRequest(() -> brake));
 
                 // reset the field-centric heading on middle button press
-                joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+                // joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+
                 drivetrain.registerTelemetry(logger::telemeterize);
 
                 // Button commands
@@ -387,7 +441,6 @@ public class RobotContainer {
                 if (!Constants.masterNerf) {
                         joystick.button(Constants.Joystick.strafeRight)
                                         .onTrue(new InstantCommand(() -> {
-                                                mLastStrafeButtonTime = Timer.getFPGATimestamp();
                                                 int closest = getClosestTagId();
                                                 mCurrentTargetTag = closest;
                                                 mCurrentTargetSide = tagSide.RIGHT;
@@ -395,12 +448,16 @@ public class RobotContainer {
                                         }, drivetrain));
                         joystick.button(Constants.Joystick.strafeLeft)
                                         .onTrue(new InstantCommand(() -> {
-                                                mLastStrafeButtonTime = Timer.getFPGATimestamp();
                                                 int closest = getClosestTagId();
                                                 mCurrentTargetTag = closest;
                                                 mCurrentTargetSide = tagSide.LEFT;
                                                 makeGoToTag(closest, tagSide.LEFT, 0.164338, 0.35).schedule();
                                         }, drivetrain));
+                        // Path to the closest station
+                        joystick.button(2)
+                                .onTrue(new InstantCommand(() -> {
+                                        pathToClosestStation().schedule();
+                                }, drivetrain));
 
                 }
         }

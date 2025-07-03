@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.Map;
 import static java.util.Map.entry;
 
+import java.util.List;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,6 +19,7 @@ public class TagUtils {
     final Translation2d leftDir;
     final Translation2d rightDir;
     final Translation2d frontDir;
+
     TagOffsetConfig(Translation2d leftDir, Translation2d rightDir, Translation2d frontDir) {
       this.leftDir = leftDir;
       this.rightDir = rightDir;
@@ -25,67 +28,55 @@ public class TagUtils {
   }
 
   private static final Map<Integer, TagOffsetConfig> kTagConfigs = Map.ofEntries(
-    entry(6,  new TagOffsetConfig(
-      new Translation2d(-Math.sqrt(3)/2, -0.5),
-      new Translation2d( Math.sqrt(3)/2,  0.5),
-      new Translation2d( 1/Math.sqrt(3), -2/Math.sqrt(3))
-    )),
-    entry(7,  new TagOffsetConfig(
-      new Translation2d( 0, -1),
-      new Translation2d( 0,  1),
-      new Translation2d( 1,  0)
-    )),
-    entry(8, new TagOffsetConfig(
-      new Translation2d( Math.sqrt(3)/2, -0.5),
-      new Translation2d(-Math.sqrt(3)/2,  0.5),
-      new Translation2d( 1/Math.sqrt(3),  2/Math.sqrt(3))
-    )),
-    entry(9, new TagOffsetConfig(
-      new Translation2d( Math.sqrt(3)/2,  0.5),
-      new Translation2d(-Math.sqrt(3)/2, -0.5),
-      new Translation2d(-1/Math.sqrt(3),  2/Math.sqrt(3))
-    )),
-    entry(10, new TagOffsetConfig(
-      new Translation2d( 0,  1),
-      new Translation2d( 0, -1),
-      new Translation2d(-1,  0) // Adjust front offset with -0.107 removed
-    )),
-    entry(11, new TagOffsetConfig(
-      new Translation2d(-Math.sqrt(3)/2,  0.5),
-      new Translation2d( Math.sqrt(3)/2, -0.5),
-      new Translation2d(-1/Math.sqrt(3), -2/Math.sqrt(3))
-    )),
-    entry(17, new TagOffsetConfig(
-      new Translation2d(-Math.sqrt(3)/2,  0.5),
-      new Translation2d( Math.sqrt(3)/2, -0.5),
-      new Translation2d(-1/Math.sqrt(3), -2/Math.sqrt(3))
-    )),
-    entry(18, new TagOffsetConfig(
-      new Translation2d( 0,  1),
-      new Translation2d( 0, -1),
-      new Translation2d(-1,  0)
-    )),
-    entry(19, new TagOffsetConfig(
-      new Translation2d( Math.sqrt(3)/2,  0.5),
-      new Translation2d(-Math.sqrt(3)/2, -0.5),
-      new Translation2d(-1/Math.sqrt(3),  2/Math.sqrt(3))
-    )),
-    entry(20, new TagOffsetConfig(
-      new Translation2d( Math.sqrt(3)/2, -0.5),
-      new Translation2d(-Math.sqrt(3)/2,  0.5),
-      new Translation2d( 1/Math.sqrt(3),  2/Math.sqrt(3))
-    )),
-    entry(21, new TagOffsetConfig(
-      new Translation2d( 0, -1),
-      new Translation2d( 0,  1),
-      new Translation2d( 1,  0)
-    )),
-    entry(22, new TagOffsetConfig(
-      new Translation2d(-Math.sqrt(3)/2, -0.5),
-      new Translation2d( Math.sqrt(3)/2,  0.5),
-      new Translation2d( 1/Math.sqrt(3), -2/Math.sqrt(3))
-    ))
-  );
+      entry(6, new TagOffsetConfig(
+          new Translation2d(-Math.sqrt(3) / 2, -0.5),
+          new Translation2d(Math.sqrt(3) / 2, 0.5),
+          new Translation2d(1 / Math.sqrt(3), -2 / Math.sqrt(3)))),
+      entry(7, new TagOffsetConfig(
+          new Translation2d(0, -1),
+          new Translation2d(0, 1),
+          new Translation2d(1, 0))),
+      entry(8, new TagOffsetConfig(
+          new Translation2d(Math.sqrt(3) / 2, -0.5),
+          new Translation2d(-Math.sqrt(3) / 2, 0.5),
+          new Translation2d(1 / Math.sqrt(3), 2 / Math.sqrt(3)))),
+      entry(9, new TagOffsetConfig(
+          new Translation2d(Math.sqrt(3) / 2, 0.5),
+          new Translation2d(-Math.sqrt(3) / 2, -0.5),
+          new Translation2d(-1 / Math.sqrt(3), 2 / Math.sqrt(3)))),
+      entry(10, new TagOffsetConfig(
+          new Translation2d(0, 1),
+          new Translation2d(0, -1),
+          new Translation2d(-1, 0) // Adjust front offset with -0.107 removed
+      )),
+      entry(11, new TagOffsetConfig(
+          new Translation2d(-Math.sqrt(3) / 2, 0.5),
+          new Translation2d(Math.sqrt(3) / 2, -0.5),
+          new Translation2d(-1 / Math.sqrt(3), -2 / Math.sqrt(3)))),
+      entry(17, new TagOffsetConfig(
+          new Translation2d(-Math.sqrt(3) / 2, 0.5),
+          new Translation2d(Math.sqrt(3) / 2, -0.5),
+          new Translation2d(-1 / Math.sqrt(3), -2 / Math.sqrt(3)))),
+      entry(18, new TagOffsetConfig(
+          new Translation2d(0, 1),
+          new Translation2d(0, -1),
+          new Translation2d(-1, 0))),
+      entry(19, new TagOffsetConfig(
+          new Translation2d(Math.sqrt(3) / 2, 0.5),
+          new Translation2d(-Math.sqrt(3) / 2, -0.5),
+          new Translation2d(-1 / Math.sqrt(3), 2 / Math.sqrt(3)))),
+      entry(20, new TagOffsetConfig(
+          new Translation2d(Math.sqrt(3) / 2, -0.5),
+          new Translation2d(-Math.sqrt(3) / 2, 0.5),
+          new Translation2d(1 / Math.sqrt(3), 2 / Math.sqrt(3)))),
+      entry(21, new TagOffsetConfig(
+          new Translation2d(0, -1),
+          new Translation2d(0, 1),
+          new Translation2d(1, 0))),
+      entry(22, new TagOffsetConfig(
+          new Translation2d(-Math.sqrt(3) / 2, -0.5),
+          new Translation2d(Math.sqrt(3) / 2, 0.5),
+          new Translation2d(1 / Math.sqrt(3), -2 / Math.sqrt(3)))));
 
   // Pull in your field’s AprilTag layout
   private static final AprilTagFieldLayout kTagLayout = Constants.Vision.kTagLayout;
@@ -96,6 +87,47 @@ public class TagUtils {
     return kTagLayout
         .getTagPose(tagId)
         .map(p3 -> new Pose2d(p3.getX(), p3.getY(), p3.getRotation().toRotation2d()));
+  }
+
+  public static Pose2d getClosestStationPose(
+      List<Integer> tagIds,
+      Pose2d robotPose,
+      double frontOffsetMeters,
+      double lateralOffsetMeters) {
+    Pose2d closestPose = null;
+    double minDistance = Double.MAX_VALUE;
+
+    for (int tagId : tagIds) {
+      Pose2d tagPose = getTagPose2d(tagId)
+          .orElse(RobotContainer.drivetrain.getPose());
+
+      TagOffsetConfig cfg = kTagConfigs.get(tagId);
+      if (cfg == null) {
+        Logger.warn("No tag config for ID {}", tagId);
+        continue;
+      }
+
+      Translation2d front = cfg.frontDir.times(frontOffsetMeters);
+      Translation2d leftShift = cfg.leftDir.times(lateralOffsetMeters);
+      Translation2d rightShift = cfg.rightDir.times(lateralOffsetMeters);
+      Rotation2d heading = tagPose.getRotation();
+
+      Pose2d[] candidates = new Pose2d[] {
+          new Pose2d(tagPose.getTranslation().plus(front), heading), // center
+          new Pose2d(tagPose.getTranslation().plus(front).plus(leftShift), heading), // center-left
+          new Pose2d(tagPose.getTranslation().plus(front).plus(rightShift), heading) // center-right
+      };
+
+      for (Pose2d candidate : candidates) {
+        double distance = robotPose.getTranslation().getDistance(candidate.getTranslation());
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestPose = candidate;
+        }
+      }
+    }
+
+    return closestPose;
   }
 
   /**
@@ -118,11 +150,10 @@ public class TagUtils {
     }
     Translation2d dir = (side == tagSide.LEFT) ? cfg.leftDir : cfg.rightDir;
     Translation2d override = dir.times(offsetMeters);
-    Translation2d front   = cfg.frontDir.times(frontoffsetMeters);
+    Translation2d front = cfg.frontDir.times(frontoffsetMeters);
     return new Pose2d(
-      tagPose.getTranslation().plus(override).plus(front),
-      tagPose.getRotation().plus(Rotation2d.fromDegrees(180))
-    );
+        tagPose.getTranslation().plus(override).plus(front),
+        tagPose.getRotation().plus(Rotation2d.fromDegrees(180)));
 
   }
 };

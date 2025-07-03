@@ -54,8 +54,8 @@ public class Effector extends SubsystemBase {
         effectorLeft = new TalonFX(Constants.effector.EffectorLeft);
         effectorRight = new TalonFX(Constants.effector.EffectorRight);
 
-        intakeLeft = new TalonFX(Constants.intakeMotors.intakeLeftID);
-        intakeRight = new TalonFX(Constants.intakeMotors.intakeRightID);
+        intakeLeft = new TalonFX(Constants.intake.intakeLeftID);
+        intakeRight = new TalonFX(Constants.intake.intakeRightID);
         intakeLeft.setControl(new Follower(intakeRight.getDeviceID(), false));
 
         effectorLeft.setNeutralMode(NeutralModeValue.Coast);
@@ -169,9 +169,27 @@ public class Effector extends SubsystemBase {
         intakeLeft.setControl(m_velocityVoltage.withVelocity(20 * Constants.masterSpeedMultiplier));
     }
 
+    public void startLock() {
+        // Turn on intake 
+        effectorLeft.setControl(m_velocityVoltage.withVelocity(20 * Constants.masterSpeedMultiplier));
+        effectorRight.setControl(m_velocityVoltage.withVelocity(-20 * Constants.masterSpeedMultiplier));
+
+    }
+
+    public void startOutTake() {
+        // Turn on intake 
+        effectorLeft.setControl(m_velocityVoltage.withVelocity(40 * Constants.masterSpeedMultiplier));
+        effectorRight.setControl(m_velocityVoltage.withVelocity(-40 * Constants.masterSpeedMultiplier));
+
+    }
+
     public boolean isCoralDetected() {
         return intakeSensor.getMeasurement().distance_mm < 10;
     }
+
+    public boolean isCoralNotDetected() {
+        return intakeSensor.getMeasurement().distance_mm > 10;
+    }   
     
 
     public static void outtakeUntilDetected() {
