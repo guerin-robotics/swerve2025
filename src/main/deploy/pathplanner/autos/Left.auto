@@ -29,9 +29,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Drive 19L"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "LockCoral"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Drive 19L"
+                }
+              }
+            ]
           }
         },
         {
@@ -53,9 +66,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Drive 19R"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "LockCoral"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Drive 19R"
+                }
+              }
+            ]
           }
         },
         {
