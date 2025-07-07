@@ -139,8 +139,6 @@ public class RobotContainer {
                                                                 waitUntil(m_effector::isCoralNotDetected),
                                                                 waitSeconds(2.0)),
 
-                                                new WaitCommand(.45),
-
                                                 m_effector.bumpSpeedRotations(
                                                                 Constants.effector.scoreRotations,
                                                                 Constants.effector.scoreVelocity),
@@ -163,27 +161,29 @@ public class RobotContainer {
                                                                                 m_effector::stopIntake,
                                                                                 m_effector),
                                                                 waitUntil(m_effector::isCoralDetected),
-                                                                waitSeconds(2.0))
+                                                                waitSeconds(2.0)),
+
+                                                new ParallelRaceGroup(
+                                                                        new StartEndCommand(
+                                                                                        m_effector::startLock,
+                                                                                        m_effector::stopIntake,
+                                                                                        m_effector),
+                                                                        waitUntil(m_effector::isCoralNotDetected),
+                                                                        waitSeconds(3.0),
+                                                                        waitUntil(() -> buttonPanel.button(
+                                                                                        Constants.buttonPanel.intake.cancel)
+                                                                                        .getAsBoolean())),
+                                                        // 3) bump the wheels 3 rotations (always runs after the
+                                                        // intake group)
+                                                        m_effector.bumpSpeedRotations(
+                                                                        Constants.intake.lockRotations,
+                                                                        Constants.intake.lockSpeedRPS)
 
                                 ));
 
                 NamedCommands.registerCommand("LockCoral",
                                 sequence(
-                                                new ParallelRaceGroup(
-                                                                new StartEndCommand(
-                                                                                m_effector::startLock,
-                                                                                m_effector::stopIntake,
-                                                                                m_effector),
-                                                                waitUntil(m_effector::isCoralNotDetected),
-                                                                waitSeconds(3.0),
-                                                                waitUntil(() -> buttonPanel.button(
-                                                                                Constants.buttonPanel.intake.cancel)
-                                                                                .getAsBoolean())),
-                                                // 3) bump the wheels 3 rotations (always runs after the
-                                                // intake group)
-                                                m_effector.bumpSpeedRotations(
-                                                                Constants.intake.lockRotations,
-                                                                Constants.intake.lockSpeedRPS)));
+                                               ));
 
                 autoChooser = AutoBuilder.buildAutoChooser("");
                 SmartDashboard.putData("Auto Chooser", autoChooser);

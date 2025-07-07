@@ -17,15 +17,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Station Right"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Station Right"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "intakeCoral"
+            "waitTime": 0.1
           }
         },
         {
@@ -33,15 +40,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "LockCoral"
-                }
-              },
-              {
                 "type": "path",
                 "data": {
                   "pathName": "Drive 17R"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeCoral"
                 }
               }
             ]
@@ -54,15 +61,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "17R to Sation"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "17R to Sation"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "intakeCoral"
+            "waitTime": 0.1
           }
         },
         {
@@ -70,15 +84,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "LockCoral"
-                }
-              },
-              {
                 "type": "path",
                 "data": {
                   "pathName": "Drive 17L"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeCoral"
                 }
               }
             ]

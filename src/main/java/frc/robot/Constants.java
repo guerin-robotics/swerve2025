@@ -201,16 +201,16 @@ public class Constants {
         System.out.println("Driver side:" + DriverStationJNI.getAllianceStation().toString());
         var driverStation = DriverStationJNI.getAllianceStation().toString();
         if (driverStation == ("Blue1")) {
-            elevator.level.L4 = 72.0;
+            elevator.level.L4 = 71.5;
             System.out.println("Setting blue side L4");
         } else if (driverStation == ("Blue2")) {
-            elevator.level.L4 = 72.0;
+            elevator.level.L4 = 71.5;
             System.out.println("Setting blue side L4");
         } else if (driverStation == ("Blue3")) {
-            elevator.level.L4 = 72.0;
+            elevator.level.L4 = 71.5;
             System.out.println("Setting blue side L4");
         } else {
-            elevator.level.L4 = 72.6; // 74.0 for good wheels
+            elevator.level.L4 = 72.4; // 74.0 for good wheels
             System.out.println("Setting red side L4");
         }
     }
