@@ -58,9 +58,9 @@ public class Constants {
 
     public static class Pathfinding {
         // max translation m/s
-        public static final double MaxSpeed = 4;
+        public static final double MaxSpeed = 5;
         // max accel m/s²
-        public static final double MaxAccel = 4;
+        public static final double MaxAccel = 2.5;
         // max rot deg/s
         public static final double MaxRotSpeed = 600;
         // max rot accel deg/s²
@@ -210,7 +210,7 @@ public class Constants {
             elevator.level.L4 = 72.0;
             System.out.println("Setting blue side L4");
         } else {
-            elevator.level.L4 = 72.5; // 74.0 for good wheels
+            elevator.level.L4 = 72.6; // 74.0 for good wheels
             System.out.println("Setting red side L4");
         }
     }

@@ -106,7 +106,6 @@ public class RobotContainer {
         public final Hang m_hang = new Hang();
 
         public RobotContainer() {
-                drivetrain.seedFieldCentric();
                 vision = new Vision((pose, timestamp, stdDevs) -> drivetrain.addVisionMeasurement(pose, timestamp,
                                 stdDevs));
                 configureBindings();
@@ -139,6 +138,8 @@ public class RobotContainer {
                                                                                 m_effector),
                                                                 waitUntil(m_effector::isCoralNotDetected),
                                                                 waitSeconds(2.0)),
+
+                                                new WaitCommand(.45),
 
                                                 m_effector.bumpSpeedRotations(
                                                                 Constants.effector.scoreRotations,
@@ -202,7 +203,7 @@ public class RobotContainer {
                 Pose2d closestStationPose = TagUtils.getClosestStationPose(
                                 List.of(1, 2, 12, 13), // Station tag IDs
                                 robotPose,
-                                0.35, // Front offset (meters)
+                                0.41, // Front offset (meters)
                                 0.25 // Lateral offset (meters)
                 );
 
@@ -458,8 +459,8 @@ public class RobotContainer {
 
                 drivetrain.setDefaultCommand(
                                 drivetrain.applyRequest(() -> {
-                                        double rawY = joystick.getY();
-                                        double rawX = joystick.getX();
+                                        double rawY = -joystick.getY();
+                                        double rawX = -joystick.getX();
                                         double rawRot = -joystick.getTwist();
 
                                         // cubic expo
@@ -502,14 +503,14 @@ public class RobotContainer {
                                                 int closest = getClosestTagId();
                                                 mCurrentTargetTag = closest;
                                                 mCurrentTargetSide = tagSide.RIGHT;
-                                                makeGoToTag(closest, tagSide.RIGHT, 0.164338, 0.35).schedule();
+                                                makeGoToTag(closest, tagSide.RIGHT, 0.167, 0.42).schedule();
                                         }, drivetrain));
                         joystick.button(Constants.Joystick.strafeLeft)
                                         .onTrue(new InstantCommand(() -> {
                                                 int closest = getClosestTagId();
                                                 mCurrentTargetTag = closest;
                                                 mCurrentTargetSide = tagSide.LEFT;
-                                                makeGoToTag(closest, tagSide.LEFT, 0.164338, 0.35).schedule();
+                                                makeGoToTag(closest, tagSide.LEFT, 0.193, 0.42).schedule();
                                         }, drivetrain));
                         // Path to the closest station
                         joystick.button(2)

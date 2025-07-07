@@ -32,22 +32,26 @@ public class TagUtils {
           new Translation2d(-Math.sqrt(3) / 2, -0.5),
           new Translation2d(Math.sqrt(3) / 2, 0.5),
           new Translation2d(1 / Math.sqrt(3), -2 / Math.sqrt(3)))),
+          
       entry(7, new TagOffsetConfig(
           new Translation2d(0, -1),
           new Translation2d(0, 1),
           new Translation2d(1, 0))),
+
       entry(8, new TagOffsetConfig(
           new Translation2d(Math.sqrt(3) / 2, -0.5),
           new Translation2d(-Math.sqrt(3) / 2, 0.5),
           new Translation2d(1 / Math.sqrt(3), 2 / Math.sqrt(3)))),
+
       entry(9, new TagOffsetConfig(
           new Translation2d(Math.sqrt(3) / 2, 0.5),
           new Translation2d(-Math.sqrt(3) / 2, -0.5),
           new Translation2d(-1 / Math.sqrt(3), 2 / Math.sqrt(3)))),
+
       entry(10, new TagOffsetConfig(
           new Translation2d(0, 1),
           new Translation2d(0, -1),
-          new Translation2d(-1, 0) // Adjust front offset with -0.107 removed
+          new Translation2d(-1, 0) 
       )),
       entry(11, new TagOffsetConfig(
           new Translation2d(-Math.sqrt(3) / 2, 0.5),

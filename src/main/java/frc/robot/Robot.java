@@ -110,7 +110,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        // resetPose();
+        resetPose();
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
@@ -135,11 +135,15 @@ public class Robot extends TimedRobot {
         // of where your robot was placed on the field.
         // The first pose in an autonomous path is often a good choice.
 
-        Pose2d startPose = new Pose2d(14.89, 4.026, Rotation2d.fromDegrees(180)); // id ??
+        // Pose2d startPose = new Pose2d(14.89, c4.026, Rotation2d.fromDegrees(180)); // id ??
 
         // Pose2d startPose = new Pose2d(7.89, 4.026, Rotation2d.fromDegrees(180)); // id 21
         // Pose2d startPose = new Pose2d(6, 5.5, Rotation2d.fromDegrees(240)); // id 20
         // Pose2d startPose = new Pose2d(4, 5.5, Rotation2d.fromDegrees(30)); // id 22
+
+        Pose2d startPose = new Pose2d(16, 4, Rotation2d.fromDegrees(0)); // id ??
+
+
 
         drivetrain.resetPose(startPose);
         System.out.println("Resetting pose to " + startPose);
