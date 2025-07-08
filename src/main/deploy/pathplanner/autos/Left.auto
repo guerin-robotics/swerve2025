@@ -17,15 +17,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "22R to Station"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intakeCoral"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "22R to Station"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "startIntakeCoral"
+                }
+              }
+            ]
           }
         },
         {
@@ -35,7 +42,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "LockCoral"
+                  "name": "intakeCoral"
                 }
               },
               {
@@ -54,15 +61,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "19L to Station"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intakeCoral"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "startIntakeCoral"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "19L to Station"
+                }
+              }
+            ]
           }
         },
         {
@@ -72,7 +86,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "LockCoral"
+                  "name": "intakeCoral"
                 }
               },
               {

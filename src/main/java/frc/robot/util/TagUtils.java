@@ -111,7 +111,12 @@ public class TagUtils {
         continue;
       }
 
-      Translation2d front = cfg.frontDir.times(frontOffsetMeters);
+      
+      // Apply an extra front offset for tags 7, 10, 18, and 21
+      double extraFront = (tagId == 7 || tagId == 10 || tagId == 18 || tagId == 21) ? 0.107 : 0.0;
+      
+      double effectiveFrontOffset = frontOffsetMeters + extraFront;
+      Translation2d front = cfg.frontDir.times(effectiveFrontOffset);
       Translation2d leftShift = cfg.leftDir.times(lateralOffsetMeters);
       Translation2d rightShift = cfg.rightDir.times(lateralOffsetMeters);
       Rotation2d heading = tagPose.getRotation();
@@ -153,7 +158,18 @@ public class TagUtils {
       return tagPose;
     }
     Translation2d dir = (side == tagSide.LEFT) ? cfg.leftDir : cfg.rightDir;
-    Translation2d override = dir.times(offsetMeters);
+
+    // apply tag-specific lateral tweaks for tags 
+
+    double lateral = offsetMeters;
+    // if (tagId == 18 && side == tagSide.LEFT) {
+    //   lateral += 0.1; // move 0.1 m further left for tag 18
+    // }
+    // if (tagId == 20 && side == tagSide.RIGHT) {
+    //   lateral += 0.18; // move 0.18 m further right for tag 20
+    // }
+    
+    Translation2d override = dir.times(lateral);
     Translation2d front = cfg.frontDir.times(frontoffsetMeters);
     return new Pose2d(
         tagPose.getTranslation().plus(override).plus(front),

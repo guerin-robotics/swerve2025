@@ -157,7 +157,7 @@ public class Constants {
 
         public static final class level {
             public static double L1 = 0.05;
-            public static double L2 = 17.5;
+            public static double L2 = 16.5;
             public static double L3 = 38.0;
             public static double L4 = 74.0;
             public static double intake = 0.5;
@@ -198,15 +198,8 @@ public class Constants {
     }
 
     public static void setL4() {
-        System.out.println("Driver side:" + DriverStationJNI.getAllianceStation().toString());
         var driverStation = DriverStationJNI.getAllianceStation().toString();
-        if (driverStation == ("Blue1")) {
-            elevator.level.L4 = 71.5;
-            System.out.println("Setting blue side L4");
-        } else if (driverStation == ("Blue2")) {
-            elevator.level.L4 = 71.5;
-            System.out.println("Setting blue side L4");
-        } else if (driverStation == ("Blue3")) {
+        if (driverStation.contains("Blue")) {
             elevator.level.L4 = 71.5;
             System.out.println("Setting blue side L4");
         } else {

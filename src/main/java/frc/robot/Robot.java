@@ -131,23 +131,22 @@ public class Robot extends TimedRobot {
     }
 
     public void resetPose() {
-        // Example Only - startPose should be derived from some assumption
-        // of where your robot was placed on the field.
-        // The first pose in an autonomous path is often a good choice.
-
-        // Pose2d startPose = new Pose2d(14.89, c4.026, Rotation2d.fromDegrees(180)); // id ??
-
-        // Pose2d startPose = new Pose2d(7.89, 4.026, Rotation2d.fromDegrees(180)); // id 21
-        // Pose2d startPose = new Pose2d(6, 5.5, Rotation2d.fromDegrees(240)); // id 20
-        // Pose2d startPose = new Pose2d(4, 5.5, Rotation2d.fromDegrees(30)); // id 22
-
-        Pose2d startPose = new Pose2d(16, 4, Rotation2d.fromDegrees(0)); // id ??
-
-
+        int pos = m_robotContainer.positionChooser.getSelected();
+        if (pos == 2) {
+            System.out.println("Position 2 selected; skipping pose reset.");
+            return;
+        }
+        Pose2d startPose;
+        if (pos == 1) {
+            startPose = new Pose2d(16, 4, Rotation2d.fromDegrees(0));
+        } else if (pos == 3) {
+            startPose = new Pose2d(14, 6, Rotation2d.fromDegrees(60)); // Add your third pose here
+        } else {
+            startPose = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
+        }
 
         drivetrain.resetPose(startPose);
         System.out.println("Resetting pose to " + startPose);
-
     }
 
 }
