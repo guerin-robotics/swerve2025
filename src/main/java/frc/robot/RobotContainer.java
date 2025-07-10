@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import java.util.Map;
+import java.util.HashMap;
+
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -49,6 +52,21 @@ import frc.robot.util.TagUtils;
 import frc.robot.util.tagSide;
 
 public class RobotContainer {
+        // Key type for caching per-(tag, side) commands
+        private record TagKey(int id, tagSide side) {
+        }
+
+        // Prebuilt map of Go-To-Tag commands
+        // Precomputed map of Go-To-Tag goal poses
+        private final Map<TagKey, Pose2d> mCachedGoals = new HashMap<>();
+
+        // Cache for raw tag poses to avoid repeated Optional lookups
+        private final Map<Integer, Pose2d> mTagPoseCache = new HashMap<>();
+
+        // Shared "cancel on stick" condition reused across all commands
+        private final Command mCancelOnStick = waitUntil(() -> Math.abs(joystick.getY()) > 0.2 ||
+                        Math.abs(joystick.getX()) > 0.2 ||
+                        Math.abs(joystick.getTwist()) > 0.2);
         // Tracks the currently targeted AprilTag ID for stick-based rotation commands
         private int mCurrentTargetTag = -1;
         // Timestamp of the last strafe button press
@@ -64,13 +82,21 @@ public class RobotContainer {
         // 2) Find the closest tag ID to the robot (search both groups)
         private int getClosestTagId() {
                 Pose2d robotPose = drivetrain.getPose();
-                List<Integer> allTags = new ArrayList<>(Constants.Vision.kTags);
-                // allTags.addAll(kBlueTags);
-                return allTags.stream()
-                                .min(Comparator.comparingDouble(id -> TagUtils.getTagPose2d(id)
-                                                .map(p -> p.getTranslation().getDistance(robotPose.getTranslation()))
-                                                .orElse(Double.MAX_VALUE)))
-                                .orElse(Constants.Vision.kTags.get(0));
+                double rx = robotPose.getTranslation().getX();
+                double ry = robotPose.getTranslation().getY();
+                double minDist2 = Double.MAX_VALUE;
+                int closest = Constants.Vision.kTags.get(0);
+                for (Map.Entry<Integer, Pose2d> entry : mTagPoseCache.entrySet()) {
+                        Pose2d tagPose = entry.getValue();
+                        double dx = tagPose.getTranslation().getX() - rx;
+                        double dy = tagPose.getTranslation().getY() - ry;
+                        double dist2 = dx * dx + dy * dy;
+                        if (dist2 < minDist2) {
+                                minDist2 = dist2;
+                                closest = entry.getKey();
+                        }
+                }
+                return closest;
         }
 
         public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -117,6 +143,22 @@ public class RobotContainer {
         public RobotContainer() {
                 vision = new Vision((pose, timestamp, stdDevs) -> drivetrain.addVisionMeasurement(pose, timestamp,
                                 stdDevs));
+
+                // Precompute goal poses and cache Go-To-Tag commands
+                for (int id : Constants.Vision.kTags) {
+                        TagKey leftKey = new TagKey(id, tagSide.LEFT);
+                        TagKey rightKey = new TagKey(id, tagSide.RIGHT);
+                        Pose2d leftGoal = TagUtils.computeTagAdjacencyPose(id, tagSide.LEFT, 0.193, 0.365);
+                        Pose2d rightGoal = TagUtils.computeTagAdjacencyPose(id, tagSide.RIGHT, 0.167, 0.365);
+                        mCachedGoals.put(leftKey, leftGoal);
+                        mCachedGoals.put(rightKey, rightGoal);
+                }
+
+                // Populate tag pose cache once
+                for (Integer id : Constants.Vision.kTags) {
+                        TagUtils.getTagPose2d(id).ifPresent(pose -> mTagPoseCache.put(id, pose));
+                }
+
                 configureBindings();
 
                 NamedCommands.registerCommand("scoreL1Coral",
@@ -249,15 +291,14 @@ public class RobotContainer {
                 Command pathCmd = AutoBuilder.pathfindToPose(closestStationPose, constraints, 0.0);
 
                 // Canceller: finishes as soon as any joystick movement > 20%
-                Command cancelOnStick = waitUntil(() -> Math.abs(joystick.getY()) > 0.2 ||
-                                Math.abs(joystick.getX()) > 0.2 ||
-                                Math.abs(joystick.getTwist()) > 0.2);
+                Command cancelOnStick = mCancelOnStick;
 
-                // Race them: whichever ends first wins and cancels the other, then null out mCurrentAutoAlignCommand
+                // Race them: whichever ends first wins and cancels the other, then null out
+                // mCurrentAutoAlignCommand
                 return race(pathCmd, cancelOnStick)
-                    .andThen(new InstantCommand(() -> {
-                        mCurrentAutoAlignCommand = null;
-                    }));
+                                .andThen(new InstantCommand(() -> {
+                                        mCurrentAutoAlignCommand = null;
+                                }));
         }
 
         private Command makeGoToTag(
@@ -278,15 +319,13 @@ public class RobotContainer {
                 Command pathCmd = AutoBuilder.pathfindToPose(goal, constraints, 0.0);
 
                 // Canceller: finishes as soon as any joystick movement > 20%
-                Command cancelOnStick = waitUntil(() -> Math.abs(joystick.getY()) > 0.2 ||
-                        Math.abs(joystick.getX()) > 0.2 ||
-                        Math.abs(joystick.getTwist()) > 0.2);
+                Command cancelOnStick = mCancelOnStick;
 
                 // Race them: whichever ends first wins and cancels the other
                 return race(pathCmd, cancelOnStick)
-                    .andThen(new InstantCommand(() -> {
-                        mCurrentAutoAlignCommand = null;
-                    }));
+                                .andThen(new InstantCommand(() -> {
+                                        mCurrentAutoAlignCommand = null;
+                                }));
         }
 
         private void configureBindings() {
@@ -439,10 +478,8 @@ public class RobotContainer {
                                                                 new InstantCommand(() -> Elevator.toPosition(
                                                                                 Constants.elevator.level.L1),
                                                                                 m_elevator))
-                                                                                
 
-                                                                                
-                                                                );
+                                );
 
                 XboxController.button(Constants.XboxController.button.Y)
                                 .onTrue(new InstantCommand(() -> Elevator.toPosition(0)));
@@ -537,42 +574,28 @@ public class RobotContainer {
                         // Strafe Right: schedule and track the command, only one at a time
                         joystick.button(Constants.Joystick.strafeRight)
                                         .onTrue(new InstantCommand(() -> {
-
-                                                int closest = getClosestTagId();
-
-                                                mCurrentTargetSide = tagSide.RIGHT;
-
-                                                if (mCurrentAutoAlignCommand != null) {
-                                                        mCurrentAutoAlignCommand.cancel();
-                                                        mCurrentAutoAlignCommand = null;
+                                                if (mCurrentAutoAlignCommand == null) {
+                                                        int closest = getClosestTagId();
+                                                        mCurrentTargetSide = tagSide.RIGHT;
+                                                        Pose2d goal = mCachedGoals.get(new TagKey(closest, tagSide.RIGHT));
+                                                        Command strafeRightCmd = makeGoToPoseCommand(goal);
+                                                        strafeRightCmd.schedule();
+                                                        mCurrentAutoAlignCommand = strafeRightCmd;
                                                 }
-
-                                                Command strafeRightCmd = makeGoToTag(closest, tagSide.RIGHT, 0.167,
-                                                                0.365);
-
-                                                strafeRightCmd.schedule();
-                                                mCurrentAutoAlignCommand = strafeRightCmd;
-
-                                                return;
                                         }, drivetrain));
 
                         // Strafe Left: schedule and track the command, only one at a time
                         joystick.button(Constants.Joystick.strafeLeft)
                                         .onTrue(new InstantCommand(() -> {
-                                                int closest = getClosestTagId();
-                                                mCurrentTargetTag = closest;
-                                                mCurrentTargetSide = tagSide.LEFT;
-                                                if (mCurrentAutoAlignCommand != null) {
-                                                        mCurrentAutoAlignCommand.cancel();
-                                                        mCurrentAutoAlignCommand = null;
+                                                if (mCurrentAutoAlignCommand == null) {
+                                                        int closest = getClosestTagId();
+                                                        mCurrentTargetTag = closest;
+                                                        mCurrentTargetSide = tagSide.LEFT;
+                                                        Pose2d goal = mCachedGoals.get(new TagKey(closest, tagSide.LEFT));
+                                                        Command strafeLeftCmd = makeGoToPoseCommand(goal);
+                                                        strafeLeftCmd.schedule();
+                                                        mCurrentAutoAlignCommand = strafeLeftCmd;
                                                 }
-                                                Command strafeLeftCmd = makeGoToTag(closest, tagSide.LEFT, 0.193,
-                                                                0.365);
-
-                                                strafeLeftCmd.schedule();
-
-                                                mCurrentAutoAlignCommand = strafeLeftCmd;
-                                                return;
                                         }, drivetrain));
 
                         // Add a cancel binding
@@ -585,14 +608,20 @@ public class RobotContainer {
 
                         // Path to the closest station
                         // joystick.button(2)
-                        //                 .onTrue(new InstantCommand(() -> {
-                        //                         pathToClosestStation().schedule();
-                        //                 }, drivetrain));
+                        // .onTrue(new InstantCommand(() -> {
+                        // pathToClosestStation().schedule();
+                        // }, drivetrain));
                 }
         }
 
         public Command getAutonomousCommand() {
                 // return Commands.print("No autonomous command configured");
                 return autoChooser.getSelected();
+        }
+
+        private Command makeGoToPoseCommand(Pose2d goal) {
+                return race(
+                                AutoBuilder.pathfindToPose(goal, kPathConstraints, 0.0),
+                                mCancelOnStick).andThen(new InstantCommand(() -> mCurrentAutoAlignCommand = null));
         }
 }

@@ -46,6 +46,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
+    // Prevent multiple AutoBuilder configurations
+    private boolean m_autoBuilderConfigured = false;
+
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
     /* Swerve requests to apply during SysId characterization */
@@ -293,6 +296,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
     public void configureAutoBuilder() {
+      if (m_autoBuilderConfigured) {
+          return;
+      }
+      m_autoBuilderConfigured = true;
         try {
             var config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
