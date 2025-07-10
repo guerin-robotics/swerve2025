@@ -56,12 +56,17 @@ public class Robot extends TimedRobot {
 
     private final NeutralOut m_brake = new NeutralOut();
 
+
+
     //private Spark intakeActuator = new Spark(7);
 
     Timer intakeTimer = new Timer();
     static Timer liftTimer = new Timer();
+    Timer gc = new Timer();
+
 
     public Robot() {
+        gc.start();
         // Initialize robot components
         var inst = NetworkTableInstance.getDefault();
         inst.startServer();
@@ -79,6 +84,9 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
         vision.periodic();
         drivetrain.periodic();
+        if (gc.advanceIfElapsed(5)){
+            System.gc();
+        }
         
     }
     @Override
@@ -114,7 +122,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        resetPose();
+        // resetPose();
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }

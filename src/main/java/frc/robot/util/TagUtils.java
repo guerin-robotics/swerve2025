@@ -36,7 +36,7 @@ public class TagUtils {
       entry(7, new TagOffsetConfig(
           new Translation2d(0, -1),
           new Translation2d(0, 1),
-          new Translation2d(1, 0))),
+          new Translation2d(1.101, 0))),
 
       entry(8, new TagOffsetConfig(
           new Translation2d(Math.sqrt(3) / 2, -0.5),
@@ -51,7 +51,7 @@ public class TagUtils {
       entry(10, new TagOffsetConfig(
           new Translation2d(0, 1),
           new Translation2d(0, -1),
-          new Translation2d(-1, 0) 
+          new Translation2d(-1.101, 0) 
       )),
       entry(11, new TagOffsetConfig(
           new Translation2d(-Math.sqrt(3) / 2, 0.5),
@@ -64,7 +64,7 @@ public class TagUtils {
       entry(18, new TagOffsetConfig(
           new Translation2d(0, 1),
           new Translation2d(0, -1),
-          new Translation2d(-1, 0))),
+          new Translation2d(-1.101, 0))),
       entry(19, new TagOffsetConfig(
           new Translation2d(Math.sqrt(3) / 2, 0.5),
           new Translation2d(-Math.sqrt(3) / 2, -0.5),
@@ -76,7 +76,7 @@ public class TagUtils {
       entry(21, new TagOffsetConfig(
           new Translation2d(0, -1),
           new Translation2d(0, 1),
-          new Translation2d(1, 0))),
+          new Translation2d(1.101, 0))),
       entry(22, new TagOffsetConfig(
           new Translation2d(-Math.sqrt(3) / 2, -0.5),
           new Translation2d(Math.sqrt(3) / 2, 0.5),
@@ -110,12 +110,9 @@ public class TagUtils {
         Logger.warn("No tag config for ID {}", tagId);
         continue;
       }
-
       
-      // Apply an extra front offset for tags 7, 10, 18, and 21
-      double extraFront = (tagId == 7 || tagId == 10 || tagId == 18 || tagId == 21) ? 0.107 : 0.0;
+      double effectiveFrontOffset = frontOffsetMeters;
       
-      double effectiveFrontOffset = frontOffsetMeters + extraFront;
       Translation2d front = cfg.frontDir.times(effectiveFrontOffset);
       Translation2d leftShift = cfg.leftDir.times(lateralOffsetMeters);
       Translation2d rightShift = cfg.rightDir.times(lateralOffsetMeters);

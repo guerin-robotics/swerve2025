@@ -59,20 +59,18 @@ public class RobotContainer {
         private Command mCurrentAutoAlignCommand = null;
 
         // 1) Separate tag IDs into upper and lower groups
-        private static final List<Integer> kUpperTags = List.of(6, 7, 8, 9, 10, 11);
-        private static final List<Integer> kLowerTags = List.of(17, 18, 19, 20, 21, 22);
         private static final List<Integer> kStation = List.of(1, 2, 12, 13);
 
         // 2) Find the closest tag ID to the robot (search both groups)
         private int getClosestTagId() {
                 Pose2d robotPose = drivetrain.getPose();
-                List<Integer> allTags = new ArrayList<>(kUpperTags);
-                allTags.addAll(kLowerTags);
+                List<Integer> allTags = new ArrayList<>(Constants.Vision.kTags);
+                // allTags.addAll(kBlueTags);
                 return allTags.stream()
                                 .min(Comparator.comparingDouble(id -> TagUtils.getTagPose2d(id)
                                                 .map(p -> p.getTranslation().getDistance(robotPose.getTranslation()))
                                                 .orElse(Double.MAX_VALUE)))
-                                .orElse(kUpperTags.get(0));
+                                .orElse(Constants.Vision.kTags.get(0));
         }
 
         public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -89,11 +87,10 @@ public class RobotContainer {
 
         /** Shared path-following constraints for all tag paths */
         public static final PathConstraints kPathConstraints = new PathConstraints(
-                Constants.Pathfinding.MaxSpeed,
-                Constants.Pathfinding.MaxAccel,
-                Units.degreesToRadians(Constants.Pathfinding.MaxRotSpeed),
-                Units.degreesToRadians(Constants.Pathfinding.MaxRotAccel)
-        );
+                        Constants.Pathfinding.MaxSpeed,
+                        Constants.Pathfinding.MaxAccel,
+                        Units.degreesToRadians(Constants.Pathfinding.MaxRotSpeed),
+                        Units.degreesToRadians(Constants.Pathfinding.MaxRotAccel));
 
         /* Setting up bindings for necessary control of the swerve drive platform */
         public static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -256,8 +253,11 @@ public class RobotContainer {
                                 Math.abs(joystick.getX()) > 0.2 ||
                                 Math.abs(joystick.getTwist()) > 0.2);
 
-                // Race them: whichever ends first wins and cancels the other
-                return race(pathCmd, cancelOnStick);
+                // Race them: whichever ends first wins and cancels the other, then null out mCurrentAutoAlignCommand
+                return race(pathCmd, cancelOnStick)
+                    .andThen(new InstantCommand(() -> {
+                        mCurrentAutoAlignCommand = null;
+                    }));
         }
 
         private Command makeGoToTag(
@@ -277,8 +277,16 @@ public class RobotContainer {
                 // 2) build your PathPlanner command as before
                 Command pathCmd = AutoBuilder.pathfindToPose(goal, constraints, 0.0);
 
-                // No canceller here - caller is responsible for canceling
-                return pathCmd;
+                // Canceller: finishes as soon as any joystick movement > 20%
+                Command cancelOnStick = waitUntil(() -> Math.abs(joystick.getY()) > 0.2 ||
+                        Math.abs(joystick.getX()) > 0.2 ||
+                        Math.abs(joystick.getTwist()) > 0.2);
+
+                // Race them: whichever ends first wins and cancels the other
+                return race(pathCmd, cancelOnStick)
+                    .andThen(new InstantCommand(() -> {
+                        mCurrentAutoAlignCommand = null;
+                    }));
         }
 
         private void configureBindings() {
@@ -360,7 +368,6 @@ public class RobotContainer {
                                                                 () -> Hang.intakeDrop(0),
                                                                 m_hang).withTimeout(5.5));
 
-
                 // joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() ->
                 // Effector.algaeEffectorUp(null)));
 
@@ -431,7 +438,11 @@ public class RobotContainer {
                                                                                 Constants.intake.lockSpeedRPS),
                                                                 new InstantCommand(() -> Elevator.toPosition(
                                                                                 Constants.elevator.level.L1),
-                                                                                m_elevator)));
+                                                                                m_elevator))
+                                                                                
+
+                                                                                
+                                                                );
 
                 XboxController.button(Constants.XboxController.button.Y)
                                 .onTrue(new InstantCommand(() -> Elevator.toPosition(0)));
@@ -525,66 +536,46 @@ public class RobotContainer {
                 if (!Constants.masterNerf) {
                         // Strafe Right: schedule and track the command, only one at a time
                         joystick.button(Constants.Joystick.strafeRight)
-                                .onTrue(new InstantCommand(() -> {
-                                        
-                                        double autoFindRight = Timer.getFPGATimestamp();
+                                        .onTrue(new InstantCommand(() -> {
 
-                                        Logger.warn("Right Start {}", autoFindRight);
+                                                int closest = getClosestTagId();
 
-                                        int closest = getClosestTagId();
+                                                mCurrentTargetSide = tagSide.RIGHT;
 
-                                        double closestTagRight = Timer.getFPGATimestamp()-autoFindRight;
-                                        Logger.warn("Closest Tag {}", closestTagRight);
+                                                if (mCurrentAutoAlignCommand != null) {
+                                                        mCurrentAutoAlignCommand.cancel();
+                                                        mCurrentAutoAlignCommand = null;
+                                                }
 
-                                        mCurrentTargetTag = closest;
-                                        mCurrentTargetSide = tagSide.RIGHT;
-                                        // Cancel any existing auto-align command
-                                        if (mCurrentAutoAlignCommand != null) {
-                                                mCurrentAutoAlignCommand.cancel();
-                                                mCurrentAutoAlignCommand = null;
-                                        }
+                                                Command strafeRightCmd = makeGoToTag(closest, tagSide.RIGHT, 0.167,
+                                                                0.365);
 
-                                        Command strafeRightCmd = makeGoToTag(closest, tagSide.RIGHT, 0.167, 0.365);
+                                                strafeRightCmd.schedule();
+                                                mCurrentAutoAlignCommand = strafeRightCmd;
 
-                                        double cmdBuiltRight = Timer.getFPGATimestamp()-closestTagRight;
-                                        Logger.warn("Command Built {}", cmdBuiltRight);
-
-                                        strafeRightCmd.schedule();
-                                        mCurrentAutoAlignCommand = strafeRightCmd;
-                                }, drivetrain));
+                                                return;
+                                        }, drivetrain));
 
                         // Strafe Left: schedule and track the command, only one at a time
                         joystick.button(Constants.Joystick.strafeLeft)
-                                .onTrue(new InstantCommand(() -> {
+                                        .onTrue(new InstantCommand(() -> {
+                                                int closest = getClosestTagId();
+                                                mCurrentTargetTag = closest;
+                                                mCurrentTargetSide = tagSide.LEFT;
+                                                if (mCurrentAutoAlignCommand != null) {
+                                                        mCurrentAutoAlignCommand.cancel();
+                                                        mCurrentAutoAlignCommand = null;
+                                                }
+                                                Command strafeLeftCmd = makeGoToTag(closest, tagSide.LEFT, 0.193,
+                                                                0.365);
 
-                                        double autoFindLeft = Timer.getFPGATimestamp();
-                                        
-                                        Logger.warn("Left Start {}", autoFindLeft);
+                                                strafeLeftCmd.schedule();
 
-                                        int closest = getClosestTagId();
+                                                mCurrentAutoAlignCommand = strafeLeftCmd;
+                                                return;
+                                        }, drivetrain));
 
-
-                                        double closestTagLeft = Timer.getFPGATimestamp()-autoFindLeft;
-                                        Logger.warn("Closest Tag {}", closestTagLeft);
-
-                                        mCurrentTargetTag = closest;
-                                        mCurrentTargetSide = tagSide.LEFT;
-                                        // Cancel any existing auto-align command
-                                        if (mCurrentAutoAlignCommand != null) {
-                                                mCurrentAutoAlignCommand.cancel();
-                                                mCurrentAutoAlignCommand = null;
-                                        }
-                                        Command strafeLeftCmd = makeGoToTag(closest, tagSide.LEFT, 0.193, 0.365);
-                                        
-                                        double cmdBuiltLeft = Timer.getFPGATimestamp()-closestTagLeft;
-                                        Logger.warn("Command Built {}", cmdBuiltLeft);
-                                        
-                                        strafeLeftCmd.schedule();
-
-                                        mCurrentAutoAlignCommand = strafeLeftCmd;
-                                }, drivetrain));
-
-                        // Add a cancel binding 
+                        // Add a cancel binding
                         joystick.button(Constants.Joystick.Function1).onTrue(new InstantCommand(() -> {
                                 if (mCurrentAutoAlignCommand != null) {
                                         mCurrentAutoAlignCommand.cancel();
@@ -593,10 +584,10 @@ public class RobotContainer {
                         }));
 
                         // Path to the closest station
-                        joystick.button(2)
-                                .onTrue(new InstantCommand(() -> {
-                                        pathToClosestStation().schedule();
-                                }, drivetrain));
+                        // joystick.button(2)
+                        //                 .onTrue(new InstantCommand(() -> {
+                        //                         pathToClosestStation().schedule();
+                        //                 }, drivetrain));
                 }
         }
 

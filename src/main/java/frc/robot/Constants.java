@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.List;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.hal.DriverStationJNI;
@@ -77,6 +79,7 @@ public class Constants {
         public static final Matrix<N3, N1> kSingleTagStdDevs = Constants.kSingleTagStdDevs;
         public static final Matrix<N3, N1> kMultiTagStdDevs = Constants.kMultiTagStdDevs;
         public static final Matrix<N3, N1> kOdometryStdDevs = Constants.kOdometryStdDevs;
+        public static List<Integer> kTags = List.of();
 
         /** Odometry update rate in Hz for the SwerveDrivePoseEstimator */
         public static final double kOdometryUpdateHz = 250.0;
@@ -88,7 +91,7 @@ public class Constants {
 
     public static final class Joystick {
         public static final int Function1 = 10;
-        //public static final int Function2 = 9;
+        // public static final int Function2 = 9;
         public static final int strafeLeft = 3;
         public static final int strafeRight = 4;
         public static final int servoControl = 8;
@@ -112,11 +115,12 @@ public class Constants {
             public static final int Lower = 5;
             public static final int Upper = 9;
         }
+
         public static final class intake {
             public static final int intakeDropButton = 6;
             public static final int cancel = 10;
 
-            }
+        }
     }
 
     public static final class XboxController {
@@ -163,7 +167,6 @@ public class Constants {
             public static double intake = 0.5;
             public static double activeLevel = 1;
 
-
         }
 
         public static final class algaeLevel {
@@ -179,8 +182,6 @@ public class Constants {
         public static final double scoreRotations = 4;
         public static final double scoreVelocity = 15;
 
-        
-
     }
 
     public static final class intake {
@@ -189,7 +190,6 @@ public class Constants {
         public static final double lockRotations = -2.75;
         public static final double intakeRotations = 2.5;
         public static final double lockSpeedRPS = 25;
-
 
     }
 
@@ -201,9 +201,15 @@ public class Constants {
         var driverStation = DriverStationJNI.getAllianceStation().toString();
         if (driverStation.contains("Blue")) {
             elevator.level.L4 = 71.5;
+
+            Vision.kTags = List.of(17, 18, 19, 20, 21, 22);
+
             System.out.println("Setting blue side L4");
         } else {
             elevator.level.L4 = 72.4; // 74.0 for good wheels
+
+            Vision.kTags = List.of(6, 7, 8, 9, 10, 11);
+
             System.out.println("Setting red side L4");
         }
     }

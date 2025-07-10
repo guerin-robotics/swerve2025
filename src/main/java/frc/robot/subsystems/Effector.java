@@ -197,6 +197,8 @@ public class Effector extends SubsystemBase {
         effectorRight.setControl(m_velocityVoltage.withVelocity(0));
         intakeRight.setControl(m_velocityVoltage.withVelocity(0));
         intakeLeft.setControl(m_velocityVoltage.withVelocity(0));
+        return;
+
     }
 
     public void startIntake() {
@@ -206,12 +208,14 @@ public class Effector extends SubsystemBase {
 
         intakeRight.setControl(m_velocityVoltage.withVelocity(-20 * Constants.masterSpeedMultiplier));
         intakeLeft.setControl(m_velocityVoltage.withVelocity(20 * Constants.masterSpeedMultiplier));
+        return;
     }
 
     public void startLock() {
         // Turn on intake 
         effectorLeft.setControl(m_velocityVoltage.withVelocity(15 * Constants.masterSpeedMultiplier));
         effectorRight.setControl(m_velocityVoltage.withVelocity(-15 * Constants.masterSpeedMultiplier));
+        return;
 
     }
 
@@ -219,6 +223,7 @@ public class Effector extends SubsystemBase {
         // Turn on intake 
         effectorLeft.setControl(m_velocityVoltage.withVelocity(40 * Constants.masterSpeedMultiplier));
         effectorRight.setControl(m_velocityVoltage.withVelocity(-40 * Constants.masterSpeedMultiplier));
+        return;
 
     }
 
@@ -244,6 +249,8 @@ public class Effector extends SubsystemBase {
         effectorRight.setControl(m_velocityVoltage.withVelocity(0));
         effectorTimer.stop();
         effectorTimer.reset();
+        return;
+
     }
 
     public static void symmetricalOuttake(Double velocity) {
@@ -292,6 +299,7 @@ public class Effector extends SubsystemBase {
         effectorRight.setControl(m_velocityVoltage.withVelocity(0));
         effectorTimer.stop();
         effectorTimer.reset();
+        return;
     }
 
     public static void manualControl(double velocityLeft, Double velocityRight) {
@@ -300,6 +308,7 @@ public class Effector extends SubsystemBase {
         }
         effectorLeft.setControl(m_velocityVoltage.withVelocity(velocityLeft * Constants.masterSpeedMultiplier));
         effectorRight.setControl(m_velocityVoltage.withVelocity(velocityRight * Constants.masterSpeedMultiplier));
+
     }
 
     public static void algaeEffectorUp(Double time) {
@@ -319,6 +328,8 @@ public class Effector extends SubsystemBase {
 
         algaeTimer.stop();
         algaeTimer.reset();
+        return;
+
     }
 
     public static void algaeEffectorDown() {
@@ -331,13 +342,9 @@ public class Effector extends SubsystemBase {
         isAlgaeOut = false;
 
         algaeTimer.stop();
-        algaeTimer.reset();        
-    }
+        algaeTimer.reset();     
+        return;
 
-    public static void resetAlgaePosition() {
-        RelativeEncoder algaeEncoder = algaeMotor.getEncoder();
-
-        algaeEncoder.setPosition(0);
     }
 
     public static void toggleAlgae() {
@@ -347,5 +354,7 @@ public class Effector extends SubsystemBase {
         else {
             algaeEffectorUp(null);
         }
+        return;
+
     }
 }
