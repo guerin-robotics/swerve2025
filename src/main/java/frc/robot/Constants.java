@@ -159,11 +159,11 @@ public class Constants {
         public static final int LiftLeft = 10;
         public static final int LiftRight = 11;
 
-        public static final class level {
+        public static class level {
             public static double L1 = 0.05;
-            public static double L2 = 16.5;
-            public static double L3 = 38.0;
-            public static double L4 = 74.0;
+            public static double L2 = 16.0;
+            public static double L3 = 39.0;
+            public static double L4 = 73.0;
             public static double intake = 0.5;
             public static double activeLevel = 1;
 
@@ -200,7 +200,7 @@ public class Constants {
     public static void setL4() {
         var driverStation = DriverStationJNI.getAllianceStation().toString();
         if (driverStation.contains("Blue")) {
-            elevator.level.L4 = 71.5;
+            elevator.level.L4 = 73.0;
 
             Vision.kTags = List.of(17, 18, 19, 20, 21, 22);
 
