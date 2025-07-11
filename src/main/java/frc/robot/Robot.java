@@ -71,7 +71,7 @@ public class Robot extends TimedRobot {
         var inst = NetworkTableInstance.getDefault();
         inst.startServer();
         m_robotContainer = new RobotContainer();
-        CameraServer.startAutomaticCapture();
+        // CameraServer.startAutomaticCapture();
         PathfindingCommand.warmupCommand().schedule();
         // elevator = new Elevator();
 
@@ -84,9 +84,9 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
         vision.periodic();
         drivetrain.periodic();
-        if (gc.advanceIfElapsed(5)){
-            System.gc();
-        }
+        // if (gc.advanceIfElapsed(5)){
+        //     System.gc();
+        // }
         
     }
     @Override
@@ -96,7 +96,7 @@ public class Robot extends TimedRobot {
         vision = m_robotContainer.vision;
     
         CanBridge.runTCP();
-        CameraServer.startAutomaticCapture();
+        // CameraServer.startAutomaticCapture();
     }
 
     

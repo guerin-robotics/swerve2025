@@ -536,7 +536,7 @@ public class RobotContainer {
                 if (!Constants.masterNerf) {
                         // Strafe Right: schedule and track the command, only one at a time
                         joystick.button(Constants.Joystick.strafeRight)
-                                        .onTrue(new InstantCommand(() -> {
+                                        .whileTrue(new RunCommand(() -> {
 
                                                 int closest = getClosestTagId();
 
@@ -558,7 +558,7 @@ public class RobotContainer {
 
                         // Strafe Left: schedule and track the command, only one at a time
                         joystick.button(Constants.Joystick.strafeLeft)
-                                        .onTrue(new InstantCommand(() -> {
+                                        .whileTrue(new RunCommand(() -> {
                                                 int closest = getClosestTagId();
                                                 mCurrentTargetTag = closest;
                                                 mCurrentTargetSide = tagSide.LEFT;
