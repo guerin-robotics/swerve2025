@@ -139,14 +139,11 @@ public class Elevator extends SubsystemBase {
             }
 
         }
-        ;
 
         liftLeft.setControl(motionControl.withPosition(currentPos));
         System.out.println("New Position: " + currentPos);
         SmartDashboard.putNumber("Offset", currentPos);
         return;
-
-
     }
 
     public static void configureElevator() {
