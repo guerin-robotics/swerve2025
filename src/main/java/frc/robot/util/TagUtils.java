@@ -36,7 +36,7 @@ public class TagUtils {
       entry(7, new TagOffsetConfig(
           new Translation2d(0, -1),
           new Translation2d(0, 1),
-          new Translation2d(1.101, 0))),
+          new Translation2d(1.121, 0))),
 
       entry(8, new TagOffsetConfig(
           new Translation2d(Math.sqrt(3) / 2, -0.5),
@@ -51,7 +51,7 @@ public class TagUtils {
       entry(10, new TagOffsetConfig(
           new Translation2d(0, 1),
           new Translation2d(0, -1),
-          new Translation2d(-1.101, 0) 
+          new Translation2d(-1.121, 0) 
       )),
       entry(11, new TagOffsetConfig(
           new Translation2d(-Math.sqrt(3) / 2, 0.5),
@@ -64,7 +64,7 @@ public class TagUtils {
       entry(18, new TagOffsetConfig(
           new Translation2d(0, 1),
           new Translation2d(0, -1),
-          new Translation2d(-1.101, 0))),
+          new Translation2d(-1.121, 0))),
       entry(19, new TagOffsetConfig(
           new Translation2d(Math.sqrt(3) / 2, 0.5),
           new Translation2d(-Math.sqrt(3) / 2, -0.5),
@@ -76,7 +76,7 @@ public class TagUtils {
       entry(21, new TagOffsetConfig(
           new Translation2d(0, -1),
           new Translation2d(0, 1),
-          new Translation2d(1.101, 0))),
+          new Translation2d(1.121, 0))),
       entry(22, new TagOffsetConfig(
           new Translation2d(-Math.sqrt(3) / 2, -0.5),
           new Translation2d(Math.sqrt(3) / 2, 0.5),

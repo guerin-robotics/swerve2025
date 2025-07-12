@@ -96,7 +96,7 @@ public class Robot extends TimedRobot {
         vision = m_robotContainer.vision;
     
         CanBridge.runTCP();
-        // CameraServer.startAutomaticCapture();
+        CameraServer.startAutomaticCapture();
     }
 
     
@@ -122,7 +122,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        // resetPose();
+        resetPose();
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
@@ -143,19 +143,10 @@ public class Robot extends TimedRobot {
     }
 
     public void resetPose() {
-        int pos = m_robotContainer.positionChooser.getSelected();
-        if (pos == 2) {
-            System.out.println("Position 2 selected; skipping pose reset.");
-            return;
-        }
-        Pose2d startPose;
-        if (pos == 1) {
-            startPose = new Pose2d(16, 4, Rotation2d.fromDegrees(0));
-        } else if (pos == 3) {
-            startPose = new Pose2d(14, 6, Rotation2d.fromDegrees(60)); // Add your third pose here
-        } else {
-            startPose = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
-        }
+        
+        
+        Pose2d startPose = new Pose2d(14, 6, Rotation2d.fromDegrees(60)); // Add your third pose here
+
 
         drivetrain.resetPose(startPose);
         System.out.println("Resetting pose to " + startPose);

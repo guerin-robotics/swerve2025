@@ -335,7 +335,7 @@ public class Effector extends SubsystemBase {
     public static void algaeEffectorDown() {
         algaeTimer.start();
 
-        while (algaeTimer.get() < 0.08) { //0.08
+        while (algaeTimer.get() < 0.1) { //0.08
             algaeMotor.set(80); //80
         }
         algaeMotor.set(0);

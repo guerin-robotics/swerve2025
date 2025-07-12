@@ -363,7 +363,8 @@ public class RobotContainer {
                                                 new StartEndCommand(
                                                                 () -> Hang.intakeDrop(-1.0),
                                                                 () -> Hang.intakeDrop(0),
-                                                                m_hang).withTimeout(5.5));
+                                                                m_hang).withTimeout(10));
+
 
                 // joystick.button(Constants.Joystick.Function2).onTrue(new InstantCommand(() ->
                 // Effector.algaeEffectorUp(null)));
@@ -376,21 +377,28 @@ public class RobotContainer {
                                                                 () -> Hang.intakeDrop(1.0),
                                                                 () -> Hang.intakeDrop(0),
                                                                 m_hang).withTimeout(5.5));
+
+                XboxController.button(Constants.XboxController.button.B).onTrue (
+                        new StartEndCommand(
+                                                                () -> Hang.intakeDrop(-1.0),
+                                                                () -> Hang.intakeDrop(0),
+                                                                m_hang).withTimeout(10));
+
                 XboxController.button(Constants.XboxController.button.A).onTrue(
                                 new SequentialCommandGroup(
                                                 new InstantCommand(() -> Elevator
                                                                 .toPosition(Constants.elevator.level.L1 + 2))));
 
-                XboxController.button(Constants.XboxController.button.B)
-                                .onTrue(sequence(
-                                                new InstantCommand(
-                                                                () -> Elevator.toPosition(Constants.elevator.level.L3),
-                                                                m_elevator),
-                                                new WaitCommand(.5),
-                                                m_effector.bumpSpeedRotations(10, -150),
-                                                new InstantCommand(
-                                                                () -> Elevator.toPosition(Constants.elevator.level.L1),
-                                                                m_elevator)));
+                // XboxController.button(Constants.XboxController.button.B)
+                //                 .onTrue(sequence(
+                //                                 new InstantCommand(
+                //                                                 () -> Elevator.toPosition(Constants.elevator.level.L3),
+                //                                                 m_elevator),
+                //                                 new WaitCommand(.5),
+                //                                 m_effector.bumpSpeedRotations(10, -150),
+                //                                 new InstantCommand(
+                //                                                 () -> Elevator.toPosition(Constants.elevator.level.L1),
+                //                                                 m_elevator)));
 
                 XboxController.button(Constants.XboxController.bumper.Right).whileTrue(new RunCommand(
                                 () -> Effector.manualControl(
@@ -510,11 +518,11 @@ public class RobotContainer {
                                                         + (1 - Constants.stearingMultiplier) * rawRot;
 
                                         return drive
-                                                        .withVelocityX(yOut * MaxSpeed
+                                                        .withVelocityX(rawY * MaxSpeed
                                                                         * Constants.masterDriveMultiplier)
-                                                        .withVelocityY(xOut * MaxSpeed
+                                                        .withVelocityY(rawX * MaxSpeed
                                                                         * Constants.masterDriveMultiplier)
-                                                        .withRotationalRate(rotOut * MaxAngularRate
+                                                        .withRotationalRate(rawRot * MaxAngularRate
                                                                         * Constants.masterDriveMultiplier);
                                 }));
 
@@ -544,8 +552,8 @@ public class RobotContainer {
                                                         mCurrentAutoAlignCommand = null;
                                                 }
 
-                                                Command strafeRightCmd = makeGoToTag(closest, tagSide.RIGHT, 0.167,
-                                                                0.365);
+                                                Command strafeRightCmd = makeGoToTag(closest, tagSide.RIGHT, 0.197,
+                                                                0.345);
 
                                                 strafeRightCmd.schedule();
                                                 mCurrentAutoAlignCommand = strafeRightCmd;
@@ -563,8 +571,8 @@ public class RobotContainer {
                                                         mCurrentAutoAlignCommand.cancel();
                                                         mCurrentAutoAlignCommand = null;
                                                 }
-                                                Command strafeLeftCmd = makeGoToTag(closest, tagSide.LEFT, 0.193,
-                                                                0.365);
+                                                Command strafeLeftCmd = makeGoToTag(closest, tagSide.LEFT, 0.165,
+                                                                0.345);
 
                                                 strafeLeftCmd.schedule();
 

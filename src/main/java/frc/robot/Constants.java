@@ -45,7 +45,7 @@ public class Constants {
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(
             0.25, // σₓ: odometry may drift ±10 cm
             0.25, // σᵧ: same sideways
-            Math.toRadians(.05) // σθ: roughly ±5° heading error
+            Math.toRadians(.15) // σθ: roughly ±5° heading error
     );
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(
             0.18, // σₓ: vision ±0.5 cm
@@ -55,7 +55,7 @@ public class Constants {
     public static final Matrix<N3, N1> kOdometryStdDevs = VecBuilder.fill(
             0.075, // 2 cm
             0.075, // 2 cm
-            Math.toRadians(.6) // 2°
+            Math.toRadians(.1) // 2°
     );
 
     public static class Pathfinding {
@@ -92,8 +92,8 @@ public class Constants {
     public static final class Joystick {
         public static final int Function1 = 10;
         // public static final int Function2 = 9;
-        public static final int strafeLeft = 3;
-        public static final int strafeRight = 4;
+        public static final int strafeLeft = 6;
+        public static final int strafeRight = 7 ;
         public static final int servoControl = 8;
         public static final int intakeResetButton = 9;
     }
@@ -161,10 +161,10 @@ public class Constants {
 
         public static class level {
             public static double L1 = 0.05;
-            public static double L2 = 16.0;
-            public static double L3 = 39.0;
+            public static double L2 = 15.5;
+            public static double L3 = 37.5;
             public static double L4 = 73.0;
-            public static double intake = 0.5;
+            public static double intake = 0.75;
             public static double activeLevel = 1;
 
         }
@@ -200,13 +200,13 @@ public class Constants {
     public static void setL4() {
         var driverStation = DriverStationJNI.getAllianceStation().toString();
         if (driverStation.contains("Blue")) {
-            elevator.level.L4 = 73.0;
+            elevator.level.L4 = 72.5;
 
             Vision.kTags = List.of(17, 18, 19, 20, 21, 22);
 
             System.out.println("Setting blue side L4");
         } else {
-            elevator.level.L4 = 72.4; // 74.0 for good wheels
+            elevator.level.L4 = 73; // 74.0 for good wheels
 
             Vision.kTags = List.of(6, 7, 8, 9, 10, 11);
 
