@@ -164,7 +164,7 @@ public class Constants {
             public static double L2 = 15.5;
             public static double L3 = 37.5;
             public static double L4 = 73.0;
-            public static double intake = 0.75;
+            public static double intake = 1.2;
             public static double activeLevel = 1;
 
         }
