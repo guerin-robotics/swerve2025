@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.subsystems.Effector;
+import frc.robot.subsystems.Lights;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -44,6 +45,8 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import au.grapplerobotics.CanBridge;
 import au.grapplerobotics.LaserCan;
 import frc.robot.subsystems.Hang;
+
+import frc.robot.subsystems.Lights;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -84,6 +87,7 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
         vision.periodic();
         drivetrain.periodic();
+        //Lights.setRed();
         // if (gc.advanceIfElapsed(5)){
         //     System.gc();
         // }
