@@ -1,16 +1,20 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.subsystems.Effector;
-import frc.robot.subsystems.Lights;
+// import frc.robot.subsystems.Lights;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -46,13 +50,13 @@ import au.grapplerobotics.CanBridge;
 import au.grapplerobotics.LaserCan;
 import frc.robot.subsystems.Hang;
 
-import frc.robot.subsystems.Lights;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
     private RobotContainer m_robotContainer;
     private Vision vision;
     private CommandSwerveDrivetrain drivetrain;
+    // private Lights lights;
     private XboxController m_joystick = new XboxController(1);
 
     private final LaserCan elevatorTop = new LaserCan(1);
@@ -79,7 +83,32 @@ public class Robot extends TimedRobot {
         // elevator = new Elevator();
 
         CanBridge.runTCP();
+
+        // PWM port 9
+        // Must be a PWM header, not MXP or DIO
+
+        AddressableLED m_led = new AddressableLED(1);
+        
+        // Reuse buffer
+        // Default to a length of 45, start empty output
+        // Length is expensive to set, so only set it once, then just update data
+        AddressableLEDBuffer m_ledBuffer = new AddressableLEDBuffer(45);
+        m_led.setLength(m_ledBuffer.getLength());
+
+
+
+        // Set the data
+        m_led.setData(m_ledBuffer);
+        m_led.start();
+
+        LEDPattern purple = LEDPattern.solid(Color.kPurple);
+        purple.applyTo(m_ledBuffer);
+        m_led.setData(m_ledBuffer);
+
+        System.out.println("Leds Turned On.");
     }
+
+    
 
     @Override
     public void robotPeriodic() {
@@ -87,10 +116,6 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
         vision.periodic();
         drivetrain.periodic();
-        //Lights.setRed();
-        // if (gc.advanceIfElapsed(5)){
-        //     System.gc();
-        // }
         
     }
     @Override
