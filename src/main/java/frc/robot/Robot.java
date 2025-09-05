@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.subsystems.Effector;
-// import frc.robot.subsystems.Lights;
+import frc.robot.subsystems.Lights;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -56,7 +56,7 @@ public class Robot extends TimedRobot {
     private RobotContainer m_robotContainer;
     private Vision vision;
     private CommandSwerveDrivetrain drivetrain;
-    // private Lights lights;
+    private final Lights lights = new Lights();
     private XboxController m_joystick = new XboxController(1);
 
     private final LaserCan elevatorTop = new LaserCan(1);
@@ -84,28 +84,7 @@ public class Robot extends TimedRobot {
 
         CanBridge.runTCP();
 
-        // PWM port 9
-        // Must be a PWM header, not MXP or DIO
-
-        AddressableLED m_led = new AddressableLED(1);
-        
-        // Reuse buffer
-        // Default to a length of 45, start empty output
-        // Length is expensive to set, so only set it once, then just update data
-        AddressableLEDBuffer m_ledBuffer = new AddressableLEDBuffer(45);
-        m_led.setLength(m_ledBuffer.getLength());
-
-
-
-        // Set the data
-        m_led.setData(m_ledBuffer);
-        m_led.start();
-
-        LEDPattern purple = LEDPattern.solid(Color.kPurple);
-        purple.applyTo(m_ledBuffer);
-        m_led.setData(m_ledBuffer);
-
-        System.out.println("Leds Turned On.");
+        lights.runPattern(lights.purpleGoldStep).schedule();
     }
 
     
