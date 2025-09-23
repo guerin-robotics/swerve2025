@@ -84,7 +84,7 @@ public class Robot extends TimedRobot {
 
         CanBridge.runTCP();
 
-        lights.runPattern(lights.purpleGoldStep).schedule();
+        // lights.runPattern(lights.purpleGoldStep).schedule();
     }
 
     
@@ -135,7 +135,7 @@ public class Robot extends TimedRobot {
             m_autonomousCommand.cancel();
         }
         Constants.setL4();
-
+        lights.lightsOn(Lights.purpleGoldStep);
     }
 
     @Override
