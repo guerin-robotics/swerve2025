@@ -11,6 +11,8 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.math.Matrix;
 
 public class Constants {
@@ -212,6 +214,10 @@ public class Constants {
 
             System.out.println("Setting red side L4");
         }
+    }
+
+    public static final class lights {
+        public static LEDPattern purple = LEDPattern.solid(Color.kPurple);
     }
 
 }

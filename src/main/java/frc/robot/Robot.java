@@ -1,15 +1,20 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.subsystems.Effector;
+import frc.robot.subsystems.Lights;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -45,11 +50,13 @@ import au.grapplerobotics.CanBridge;
 import au.grapplerobotics.LaserCan;
 import frc.robot.subsystems.Hang;
 
+
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
     private RobotContainer m_robotContainer;
     private Vision vision;
     private CommandSwerveDrivetrain drivetrain;
+    private final Lights lights = new Lights();
     private XboxController m_joystick = new XboxController(1);
 
     private final LaserCan elevatorTop = new LaserCan(1);
@@ -76,7 +83,11 @@ public class Robot extends TimedRobot {
         // elevator = new Elevator();
 
         CanBridge.runTCP();
+
+        // lights.runPattern(lights.purpleGoldStep).schedule();
     }
+
+    
 
     @Override
     public void robotPeriodic() {
@@ -84,9 +95,6 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
         vision.periodic();
         drivetrain.periodic();
-        // if (gc.advanceIfElapsed(5)){
-        //     System.gc();
-        // }
         
     }
     @Override
@@ -127,7 +135,7 @@ public class Robot extends TimedRobot {
             m_autonomousCommand.cancel();
         }
         Constants.setL4();
-
+        lights.lightsOn(Lights.purpleGoldStep);
     }
 
     @Override
