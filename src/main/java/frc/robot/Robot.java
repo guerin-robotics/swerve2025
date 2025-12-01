@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -25,6 +26,7 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.net.WebServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
@@ -85,6 +87,7 @@ public class Robot extends TimedRobot {
         CanBridge.runTCP();
 
         // lights.runPattern(lights.purpleGoldStep).schedule();
+
     }
 
     
@@ -105,6 +108,8 @@ public class Robot extends TimedRobot {
     
         CanBridge.runTCP();
         CameraServer.startAutomaticCapture();
+        //Load Elastic Dashboard
+        WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
     }
 
     
